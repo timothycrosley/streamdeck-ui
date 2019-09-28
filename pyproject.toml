@@ -27,6 +27,7 @@ pytest-mock = "^1.10"
 pep8-naming = "^0.8.2"
 portray = "^1.3.0"
 jupyter = "^1.0"
+ipdb = "^0.12.2"
 
 [build-system]
 requires = ["poetry>=0.12"]
