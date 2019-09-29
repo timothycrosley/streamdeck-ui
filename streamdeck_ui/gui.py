@@ -16,8 +16,12 @@ def start():
     window = QUiLoader().load(STREAMDECK_TEMPLATE)
     window.show()
 
-    for deck_id, deck_type in api.decks().items():
-        window.device_list.addItem(f"{deck_type} - {deck_id}", userData=deck_id)
+    for deck_id, deck in api.decks().items():
+        window.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+        for row in range(deck["layout"][0]):
+            for column in range(deck["layout"][1]):
+                window.cards.currentWidget().children()[0].addWidget(QtWidgets.QPushButton())
+
 
     return app.exec_()
 
