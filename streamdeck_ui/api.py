@@ -24,5 +24,3 @@ def set_button_text(deck_id: str, button: int, text: str) -> None:
 def set_button_icon(deck_id: str, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     state.setdefault(deck_id, {}).setdefault(button, {})["icon"] = icon
-
-

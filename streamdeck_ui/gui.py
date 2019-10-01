@@ -47,18 +47,21 @@ def start():
                 button.setCheckable(True)
                 button.index = index
                 button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-                button.setStyleSheet("""QPushButton{background-color:black;}
+                button.setStyleSheet(
+                    """QPushButton{background-color:black;}
                                         QPushButton:checked{background-color:darkGray;}
                                         QPushButton:focus{border:none; }
-                                     """)
+                                     """
+                )
                 buttons.append(button)
                 column_layout.addWidget(button)
 
         for button in buttons:
-            button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(button, buttons))
+            button.clicked.connect(
+                lambda button=button, buttons=buttons: button_clicked(button, buttons)
+            )
 
         buttons[0].click()
-
 
     return app.exec_()
 
