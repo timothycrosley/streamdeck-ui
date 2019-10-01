@@ -1,6 +1,8 @@
 import os
 import threading
 from typing import Dict, List, Tuple, Union
+from subprocess import Popen
+from functools import partial
 
 from PIL import Image, ImageDraw, ImageFont
 from StreamDeck.DeviceManager import DeviceManager
@@ -14,9 +16,20 @@ state: Dict[str, Dict[int, Dict[str, str]]] = {}
 decks: Dict[str, StreamDeck] = {deck.id().decode(): deck for deck in DeviceManager().enumerate()}
 
 
+def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
+    if state:
+        command = get_button_command(deck_id, key)
+        if command:
+            Popen(command.split(" "))
+
+
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     """Opens and then returns all known stream deck devices"""
-    [deck.open() for deck in decks.values()]
+    for deck_id, deck in decks.items():
+        deck.open()
+        deck.reset()
+        deck.set_key_callback(partial(_key_change_callback, deck_id))
+
     return {
         deck_id: {"type": deck.deck_type(), "layout": deck.key_layout()}
         for deck_id, deck in decks.items()
@@ -37,6 +50,7 @@ def get_button_text(deck_id: str, button: int) -> str:
 def set_button_icon(deck_id: str, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     state.setdefault(deck_id, {}).setdefault(button, {})["icon"] = icon
+    render()
 
 
 def get_button_icon(deck_id: str, button: int) -> str:
@@ -57,13 +71,14 @@ def get_button_command(deck_id: str, button: int) -> str:
 def render() -> None:
     """renders all decks"""
     for deck_id, buttons in state.items():
+        deck = decks[deck_id]
         for button_id, button_settings in buttons.items():
             if "text" in button_settings or "icon" in button_settings:
-                image = render_key_image(decks[deck_id], **button_settings)
-                decks[deck_id].set_key_image(button_id, image)
+                image = render_key_image(deck, **button_settings)
+                deck.set_key_image(button_id, image)
 
 
-def render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT):
+def render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
     # Create new key image of the correct dimensions, black background
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)

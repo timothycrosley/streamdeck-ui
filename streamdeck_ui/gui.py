@@ -4,7 +4,8 @@ from functools import partial
 
 from PySide2 import QtWidgets
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QSizePolicy
+from PySide2.QtWidgets import QApplication, QSizePolicy, QFileDialog
+#from PySide2.QtCore.QObject import tr
 
 from streamdeck_ui import api
 
@@ -21,6 +22,12 @@ def update_button_text(window, text):
 def update_button_command(window, command):
     deck_id = window.device_list.itemData(0)
     api.set_button_command(deck_id, selected_button.index, command)
+
+
+def select_image(window):
+    file_name = QFileDialog.getOpenFileName(window, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)")[0]
+    deck_id = window.device_list.itemData(0)
+    api.set_button_icon(deck_id, selected_button.index, file_name)
 
 
 def button_clicked(window, clicked_button, buttons):
@@ -45,6 +52,7 @@ def start():
 
     window.text.textChanged.connect(partial(update_button_text, window))
     window.command.textChanged.connect(partial(update_button_command, window))
+    window.imageButton.clicked.connect(partial(select_image, window))
     for deck_id, deck in api.open_decks().items():
         window.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
