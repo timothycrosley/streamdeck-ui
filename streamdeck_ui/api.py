@@ -1,8 +1,8 @@
 import os
 import threading
-from typing import Dict, List, Tuple, Union
-from subprocess import Popen
 from functools import partial
+from subprocess import Popen
+from typing import Dict, List, Tuple, Union
 
 from PIL import Image, ImageDraw, ImageFont
 from StreamDeck.DeviceManager import DeviceManager
