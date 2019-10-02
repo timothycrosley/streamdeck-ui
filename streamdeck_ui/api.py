@@ -14,7 +14,7 @@ FONTS_PATH = os.path.join(os.path.dirname(__file__), "fonts")
 DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
 STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
 
-decks: Dict[str, StreamDeck] = {deck.id().decode(): deck for deck in DeviceManager().enumerate()}
+decks: Dict[str, StreamDeck] = {}
 state: Dict[str, Dict[int, Dict[str, str]]] = {}
 if os.path.isfile(STATE_FILE):
     with open(STATE_FILE) as state_file:
@@ -36,9 +36,11 @@ def _save_state():
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     """Opens and then returns all known stream deck devices"""
-    for deck_id, deck in decks.items():
+    for deck in DeviceManager().enumerate():
         deck.open()
         deck.reset()
+        deck_id = deck.get_serial_number()
+        decks[deck_id] = deck
         deck.set_key_callback(partial(_key_change_callback, deck_id))
 
     return {
