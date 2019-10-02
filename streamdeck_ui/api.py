@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 from functools import partial
@@ -11,9 +12,14 @@ from StreamDeck.ImageHelpers import PILHelper
 
 FONTS_PATH = os.path.join(os.path.dirname(__file__), "fonts")
 DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
+STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
 
-state: Dict[str, Dict[int, Dict[str, str]]] = {}
 decks: Dict[str, StreamDeck] = {deck.id().decode(): deck for deck in DeviceManager().enumerate()}
+state: Dict[str, Dict[int, Dict[str, str]]] = {}
+if os.path.isfile(STATE_FILE):
+    with open(STATE_FILE) as state_file:
+        for deck, buttons in json.loads(state_file.read()).items():
+            state[deck] = {int(button_id): button for button_id, button in buttons.items()}
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
@@ -21,6 +27,11 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
         command = get_button_command(deck_id, key)
         if command:
             Popen(command.split(" "))
+
+
+def _save_state():
+    with open(STATE_FILE, "w") as state_file:
+        state_file.write(json.dumps(state))
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
@@ -40,6 +51,7 @@ def set_button_text(deck_id: str, button: int, text: str) -> None:
     """Set the text associated with a button"""
     state.setdefault(deck_id, {}).setdefault(button, {})["text"] = text
     render()
+    _save_state()
 
 
 def get_button_text(deck_id: str, button: int) -> str:
@@ -51,6 +63,7 @@ def set_button_icon(deck_id: str, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     state.setdefault(deck_id, {}).setdefault(button, {})["icon"] = icon
     render()
+    _save_state()
 
 
 def get_button_icon(deck_id: str, button: int) -> str:
@@ -61,6 +74,7 @@ def get_button_icon(deck_id: str, button: int) -> str:
 def set_button_command(deck_id: str, button: int, command: str) -> None:
     """Sets the command associated with the button"""
     state.setdefault(deck_id, {}).setdefault(button, {})["command"] = command
+    _save_state()
 
 
 def get_button_command(deck_id: str, button: int) -> str:

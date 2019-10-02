@@ -3,6 +3,7 @@ import sys
 from functools import partial
 
 from PySide2 import QtWidgets
+from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy
@@ -10,6 +11,11 @@ from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy
 from streamdeck_ui import api
 
 STREAMDECK_TEMPLATE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.ui")
+BUTTON_SYTLE = """
+    QToolButton{background-color:black;}
+    QToolButton:checked{background-color:darkGray;}
+    QToolButton:focus{border:none; }
+"""
 
 selected_button = None
 
@@ -41,7 +47,7 @@ def select_image(ui):
 def redraw_buttons(ui):
     deck_id = _deck_id(ui)
     current_tab = ui.cards.currentWidget()
-    buttons = current_tab.findChildren(QtWidgets.QPushButton)
+    buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
         button.setText(api.get_button_text(deck_id, button.index))
         button.setIcon(QIcon(api.get_button_icon(deck_id, button.index)))
@@ -84,16 +90,13 @@ def start():
             row_layout.addLayout(column_layout)
 
             for _column in range(deck["layout"][1]):
-                button = QtWidgets.QPushButton()
+                button = QtWidgets.QToolButton()
                 button.setCheckable(True)
                 button.index = index
                 button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-                button.setStyleSheet(
-                    """QPushButton{background-color:black;}
-                                        QPushButton:checked{background-color:darkGray;}
-                                        QPushButton:focus{border:none; }
-                                     """
-                )
+                button.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                button.setIconSize(QSize(100, 100))
+                button.setStyleSheet(BUTTON_SYTLE)
                 buttons.append(button)
                 column_layout.addWidget(button)
                 index += 1
@@ -103,6 +106,7 @@ def start():
                 lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
             )
 
+        redraw_buttons(ui)
         buttons[0].click()
 
     return app.exec_()
