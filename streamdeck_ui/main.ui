@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>775</width>
-    <height>585</height>
+    <width>844</width>
+    <height>625</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,10 +18,69 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QComboBox" name="device_list"/>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QComboBox" name="device_list">
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Brightness:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="brightness">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="topMargin">
+         <number>20</number>
+        </property>
         <item>
          <widget class="QTabWidget" name="cards">
           <property name="currentIndex">
@@ -110,7 +169,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>775</width>
+     <width>844</width>
      <height>30</height>
     </rect>
    </property>

@@ -15,11 +15,14 @@ DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
 STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
 
 decks: Dict[str, StreamDeck] = {}
-state: Dict[str, Dict[int, Dict[str, str]]] = {}
+state: Dict[str, Dict[str, Union[int, Dict[int, Dict[str, str]]]]] = {}
 if os.path.isfile(STATE_FILE):
     with open(STATE_FILE) as state_file:
-        for deck, buttons in json.loads(state_file.read()).items():
-            state[deck] = {int(button_id): button for button_id, button in buttons.items()}
+        for deck_id, deck in json.loads(state_file.read()).items():
+            deck["buttons"] = {
+                int(button_id): button for button_id, button in deck.get("buttons", {}).items()
+            }
+            state[deck_id] = deck
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
@@ -49,46 +52,61 @@ def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     }
 
 
+def _button_state(deck_id: str, button: int) -> dict:
+    buttons_state = state.setdefault(deck_id, {}).setdefault("buttons", {})
+    return buttons_state.setdefault(button, {})  # type: ignore
+
+
 def set_button_text(deck_id: str, button: int, text: str) -> None:
     """Set the text associated with a button"""
-    state.setdefault(deck_id, {}).setdefault(button, {})["text"] = text
+    _button_state(deck_id, button)["text"] = text
     render()
     _save_state()
 
 
 def get_button_text(deck_id: str, button: int) -> str:
     """Returns the text set for the specified button"""
-    return state.get(deck_id, {}).get(button, {}).get("text", "")
+    return _button_state(deck_id, button).get("text", "")
 
 
 def set_button_icon(deck_id: str, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
-    state.setdefault(deck_id, {}).setdefault(button, {})["icon"] = icon
+    _button_state(deck_id, button)["icon"] = icon
     render()
     _save_state()
 
 
 def get_button_icon(deck_id: str, button: int) -> str:
     """Returns the icon set for a particular button"""
-    return state.get(deck_id, {}).get(button, {}).get("icon", "")
+    return _button_state(deck_id, button).get("icon", "")
 
 
 def set_button_command(deck_id: str, button: int, command: str) -> None:
     """Sets the command associated with the button"""
-    state.setdefault(deck_id, {}).setdefault(button, {})["command"] = command
+    _button_state(deck_id, button)["command"] = command
     _save_state()
 
 
 def get_button_command(deck_id: str, button: int) -> str:
     """Returns the command set for the specified button"""
-    return state.get(deck_id, {}).get(button, {}).get("command", "")
+    return _button_state(deck_id, button).get("command", "")
+
+
+def set_brightness(deck_id: str, brightness: int) -> None:
+    decks[deck_id].set_brightness(brightness)
+    state.setdefault(deck_id, {})["brightness"] = brightness
+    _save_state()
+
+
+def get_brightness(deck_id: str) -> int:
+    return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
 
 
 def render() -> None:
     """renders all decks"""
-    for deck_id, buttons in state.items():
+    for deck_id, deck_state in state.items():
         deck = decks[deck_id]
-        for button_id, button_settings in buttons.items():
+        for button_id, button_settings in deck_state.get("buttons", {}).items():  # type: ignore
             if "text" in button_settings or "icon" in button_settings:
                 image = render_key_image(deck, **button_settings)
                 deck.set_key_image(button_id, image)

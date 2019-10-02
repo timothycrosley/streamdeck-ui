@@ -53,6 +53,11 @@ def redraw_buttons(ui):
         button.setIcon(QIcon(api.get_button_icon(deck_id, button.index)))
 
 
+def set_brightness(ui, value):
+    deck_id = _deck_id(ui)
+    api.set_brightness(deck_id, value)
+
+
 def button_clicked(ui, clicked_button, buttons):
     global selected_button
     selected_button = clicked_button
@@ -76,38 +81,40 @@ def start():
     ui.text.textChanged.connect(partial(update_button_text, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
     ui.imageButton.clicked.connect(partial(select_image, ui))
+    ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
-        tab = ui.cards.currentWidget()
-        row_layout = QtWidgets.QVBoxLayout()
-        tab.children()[0].addLayout(row_layout, 0, 0)
+    tab = ui.cards.currentWidget()
+    row_layout = QtWidgets.QVBoxLayout()
+    tab.children()[0].addLayout(row_layout, 0, 0)
 
-        buttons = []
-        index = 0
-        for _row in range(deck["layout"][0]):
-            column_layout = QtWidgets.QHBoxLayout()
-            row_layout.addLayout(column_layout)
+    buttons = []
+    index = 0
+    for _row in range(deck["layout"][0]):
+        column_layout = QtWidgets.QHBoxLayout()
+        row_layout.addLayout(column_layout)
 
-            for _column in range(deck["layout"][1]):
-                button = QtWidgets.QToolButton()
-                button.setCheckable(True)
-                button.index = index
-                button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-                button.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-                button.setIconSize(QSize(100, 100))
-                button.setStyleSheet(BUTTON_SYTLE)
-                buttons.append(button)
-                column_layout.addWidget(button)
-                index += 1
+        for _column in range(deck["layout"][1]):
+            button = QtWidgets.QToolButton()
+            button.setCheckable(True)
+            button.index = index
+            button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+            button.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+            button.setIconSize(QSize(100, 100))
+            button.setStyleSheet(BUTTON_SYTLE)
+            buttons.append(button)
+            column_layout.addWidget(button)
+            index += 1
 
-        for button in buttons:
-            button.clicked.connect(
-                lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
-            )
+    for button in buttons:
+        button.clicked.connect(
+            lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
+        )
 
         redraw_buttons(ui)
         buttons[0].click()
+        ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 
     return app.exec_()
 
