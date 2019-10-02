@@ -6,6 +6,7 @@ from subprocess import Popen
 from typing import Dict, List, Tuple, Union
 
 from PIL import Image, ImageDraw, ImageFont
+from pynput.keyboard import Controller, Key
 from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
@@ -14,6 +15,7 @@ FONTS_PATH = os.path.join(os.path.dirname(__file__), "fonts")
 DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
 STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
 
+keyboard = Controller()
 decks: Dict[str, StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[str, str]]]]] = {}
 if os.path.isfile(STATE_FILE):
@@ -30,6 +32,20 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
         command = get_button_command(deck_id, key)
         if command:
             Popen(command.split(" "))
+
+        keys = get_button_keys(deck_id, key)
+        if keys:
+            keys = keys.strip().replace(" ", "")
+            for sections in keys.split(","):
+                for key in keys.split("+"):
+                    print("Pressing ", getattr(Key, key, key))
+                    keyboard.press(getattr(Key, key, key))
+                for key in keys.split("+"):
+                    keyboard.release(getattr(Key, key, key))
+
+        write = get_button_write(deck_id, key)
+        if write:
+            keyboard.type(write)
 
 
 def _save_state():
@@ -90,6 +106,28 @@ def set_button_command(deck_id: str, button: int, command: str) -> None:
 def get_button_command(deck_id: str, button: int) -> str:
     """Returns the command set for the specified button"""
     return _button_state(deck_id, button).get("command", "")
+
+
+def set_button_keys(deck_id: str, button: int, keys: str) -> None:
+    """Sets the keys associated with the button"""
+    _button_state(deck_id, button)["keys"] = keys
+    _save_state()
+
+
+def get_button_keys(deck_id: str, button: int) -> str:
+    """Returns the keys set for the specified button"""
+    return _button_state(deck_id, button).get("keys", "")
+
+
+def set_button_write(deck_id: str, button: int, write: str) -> None:
+    """Sets the text meant to be written when button is pressed"""
+    _button_state(deck_id, button)["write"] = write
+    _save_state()
+
+
+def get_button_write(deck_id: str, button: int) -> str:
+    """Returns the text to be produced when the specified button is pressed"""
+    return _button_state(deck_id, button).get("write", "")
 
 
 def set_brightness(deck_id: str, brightness: int) -> None:
