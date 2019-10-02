@@ -108,30 +108,32 @@ def render() -> None:
         deck = decks[deck_id]
         for button_id, button_settings in deck_state.get("buttons", {}).items():  # type: ignore
             if "text" in button_settings or "icon" in button_settings:
-                image = render_key_image(deck, **button_settings)
+                image = _render_key_image(deck, **button_settings)
                 deck.set_key_image(button_id, image)
 
 
-def render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
-    # Create new key image of the correct dimensions, black background
+def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+    """Renders an individual key image"""
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
-    # Add image overlay, rescaling the image asset if it is too large to fit
-    # the requested dimensions via a high quality Lanczos scaling algorithm
     if icon:
         rgba_icon = Image.open(icon).convert("RGBA")
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
-    rgba_icon.thumbnail((image.width, image.height - 20), Image.LANCZOS)
+
+    icon_width, icon_height = image.width, image.height
+    if text:
+        icon_height -= 20
+
+    rgba_icon.thumbnail((icon_width, icon_height), Image.LANCZOS)
     icon_pos = ((image.width - rgba_icon.width) // 2, 0)
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
-    # Load a custom TrueType font and use it to overlay the key index, draw key
-    # label onto the image
-    true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
-    label_w, label_h = draw.textsize(text, font=true_font)
-    label_pos = ((image.width - label_w) // 2, image.height - 20)
-    draw.text(label_pos, text=text, font=true_font, fill="white")
+    if text:
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        label_w, label_h = draw.textsize(text, font=true_font)
+        label_pos = ((image.width - label_w) // 2, image.height - 20)
+        draw.text(label_pos, text=text, font=true_font, fill="white")
 
     return PILHelper.to_native_format(deck, image)
