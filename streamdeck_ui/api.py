@@ -38,7 +38,6 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
             keys = keys.strip().replace(" ", "")
             for sections in keys.split(","):
                 for key in keys.split("+"):
-                    print("Pressing ", getattr(Key, key, key))
                     keyboard.press(getattr(Key, key, key))
                 for key in keys.split("+"):
                     keyboard.release(getattr(Key, key, key))
