@@ -85,26 +85,17 @@ def button_clicked(ui, clicked_button, buttons):
     ui.write.setText(api.get_button_write(deck_id, button_id))
 
 
-def start():
-    app = QApplication(sys.argv)
-    ui = QUiLoader().load(STREAMDECK_TEMPLATE)
-    ui.show()
+def build_buttons(ui, tab):
+    deck_id = _deck_id(ui)
+    deck = api.get_deck(deck_id)
 
-    ui.text.textChanged.connect(partial(update_button_text, ui))
-    ui.command.textChanged.connect(partial(update_button_command, ui))
-    ui.keys.textChanged.connect(partial(update_button_keys, ui))
-    ui.write.textChanged.connect(partial(update_button_write, ui))
-    ui.imageButton.clicked.connect(partial(select_image, ui))
-    ui.brightness.valueChanged.connect(partial(set_brightness, ui))
-    for deck_id, deck in api.open_decks().items():
-        ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+    for child in tab.children()[0].children():
+        child.deleteLater()
 
-    tab = ui.cards.currentWidget()
     row_layout = QtWidgets.QVBoxLayout()
     tab.children()[0].addLayout(row_layout, 0, 0)
-
-    buttons = []
     index = 0
+    buttons = []
     for _row in range(deck["layout"][0]):
         column_layout = QtWidgets.QHBoxLayout()
         row_layout.addLayout(column_layout)
@@ -126,9 +117,27 @@ def start():
             lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
         )
 
-        redraw_buttons(ui)
-        buttons[0].click()
-        ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
+    redraw_buttons(ui)
+    buttons[0].click()
+
+
+def start():
+    app = QApplication(sys.argv)
+    ui = QUiLoader().load(STREAMDECK_TEMPLATE)
+    ui.show()
+
+    ui.text.textChanged.connect(partial(update_button_text, ui))
+    ui.command.textChanged.connect(partial(update_button_command, ui))
+    ui.keys.textChanged.connect(partial(update_button_keys, ui))
+    ui.write.textChanged.connect(partial(update_button_write, ui))
+    ui.imageButton.clicked.connect(partial(select_image, ui))
+    ui.brightness.valueChanged.connect(partial(set_brightness, ui))
+    for deck_id, deck in api.open_decks().items():
+        ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+
+    build_buttons(ui, ui.cards.currentWidget())
+
+    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 
     return app.exec_()
 

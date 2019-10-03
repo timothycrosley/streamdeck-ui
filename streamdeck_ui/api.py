@@ -36,11 +36,11 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
         keys = get_button_keys(deck_id, key)
         if keys:
             keys = keys.strip().replace(" ", "")
-            for sections in keys.split(","):
-                for key in keys.split("+"):
-                    keyboard.press(getattr(Key, key, key))
-                for key in keys.split("+"):
-                    keyboard.release(getattr(Key, key, key))
+            for section in keys.split(","):
+                for key_name in section.split("+"):
+                    keyboard.press(getattr(Key, key_name, key_name))
+                for key_name in section.split("+"):
+                    keyboard.release(getattr(Key, key_name, key_name))
 
         write = get_button_write(deck_id, key)
         if write:
@@ -65,6 +65,10 @@ def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
         deck_id: {"type": deck.deck_type(), "layout": deck.key_layout()}
         for deck_id, deck in decks.items()
     }
+
+
+def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
+    return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
 
 def _button_state(deck_id: str, button: int) -> dict:
