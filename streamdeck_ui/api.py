@@ -11,9 +11,7 @@ from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-FONTS_PATH = os.path.join(os.path.dirname(__file__), "fonts")
-DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
-STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
+from streamdeck_ui.config import FONTS_PATH, DEFAULT_FONT, STATE_FILE
 
 keyboard = Controller()
 decks: Dict[str, StreamDeck] = {}

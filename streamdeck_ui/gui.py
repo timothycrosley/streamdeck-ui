@@ -6,13 +6,12 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy
+from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy, QSystemTrayIcon, QMenu, QAction, QMainWindow
 
 from streamdeck_ui import api
-from streamdeck_ui.config import PROJECT_PATH
+from streamdeck_ui.config import PROJECT_PATH, LOGO
+from streamdeck_ui.ui_main import Ui_MainWindow
 
-STREAMDECK_TEMPLATE = os.path.join(PROJECT_PATH, "main.ui")
-LOGO = os.path.join(PROJECT_PATH, "logo.png")
 BUTTON_SYTLE = """
     QToolButton{background-color:black;}
     QToolButton:checked{background-color:darkGray;}
@@ -20,6 +19,7 @@ BUTTON_SYTLE = """
 """
 
 selected_button = None
+window_shown: bool = True
 
 
 def _deck_id(ui):
@@ -129,10 +129,49 @@ def build_buttons(ui, tab):
     buttons[0].click()
 
 
+
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.window_shown: bool = True
+
+    def closeEvent(self, event):
+        self.window_shown = False
+        self.hide()
+        event.ignore()
+
+    def systray_clicked(self, _status=None):
+        self.hide()
+        if self.window_shown:
+            self.window_shown = False
+            return
+
+        self.show()
+        self.activateWindow()
+        getattr(self, "raise")()
+        self.window_shown = True
+
+
 def start():
     app = QApplication(sys.argv)
-    ui = QUiLoader().load(STREAMDECK_TEMPLATE)
-    ui.show()
+
+    logo = QIcon(LOGO)
+    main_window = MainWindow()
+    ui = main_window.ui
+    main_window.setWindowIcon(logo)
+    tray = QSystemTrayIcon(logo, app)
+    tray.activated.connect(main_window.systray_clicked)
+
+    menu = QMenu()
+    action_exit = QAction("Exit")
+    action_exit.triggered.connect(app.exit)
+    menu.addAction(action_exit)
+
+    tray.setContextMenu(menu)
 
     ui.text.textChanged.connect(partial(update_button_text, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
@@ -148,6 +187,8 @@ def start():
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 
+    tray.show()
+    main_window.show()
     return sys.exit(app.exec_())
 
 
