@@ -1,4 +1,4 @@
-streamdeck_ui
+[![streamdeck_ui - Linux compatible UI for the Elagato Stream Deck](https://raw.github.com/timothycrosley/streamdeck_ui/master/art/logo_large.png)](https://timothycrosley.github.io/streamdeck_ui/)
 _________________
 
 [![PyPI version](https://badge.fury.io/py/streamdeck_ui.svg)](http://badge.fury.io/py/streamdeck_ui)
