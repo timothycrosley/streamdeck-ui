@@ -9,8 +9,10 @@ from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy
 
 from streamdeck_ui import api
+from streamdeck_ui.config import PROJECT_PATH
 
-STREAMDECK_TEMPLATE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.ui")
+STREAMDECK_TEMPLATE = os.path.join(PROJECT_PATH, "main.ui")
+LOGO = os.path.join(PROJECT_PATH, "logo.png")
 BUTTON_SYTLE = """
     QToolButton{background-color:black;}
     QToolButton:checked{background-color:darkGray;}
