@@ -33,3 +33,6 @@ ipdb = "^0.12.2"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+streamdeck = "streamdeck_ui.gui:start"
