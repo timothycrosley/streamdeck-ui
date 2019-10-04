@@ -46,6 +46,10 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
         if write:
             keyboard.type(write)
 
+        brightness_change = get_button_change_brightness(deck_id, key)
+        if brightness_change:
+            change_brightness(deck_id, brightness_change)
+
 
 def _save_state():
     with open(STATE_FILE, "w") as state_file:
@@ -100,6 +104,18 @@ def get_button_icon(deck_id: str, button: int) -> str:
     return _button_state(deck_id, button).get("icon", "")
 
 
+def set_button_change_brightness(deck_id: str, button: int, amount: int) -> None:
+    """Sets the brightness changing associated with a button"""
+    _button_state(deck_id, button)["brightness_change"] = amount
+    render()
+    _save_state()
+
+
+def get_button_change_brightness(deck_id: str, button: int) -> int:
+    """Returns the brightness change set for a particular button"""
+    return _button_state(deck_id, button).get("brightness_change", 0)
+
+
 def set_button_command(deck_id: str, button: int, command: str) -> None:
     """Sets the command associated with the button"""
     _button_state(deck_id, button)["command"] = command
@@ -134,13 +150,20 @@ def get_button_write(deck_id: str, button: int) -> str:
 
 
 def set_brightness(deck_id: str, brightness: int) -> None:
+    """Sets the brightness for every button on the deck"""
     decks[deck_id].set_brightness(brightness)
     state.setdefault(deck_id, {})["brightness"] = brightness
     _save_state()
 
 
 def get_brightness(deck_id: str) -> int:
+    """Gets the brightness that is set for the specified stream deck"""
     return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
+
+
+def change_brightness(deck_id: str, amount: int=1) -> None:
+    """Change the brightness of the deck by the specified amount"""
+    set_brightness(deck_id, max(min(get_brightness(deck_id) + amount, 100), 0))
 
 
 def render() -> None:

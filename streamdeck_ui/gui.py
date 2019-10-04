@@ -45,6 +45,11 @@ def update_button_write(ui, write):
     api.set_button_write(deck_id, selected_button.index, write)
 
 
+def update_change_brightness(ui, amount):
+    deck_id = _deck_id(ui)
+    api.set_button_change_brightness(deck_id, selected_button.index, amount)
+
+
 def select_image(ui):
     file_name = QFileDialog.getOpenFileName(
         ui, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
@@ -83,6 +88,7 @@ def button_clicked(ui, clicked_button, buttons):
     ui.command.setText(api.get_button_command(deck_id, button_id))
     ui.keys.setText(api.get_button_keys(deck_id, button_id))
     ui.write.setText(api.get_button_write(deck_id, button_id))
+    ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, button_id))
 
 
 def build_buttons(ui, tab):
@@ -130,6 +136,7 @@ def start():
     ui.command.textChanged.connect(partial(update_button_command, ui))
     ui.keys.textChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
+    ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.imageButton.clicked.connect(partial(select_image, ui))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
@@ -139,8 +146,8 @@ def start():
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 
-    return app.exec_()
+    return sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
-    sys.exit(start())
+    start()

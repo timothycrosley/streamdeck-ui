@@ -173,6 +173,20 @@
              <item row="4" column="1">
               <widget class="QLineEdit" name="write"/>
              </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Brightness +/-:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QSpinBox" name="change_brightness">
+               <property name="minimum">
+                <number>-99</number>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
