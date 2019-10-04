@@ -19,7 +19,6 @@ BUTTON_SYTLE = """
 """
 
 selected_button = None
-window_shown: bool = True
 
 
 def _deck_id(ui):
