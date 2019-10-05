@@ -11,16 +11,17 @@ from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-from streamdeck_ui.config import FONTS_PATH, DEFAULT_FONT, STATE_FILE
+from streamdeck_ui.config import DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
 keyboard = Controller()
 decks: Dict[str, StreamDeck] = {}
-state: Dict[str, Dict[str, Union[int, Dict[int, Dict[str, str]]]]] = {}
+state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 if os.path.isfile(STATE_FILE):
     with open(STATE_FILE) as state_file:
         for deck_id, deck in json.loads(state_file.read()).items():
             deck["buttons"] = {
-                int(button_id): button for button_id, button in deck.get("buttons", {}).items()
+                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
+                for page_id, buttons in deck.get("buttons", {}).items()
             }
             state[deck_id] = deck
 
@@ -73,78 +74,78 @@ def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
 
-def _button_state(deck_id: str, button: int) -> dict:
-    buttons_state = state.setdefault(deck_id, {}).setdefault("buttons", {})
+def _button_state(deck_id: str, page: int, button: int) -> dict:
+    buttons_state = state.setdefault(deck_id, {}).setdefault("buttons", {}).setdefault(page, {})
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
-def set_button_text(deck_id: str, button: int, text: str) -> None:
+def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
-    _button_state(deck_id, button)["text"] = text
+    _button_state(deck_id, page, button)["text"] = text
     render()
     _save_state()
 
 
-def get_button_text(deck_id: str, button: int) -> str:
+def get_button_text(deck_id: str, page: int, button: int) -> str:
     """Returns the text set for the specified button"""
-    return _button_state(deck_id, button).get("text", "")
+    return _button_state(deck_id, page, button).get("text", "")
 
 
-def set_button_icon(deck_id: str, button: int, icon: str) -> None:
+def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
-    _button_state(deck_id, button)["icon"] = icon
+    _button_state(deck_id, page, button)["icon"] = icon
     render()
     _save_state()
 
 
-def get_button_icon(deck_id: str, button: int) -> str:
+def get_button_icon(deck_id: str, page: int, button: int) -> str:
     """Returns the icon set for a particular button"""
-    return _button_state(deck_id, button).get("icon", "")
+    return _button_state(deck_id, page, button).get("icon", "")
 
 
-def set_button_change_brightness(deck_id: str, button: int, amount: int) -> None:
+def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
     """Sets the brightness changing associated with a button"""
-    _button_state(deck_id, button)["brightness_change"] = amount
+    _button_state(deck_id, page, button)["brightness_change"] = amount
     render()
     _save_state()
 
 
-def get_button_change_brightness(deck_id: str, button: int) -> int:
+def get_button_change_brightness(deck_id: str, page: int, button: int) -> int:
     """Returns the brightness change set for a particular button"""
-    return _button_state(deck_id, button).get("brightness_change", 0)
+    return _button_state(deck_id, page, button).get("brightness_change", 0)
 
 
-def set_button_command(deck_id: str, button: int, command: str) -> None:
+def set_button_command(deck_id: str, page: int, button: int, command: str) -> None:
     """Sets the command associated with the button"""
-    _button_state(deck_id, button)["command"] = command
+    _button_state(deck_id, page, button)["command"] = command
     _save_state()
 
 
-def get_button_command(deck_id: str, button: int) -> str:
+def get_button_command(deck_id: str, page: int, button: int) -> str:
     """Returns the command set for the specified button"""
-    return _button_state(deck_id, button).get("command", "")
+    return _button_state(deck_id, page, button).get("command", "")
 
 
-def set_button_keys(deck_id: str, button: int, keys: str) -> None:
+def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
     """Sets the keys associated with the button"""
-    _button_state(deck_id, button)["keys"] = keys
+    _button_state(deck_id, page, button)["keys"] = keys
     _save_state()
 
 
-def get_button_keys(deck_id: str, button: int) -> str:
+def get_button_keys(deck_id: str, page: int, button: int) -> str:
     """Returns the keys set for the specified button"""
-    return _button_state(deck_id, button).get("keys", "")
+    return _button_state(deck_id, page, button).get("keys", "")
 
 
-def set_button_write(deck_id: str, button: int, write: str) -> None:
+def set_button_write(deck_id: str, page: int, button: int, write: str) -> None:
     """Sets the text meant to be written when button is pressed"""
-    _button_state(deck_id, button)["write"] = write
+    _button_state(deck_id, page, button)["write"] = write
     _save_state()
 
 
-def get_button_write(deck_id: str, button: int) -> str:
+def get_button_write(deck_id: str, page: int, button: int) -> str:
     """Returns the text to be produced when the specified button is pressed"""
-    return _button_state(deck_id, button).get("write", "")
+    return _button_state(deck_id, page, button).get("write", "")
 
 
 def set_brightness(deck_id: str, brightness: int) -> None:
@@ -159,7 +160,7 @@ def get_brightness(deck_id: str) -> int:
     return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
 
 
-def change_brightness(deck_id: str, amount: int=1) -> None:
+def change_brightness(deck_id: str, amount: int = 1) -> None:
     """Change the brightness of the deck by the specified amount"""
     set_brightness(deck_id, max(min(get_brightness(deck_id) + amount, 100), 0))
 
@@ -168,7 +169,10 @@ def render() -> None:
     """renders all decks"""
     for deck_id, deck_state in state.items():
         deck = decks[deck_id]
-        for button_id, button_settings in deck_state.get("buttons", {}).items():  # type: ignore
+        page = deck_state.get("current_page", 0)
+        for button_id, button_settings in (
+            deck_state.get("buttons", {}).get(page, {}).items()
+        ):  # type: ignore
             if "text" in button_settings or "icon" in button_settings:
                 image = _render_key_image(deck, **button_settings)
                 deck.set_key_image(button_id, image)

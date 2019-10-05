@@ -82,19 +82,59 @@
          <number>20</number>
         </property>
         <item>
-         <widget class="QTabWidget" name="cards">
+         <widget class="QTabWidget" name="pages">
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="tab">
+          <widget class="QWidget" name="page_1">
            <attribute name="title">
-            <string>Tab 1</string>
+            <string>Page 1</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2"/>
           </widget>
-          <widget class="QWidget" name="tab_2">
+          <widget class="QWidget" name="page_2">
            <attribute name="title">
-            <string>Tab 2</string>
+            <string>2</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_3">
+           <attribute name="title">
+            <string>3</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_4">
+           <attribute name="title">
+            <string>4</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_5">
+           <attribute name="title">
+            <string>5</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_6">
+           <attribute name="title">
+            <string>6</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_7">
+           <attribute name="title">
+            <string>7</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_8">
+           <attribute name="title">
+            <string>8</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_9">
+           <attribute name="title">
+            <string>9</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="tab_10">
+           <attribute name="title">
+            <string>10</string>
            </attribute>
           </widget>
          </widget>
@@ -204,7 +244,7 @@
      <x>0</x>
      <y>0</y>
      <width>844</width>
-     <height>30</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

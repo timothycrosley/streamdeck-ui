@@ -6,10 +6,18 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QFileDialog, QSizePolicy, QSystemTrayIcon, QMenu, QAction, QMainWindow
+from PySide2.QtWidgets import (
+    QAction,
+    QApplication,
+    QFileDialog,
+    QMainWindow,
+    QMenu,
+    QSizePolicy,
+    QSystemTrayIcon,
+)
 
 from streamdeck_ui import api
-from streamdeck_ui.config import PROJECT_PATH, LOGO
+from streamdeck_ui.config import LOGO, PROJECT_PATH
 from streamdeck_ui.ui_main import Ui_MainWindow
 
 BUTTON_SYTLE = """
@@ -25,30 +33,34 @@ def _deck_id(ui):
     return ui.device_list.itemData(0)
 
 
+def _page(ui):
+    return ui.pages.currentIndex()
+
+
 def update_button_text(ui, text):
     deck_id = _deck_id(ui)
-    api.set_button_text(deck_id, selected_button.index, text)
+    api.set_button_text(deck_id, _page(ui), selected_button.index, text)
     redraw_buttons(ui)
 
 
 def update_button_command(ui, command):
     deck_id = _deck_id(ui)
-    api.set_button_command(deck_id, selected_button.index, command)
+    api.set_button_command(deck_id, _page(ui), selected_button.index, command)
 
 
 def update_button_keys(ui, keys):
     deck_id = _deck_id(ui)
-    api.set_button_keys(deck_id, selected_button.index, keys)
+    api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
 
 
 def update_button_write(ui, write):
     deck_id = _deck_id(ui)
-    api.set_button_write(deck_id, selected_button.index, write)
+    api.set_button_write(deck_id, _page(ui), selected_button.index, write)
 
 
 def update_change_brightness(ui, amount):
     deck_id = _deck_id(ui)
-    api.set_button_change_brightness(deck_id, selected_button.index, amount)
+    api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
 
 
 def select_image(ui):
@@ -56,17 +68,17 @@ def select_image(ui):
         ui, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
     )[0]
     deck_id = _deck_id(ui)
-    api.set_button_icon(deck_id, selected_button.index, file_name)
+    api.set_button_icon(deck_id, _page(ui), selected_button.index, file_name)
     redraw_buttons(ui)
 
 
 def redraw_buttons(ui):
     deck_id = _deck_id(ui)
-    current_tab = ui.cards.currentWidget()
+    current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
-        button.setText(api.get_button_text(deck_id, button.index))
-        button.setIcon(QIcon(api.get_button_icon(deck_id, button.index)))
+        button.setText(api.get_button_text(deck_id, _page(ui), button.index))
+        button.setIcon(QIcon(api.get_button_icon(deck_id, _page(ui), button.index)))
 
 
 def set_brightness(ui, value):
@@ -85,11 +97,11 @@ def button_clicked(ui, clicked_button, buttons):
 
     deck_id = _deck_id(ui)
     button_id = selected_button.index
-    ui.text.setText(api.get_button_text(deck_id, button_id))
-    ui.command.setText(api.get_button_command(deck_id, button_id))
-    ui.keys.setText(api.get_button_keys(deck_id, button_id))
-    ui.write.setText(api.get_button_write(deck_id, button_id))
-    ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, button_id))
+    ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+    ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
+    ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
+    ui.write.setText(api.get_button_write(deck_id, _page(ui), button_id))
+    ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
 
 
 def build_buttons(ui, tab):
@@ -126,9 +138,6 @@ def build_buttons(ui, tab):
 
     redraw_buttons(ui)
     buttons[0].click()
-
-
-
 
 
 class MainWindow(QMainWindow):
@@ -182,7 +191,7 @@ def start():
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
-    build_buttons(ui, ui.cards.currentWidget())
+    build_buttons(ui, ui.pages.currentWidget())
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 
