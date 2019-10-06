@@ -11,14 +11,23 @@ from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-from streamdeck_ui.config import DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
-keyboard = Controller()
 decks: Dict[str, StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+
 if os.path.isfile(STATE_FILE):
     with open(STATE_FILE) as state_file:
-        for deck_id, deck in json.loads(state_file.read()).items():
+        config = json.loads(state_file.read())
+        file_version = config.get("streamdeck_ui_version", 0)
+        if file_version != CONFIG_FILE_VERSION:
+            raise ValueError(
+                "Incompatible version of config file found: "
+                f"{file_version} does not match required version "
+                f"{CONFIG_FILE_VERSION}."
+            )
+
+        for deck_id, deck in config["state"].items():
             deck["buttons"] = {
                 int(page_id): {int(button_id): button for button_id, button in buttons.items()}
                 for page_id, buttons in deck.get("buttons", {}).items()
@@ -28,9 +37,10 @@ if os.path.isfile(STATE_FILE):
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
     if state:
+        keyboard = Controller()
         page = get_page(deck_id)
 
-        command = get_button_command(deck_id,  page, key)
+        command = get_button_command(deck_id, page, key)
         if command:
             Popen(command.split(" "))
 
@@ -58,7 +68,7 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
 
 def _save_state():
     with open(STATE_FILE, "w") as state_file:
-        state_file.write(json.dumps(state))
+        state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state}))
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:

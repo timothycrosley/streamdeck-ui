@@ -53,9 +53,9 @@ def update_button_keys(ui, keys):
     api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
 
 
-def update_button_write(ui, write):
+def update_button_write(ui):
     deck_id = _deck_id(ui)
-    api.set_button_write(deck_id, _page(ui), selected_button.index, write)
+    api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
 
 
 def update_change_brightness(ui, amount):
@@ -117,7 +117,7 @@ def button_clicked(ui, clicked_button, buttons):
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
     ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
-    ui.write.setText(api.get_button_write(deck_id, _page(ui), button_id))
+    ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
 
@@ -208,7 +208,6 @@ def start():
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-
 
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
