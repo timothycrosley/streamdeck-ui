@@ -30,7 +30,7 @@ selected_button = None
 
 
 def _deck_id(ui):
-    return ui.device_list.itemData(0)
+    return ui.device_list.itemData(ui.device_list.currentIndex())
 
 
 def _page(ui):
@@ -126,11 +126,15 @@ def build_buttons(ui, tab):
     deck_id = _deck_id(ui)
     deck = api.get_deck(deck_id)
 
-    for child in tab.children()[0].children():
-        child.deleteLater()
+    if hasattr(tab, "deck_buttons"):
+        tab.deck_buttons.hide()
+        tab.deck_buttons.deleteLater()
 
-    row_layout = QtWidgets.QVBoxLayout()
-    tab.children()[0].addLayout(row_layout, 0, 0)
+    base_widget = QtWidgets.QWidget(tab)
+    tab.children()[0].addWidget(base_widget)
+    tab.deck_buttons = base_widget
+
+    row_layout = QtWidgets.QVBoxLayout(base_widget)
     index = 0
     buttons = []
     for _row in range(deck["layout"][0]):
@@ -138,7 +142,7 @@ def build_buttons(ui, tab):
         row_layout.addLayout(column_layout)
 
         for _column in range(deck["layout"][1]):
-            button = QtWidgets.QToolButton()
+            button = QtWidgets.QToolButton(base_widget)
             button.setCheckable(True)
             button.index = index
             button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
@@ -155,6 +159,8 @@ def build_buttons(ui, tab):
         )
 
     redraw_buttons(ui)
+    tab.hide()
+    tab.show()
 
 
 def export_config(window) -> None:
@@ -176,6 +182,13 @@ def import_config(window) -> None:
 
     api.import_config(file_name)
     redraw_buttons(window.ui)
+
+
+def build_device(ui, _device_index=None) -> None:
+    for page_id in range(ui.pages.count()):
+        page = ui.pages.widget(page_id)
+        page.setStyleSheet("background-color: black")
+        build_buttons(ui, page)
 
 
 class MainWindow(QMainWindow):
@@ -230,9 +243,8 @@ def start():
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
-    for page_id in range(ui.pages.count()):
-        page = ui.pages.widget(page_id)
-        build_buttons(ui, page)
+    build_device(ui)
+    ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
 
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
     ui.pages.currentChanged.connect(partial(change_page, ui))
@@ -243,6 +255,7 @@ def start():
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
 
+    api.render()
     tray.show()
     main_window.show()
     return sys.exit(app.exec_())

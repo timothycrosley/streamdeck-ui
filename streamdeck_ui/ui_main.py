@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'streamdeck_ui/main.ui',
 # licensing of 'streamdeck_ui/main.ui' applies.
 #
-# Created: Sun Oct  6 01:12:58 2019
+# Created: Sun Oct  6 02:46:55 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,6 +58,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(-1, 20, -1, -1)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.pages = QtWidgets.QTabWidget(self.centralwidget)
+        self.pages.setAutoFillBackground(False)
+        self.pages.setStyleSheet("b")
         self.pages.setObjectName("pages")
         self.page_1 = QtWidgets.QWidget()
         self.page_1.setObjectName("page_1")

@@ -83,6 +83,12 @@
         </property>
         <item>
          <widget class="QTabWidget" name="pages">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">b</string>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>

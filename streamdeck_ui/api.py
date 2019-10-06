@@ -4,6 +4,7 @@ import threading
 from functools import partial
 from subprocess import Popen
 from typing import Dict, List, Tuple, Union
+from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
 from pynput.keyboard import Controller, Key
@@ -227,7 +228,11 @@ def set_page(deck_id: str, page: int) -> None:
 def render() -> None:
     """renders all decks"""
     for deck_id, deck_state in state.items():
-        deck = decks[deck_id]
+        deck = decks.get(deck_id, None)
+        if not deck:
+            warn(f"{deck_id} has settings specified but is not seen. Likely unplugged!")
+            continue
+
         page = get_page(deck_id)
         for button_id, button_settings in (
             deck_state.get("buttons", {}).get(page, {}).items()
