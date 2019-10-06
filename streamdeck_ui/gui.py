@@ -137,7 +137,6 @@ def build_buttons(ui, tab):
         )
 
     redraw_buttons(ui)
-    buttons[0].click()
 
 
 class MainWindow(QMainWindow):
@@ -191,7 +190,10 @@ def start():
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
-    build_buttons(ui, ui.pages.currentWidget())
+
+    for page_id in range(ui.pages.count()):
+        page = ui.pages.widget(page_id)
+        build_buttons(ui, page)
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 

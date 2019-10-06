@@ -96,46 +96,55 @@
            <attribute name="title">
             <string>2</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_3"/>
           </widget>
           <widget class="QWidget" name="page_3">
            <attribute name="title">
             <string>3</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_11"/>
           </widget>
           <widget class="QWidget" name="page_4">
            <attribute name="title">
             <string>4</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_10"/>
           </widget>
           <widget class="QWidget" name="page_5">
            <attribute name="title">
             <string>5</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_9"/>
           </widget>
           <widget class="QWidget" name="page_6">
            <attribute name="title">
             <string>6</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_8"/>
           </widget>
           <widget class="QWidget" name="page_7">
            <attribute name="title">
             <string>7</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_7"/>
           </widget>
           <widget class="QWidget" name="page_8">
            <attribute name="title">
             <string>8</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_6"/>
           </widget>
           <widget class="QWidget" name="page_9">
            <attribute name="title">
             <string>9</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_5"/>
           </widget>
           <widget class="QWidget" name="tab_10">
            <attribute name="title">
             <string>10</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_4"/>
           </widget>
          </widget>
         </item>
@@ -244,7 +253,7 @@
      <x>0</x>
      <y>0</y>
      <width>844</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
