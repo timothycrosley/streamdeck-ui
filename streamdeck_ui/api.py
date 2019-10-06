@@ -28,11 +28,13 @@ if os.path.isfile(STATE_FILE):
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
     if state:
-        command = get_button_command(deck_id, key)
+        page = get_page(deck_id)
+
+        command = get_button_command(deck_id,  page, key)
         if command:
             Popen(command.split(" "))
 
-        keys = get_button_keys(deck_id, key)
+        keys = get_button_keys(deck_id, page, key)
         if keys:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
@@ -41,13 +43,17 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
                 for key_name in section.split("+"):
                     keyboard.release(getattr(Key, key_name, key_name))
 
-        write = get_button_write(deck_id, key)
+        write = get_button_write(deck_id, page, key)
         if write:
             keyboard.type(write)
 
-        brightness_change = get_button_change_brightness(deck_id, key)
+        brightness_change = get_button_change_brightness(deck_id, page, key)
         if brightness_change:
             change_brightness(deck_id, brightness_change)
+
+        switch_page = get_button_switch_page(deck_id, page, key)
+        if switch_page:
+            set_page(deck_id, switch_page - 1)
 
 
 def _save_state():
@@ -126,6 +132,17 @@ def get_button_command(deck_id: str, page: int, button: int) -> str:
     return _button_state(deck_id, page, button).get("command", "")
 
 
+def set_button_switch_page(deck_id: str, page: int, button: int, switch_page: int) -> None:
+    """Sets the page switch associated with the button"""
+    _button_state(deck_id, page, button)["switch_page"] = switch_page
+    _save_state()
+
+
+def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
+    """Returns the page switch set for the specified button. 0 implies no page switch."""
+    return _button_state(deck_id, page, button).get("switch_page", 0)
+
+
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
     """Sets the keys associated with the button"""
     _button_state(deck_id, page, button)["keys"] = keys
@@ -165,11 +182,23 @@ def change_brightness(deck_id: str, amount: int = 1) -> None:
     set_brightness(deck_id, max(min(get_brightness(deck_id) + amount, 100), 0))
 
 
+def get_page(deck_id: str) -> int:
+    """Gets the current page shown on the stream deck"""
+    return state.get(deck_id, {}).get("page", 0)
+
+
+def set_page(deck_id: str, page: int) -> None:
+    """Sets the current page shown on the stream deck"""
+    state.setdefault(deck_id, {})["page"] = page
+    render()
+    _save_state()
+
+
 def render() -> None:
     """renders all decks"""
     for deck_id, deck_state in state.items():
         deck = decks[deck_id]
-        page = deck_state.get("current_page", 0)
+        page = get_page(deck_id)
         for button_id, button_settings in (
             deck_state.get("buttons", {}).get(page, {}).items()
         ):  # type: ignore

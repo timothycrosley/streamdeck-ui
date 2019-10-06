@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'streamdeck_ui/main.ui',
 # licensing of 'streamdeck_ui/main.ui' applies.
 #
-# Created: Sat Oct  5 22:44:05 2019
+# Created: Sat Oct  5 23:27:27 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -143,11 +143,20 @@ class Ui_MainWindow(object):
         self.formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.write)
         self.label_7 = QtWidgets.QLabel(self.groupBox)
         self.label_7.setObjectName("label_7")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(6, QtWidgets.QFormLayout.LabelRole, self.label_7)
         self.change_brightness = QtWidgets.QSpinBox(self.groupBox)
         self.change_brightness.setMinimum(-99)
         self.change_brightness.setObjectName("change_brightness")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.change_brightness)
+        self.label_8 = QtWidgets.QLabel(self.groupBox)
+        self.label_8.setObjectName("label_8")
+        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_8)
+        self.switch_page = QtWidgets.QSpinBox(self.groupBox)
+        self.switch_page.setMinimum(0)
+        self.switch_page.setMaximum(10)
+        self.switch_page.setProperty("value", 0)
+        self.switch_page.setObjectName("switch_page")
+        self.formLayout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.switch_page)
         self.verticalLayout_3.addLayout(self.formLayout)
         self.horizontalLayout.addWidget(self.groupBox)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -186,4 +195,5 @@ class Ui_MainWindow(object):
         self.label_5.setText(QtWidgets.QApplication.translate("MainWindow", "Press Keys:", None, -1))
         self.label_6.setText(QtWidgets.QApplication.translate("MainWindow", "Write Text:", None, -1))
         self.label_7.setText(QtWidgets.QApplication.translate("MainWindow", "Brightness +/-:", None, -1))
+        self.label_8.setText(QtWidgets.QApplication.translate("MainWindow", "Switch Page:", None, -1))
 

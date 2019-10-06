@@ -63,6 +63,11 @@ def update_change_brightness(ui, amount):
     api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
 
 
+def update_switch_page(ui, page):
+    deck_id = _deck_id(ui)
+    api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
+
+
 def select_image(ui):
     file_name = QFileDialog.getOpenFileName(
         ui, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
@@ -102,6 +107,7 @@ def button_clicked(ui, clicked_button, buttons):
     ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
     ui.write.setText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
+    ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
 
 
 def build_buttons(ui, tab):
@@ -185,11 +191,11 @@ def start():
     ui.keys.textChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
+    ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, ui))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-
 
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
