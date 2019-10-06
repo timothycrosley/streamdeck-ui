@@ -157,6 +157,27 @@ def build_buttons(ui, tab):
     redraw_buttons(ui)
 
 
+def export_config(window) -> None:
+    file_name = QFileDialog.getSaveFileName(
+        window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)"
+    )[0]
+    if not file_name:
+        return
+
+    api.export_config(file_name)
+
+
+def import_config(window) -> None:
+    file_name = QFileDialog.getOpenFileName(
+        window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)"
+    )[0]
+    if not file_name:
+        return
+
+    api.import_config(file_name)
+    redraw_buttons(window.ui)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -218,6 +239,9 @@ def start():
     _highlight_first_button(ui)
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
+
+    ui.actionExport.triggered.connect(partial(export_config, main_window))
+    ui.actionImport.triggered.connect(partial(import_config, main_window))
 
     tray.show()
     main_window.show()

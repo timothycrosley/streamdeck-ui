@@ -16,24 +16,6 @@ from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, 
 decks: Dict[str, StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
-if os.path.isfile(STATE_FILE):
-    with open(STATE_FILE) as state_file:
-        config = json.loads(state_file.read())
-        file_version = config.get("streamdeck_ui_version", 0)
-        if file_version != CONFIG_FILE_VERSION:
-            raise ValueError(
-                "Incompatible version of config file found: "
-                f"{file_version} does not match required version "
-                f"{CONFIG_FILE_VERSION}."
-            )
-
-        for deck_id, deck in config["state"].items():
-            deck["buttons"] = {
-                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
-                for page_id, buttons in deck.get("buttons", {}).items()
-            }
-            state[deck_id] = deck
-
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
     if state:
@@ -67,8 +49,46 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool)
 
 
 def _save_state():
-    with open(STATE_FILE, "w") as state_file:
-        state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state}))
+    export_config(STATE_FILE)
+
+
+def _open_config(config_file: str):
+    global state
+
+    with open(config_file) as state_file:
+        config = json.loads(state_file.read())
+        file_version = config.get("streamdeck_ui_version", 0)
+        if file_version != CONFIG_FILE_VERSION:
+            raise ValueError(
+                "Incompatible version of config file found: "
+                f"{file_version} does not match required version "
+                f"{CONFIG_FILE_VERSION}."
+            )
+
+        state = {}
+        for deck_id, deck in config["state"].items():
+            deck["buttons"] = {
+                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
+                for page_id, buttons in deck.get("buttons", {}).items()
+            }
+            state[deck_id] = deck
+
+
+def import_config(config_file: str) -> None:
+    _open_config(config_file)
+    render()
+    _save_state()
+
+
+def export_config(output_file: str) -> None:
+    with open(output_file, "w") as state_file:
+        state_file.write(
+            json.dumps(
+                {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
+                indent=4,
+                separators=(",", ": "),
+            )
+        )
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
@@ -241,3 +261,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
     return PILHelper.to_native_format(deck, image)
+
+
+if os.path.isfile(STATE_FILE):
+    _open_config(STATE_FILE)
