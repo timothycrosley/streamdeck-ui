@@ -68,13 +68,25 @@ def update_switch_page(ui, page):
     api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
 
 
-def select_image(ui):
-    file_name = QFileDialog.getOpenFileName(
-        ui, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
-    )[0]
-    deck_id = _deck_id(ui)
-    api.set_button_icon(deck_id, _page(ui), selected_button.index, file_name)
+def _highlight_first_button(ui):
+    button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
+    button.setChecked(False)
+    button.click()
+
+
+def change_page(ui, page):
+    api.set_page(_deck_id(ui), page)
     redraw_buttons(ui)
+    _highlight_first_button(ui)
+
+
+def select_image(window):
+    file_name = QFileDialog.getOpenFileName(
+        window, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
+    )[0]
+    deck_id = _deck_id(window.ui)
+    api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
+    redraw_buttons(window.ui)
 
 
 def redraw_buttons(ui):
@@ -192,14 +204,19 @@ def start():
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
-    ui.imageButton.clicked.connect(partial(select_image, ui))
+    ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
+
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
         build_buttons(ui, page)
+
+    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    ui.pages.currentChanged.connect(partial(change_page, ui))
+    _highlight_first_button(ui)
 
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
 

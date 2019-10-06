@@ -202,9 +202,8 @@ def render() -> None:
         for button_id, button_settings in (
             deck_state.get("buttons", {}).get(page, {}).items()
         ):  # type: ignore
-            if "text" in button_settings or "icon" in button_settings:
-                image = _render_key_image(deck, **button_settings)
-                deck.set_key_image(button_id, image)
+            image = _render_key_image(deck, **button_settings)
+            deck.set_key_image(button_id, image)
 
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
