@@ -14,6 +14,7 @@ from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
+image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
@@ -119,6 +120,7 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     _button_state(deck_id, page, button)["text"] = text
+    image_cache.pop(f"{deck_id}.{page}.{button}", None)
     render()
     _save_state()
 
@@ -131,6 +133,7 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     _button_state(deck_id, page, button)["icon"] = icon
+    image_cache.pop(f"{deck_id}.{page}.{button}", None)
     render()
     _save_state()
 
@@ -237,7 +240,12 @@ def render() -> None:
         for button_id, button_settings in (
             deck_state.get("buttons", {}).get(page, {}).items()
         ):  # type: ignore
-            image = _render_key_image(deck, **button_settings)
+            key = f"{deck_id}.{page}.{button_id}"
+            if key in image_cache:
+                image = image_cache[key]
+            else:
+                image = _render_key_image(deck, **button_settings)
+                image_cache[key] = image
             deck.set_key_image(button_id, image)
 
 
