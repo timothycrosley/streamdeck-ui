@@ -134,7 +134,7 @@ def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
 
 def _button_state(deck_id: str, page: int, button: int) -> dict:
     buttons = state.setdefault(deck_id, {}).setdefault("buttons", {})
-    button_sate = buttons.setdefault(page, {})  # type: ignore
+    buttons_state = buttons.setdefault(page, {})  # type: ignore
     return buttons_state.setdefault(button, {})  # type: ignore
 
 

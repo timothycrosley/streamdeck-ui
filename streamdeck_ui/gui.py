@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.window_shown: bool = True
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # noqa: N802 - Part of QT signature.
         self.window_shown = False
         self.hide()
         event.ignore()
@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
 
         self.show()
         self.activateWindow()
-        getattr(self, "raise")()
+        getattr(self, "raise")()  # noqa: B009 - Can't call as self.raise() due to syntax error.
         self.window_shown = True
 
 
