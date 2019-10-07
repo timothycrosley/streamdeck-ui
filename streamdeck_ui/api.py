@@ -133,7 +133,8 @@ def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
 
 
 def _button_state(deck_id: str, page: int, button: int) -> dict:
-    buttons_state = state.setdefault(deck_id, {}).setdefault("buttons", {}).setdefault(page, {})
+    buttons = state.setdefault(deck_id, {}).setdefault("buttons", {})
+    button_sate = buttons.setdefault(page, {})  # type: ignore
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
@@ -238,7 +239,7 @@ def change_brightness(deck_id: str, amount: int = 1) -> None:
 
 def get_page(deck_id: str) -> int:
     """Gets the current page shown on the stream deck"""
-    return state.get(deck_id, {}).get("page", 0)
+    return state.get(deck_id, {}).get("page", 0)  # type: ignore
 
 
 def set_page(deck_id: str, page: int) -> None:
@@ -258,8 +259,8 @@ def render() -> None:
 
         page = get_page(deck_id)
         for button_id, button_settings in (
-            deck_state.get("buttons", {}).get(page, {}).items()
-        ):  # type: ignore
+            deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
+        ):
             key = f"{deck_id}.{page}.{button_id}"
             if key in image_cache:
                 image = image_cache[key]
