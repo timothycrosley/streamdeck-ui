@@ -190,6 +190,10 @@ def build_device(ui, _device_index=None) -> None:
         page.setStyleSheet("background-color: black")
         build_buttons(ui, page)
 
+    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
+    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    _highlight_first_button(ui)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -246,11 +250,8 @@ def start():
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
 
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
-    ui.pages.currentChanged.connect(partial(change_page, ui))
-    _highlight_first_button(ui)
 
-    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
+    ui.pages.currentChanged.connect(partial(change_page, ui))
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
