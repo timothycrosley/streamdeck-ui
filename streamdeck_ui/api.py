@@ -270,7 +270,10 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     if text:
         true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
         label_w, label_h = draw.textsize(text, font=true_font)
-        label_pos = ((image.width - label_w) // 2, image.height - 20)
+        if icon:
+            label_pos = ((image.width - label_w) // 2, image.height - 20)
+        else:
+            label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
     return PILHelper.to_native_format(deck, image)
