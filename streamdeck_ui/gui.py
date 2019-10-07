@@ -186,6 +186,7 @@ def import_config(window) -> None:
 
 
 def sync(ui) -> None:
+    api.ensure_decks_connected()
     ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
