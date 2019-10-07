@@ -3,7 +3,7 @@ import sys
 from functools import partial
 
 from PySide2 import QtWidgets
-from PySide2.QtCore import QSize, Qt
+from PySide2.QtCore import QSize, Qt, QTimer
 from PySide2.QtGui import QIcon
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import (
@@ -184,14 +184,18 @@ def import_config(window) -> None:
     redraw_buttons(window.ui)
 
 
+def sync(ui) -> None:
+    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
+    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+
+
 def build_device(ui, _device_index=None) -> None:
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
         page.setStyleSheet("background-color: black")
         build_buttons(ui, page)
 
-    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    sync(ui)
     _highlight_first_button(ui)
 
 
@@ -250,11 +254,14 @@ def start():
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
 
-
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
+
+    timer = QTimer()
+    timer.timeout.connect(partial(sync, ui))
+    timer.start(1000)
 
     api.render()
     tray.show()
