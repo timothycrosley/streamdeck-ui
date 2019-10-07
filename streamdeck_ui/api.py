@@ -2,7 +2,7 @@ import json
 import os
 import threading
 from functools import partial
-from subprocess import Popen
+from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, List, Tuple, Union
 from warnings import warn
 
