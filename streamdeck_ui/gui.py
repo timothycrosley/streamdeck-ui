@@ -27,6 +27,7 @@ BUTTON_SYTLE = """
 """
 
 selected_button = None
+text_timer = None
 
 
 def _deck_id(ui):
@@ -223,6 +224,18 @@ class MainWindow(QMainWindow):
         self.window_shown = True
 
 
+def queue_text_change(ui, text):
+    global text_timer
+
+    if text_timer:
+        text_timer.stop()
+
+    text_timer = QTimer()
+    text_timer.setSingleShot(True)
+    text_timer.timeout.connect(partial(update_button_text, ui, text))
+    text_timer.start(500)
+
+
 def start():
     app = QApplication(sys.argv)
 
@@ -240,7 +253,7 @@ def start():
 
     tray.setContextMenu(menu)
 
-    ui.text.textChanged.connect(partial(update_button_text, ui))
+    ui.text.textChanged.connect(partial(queue_text_change, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
     ui.keys.textChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
