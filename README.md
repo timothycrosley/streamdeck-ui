@@ -12,4 +12,5 @@ _________________
 [Read Latest Documentation](https://timothycrosley.github.io/streamdeck_ui/) - [Browse GitHub Code Repository](https://github.com/timothycrosley/streamdeck_ui/)
 _________________
 
-**streamdeck_ui** A service, Web Interface, and UI for interacting with your computer using a Stream Deck
+**streamdeck_ui** A Linux compatible UI for the Elgato Stream Deck.
+
