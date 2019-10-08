@@ -26,62 +26,62 @@ BUTTON_SYTLE = """
     QToolButton:focus{border:none; }
 """
 
-selected_button = None
+selected_button: QtWidgets.QToolButton
 text_timer = None
 
 
-def _deck_id(ui):
+def _deck_id(ui) -> str:
     return ui.device_list.itemData(ui.device_list.currentIndex())
 
 
-def _page(ui):
+def _page(ui) -> int:
     return ui.pages.currentIndex()
 
 
-def update_button_text(ui, text):
+def update_button_text(ui, text: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_text(deck_id, _page(ui), selected_button.index, text)
     redraw_buttons(ui)
 
 
-def update_button_command(ui, command):
+def update_button_command(ui, command: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_command(deck_id, _page(ui), selected_button.index, command)
 
 
-def update_button_keys(ui, keys):
+def update_button_keys(ui, keys: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
 
 
-def update_button_write(ui):
+def update_button_write(ui) -> None:
     deck_id = _deck_id(ui)
     api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
 
 
-def update_change_brightness(ui, amount):
+def update_change_brightness(ui, amount: int) -> None:
     deck_id = _deck_id(ui)
     api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
 
 
-def update_switch_page(ui, page):
+def update_switch_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
     api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
 
 
-def _highlight_first_button(ui):
+def _highlight_first_button(ui) -> None:
     button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
     button.setChecked(False)
     button.click()
 
 
-def change_page(ui, page):
+def change_page(ui, page: int) -> None:
     api.set_page(_deck_id(ui), page)
     redraw_buttons(ui)
     _highlight_first_button(ui)
 
 
-def select_image(window):
+def select_image(window) -> None:
     file_name = QFileDialog.getOpenFileName(
         window, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
     )[0]
@@ -90,7 +90,7 @@ def select_image(window):
     redraw_buttons(window.ui)
 
 
-def redraw_buttons(ui):
+def redraw_buttons(ui) -> None:
     deck_id = _deck_id(ui)
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
@@ -99,12 +99,12 @@ def redraw_buttons(ui):
         button.setIcon(QIcon(api.get_button_icon(deck_id, _page(ui), button.index)))
 
 
-def set_brightness(ui, value):
+def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
 
 
-def button_clicked(ui, clicked_button, buttons):
+def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
     for button in buttons:
@@ -123,7 +123,7 @@ def button_clicked(ui, clicked_button, buttons):
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
 
 
-def build_buttons(ui, tab):
+def build_buttons(ui, tab) -> None:
     deck_id = _deck_id(ui)
     deck = api.get_deck(deck_id)
 
@@ -138,11 +138,11 @@ def build_buttons(ui, tab):
     row_layout = QtWidgets.QVBoxLayout(base_widget)
     index = 0
     buttons = []
-    for _row in range(deck["layout"][0]):
+    for _row in range(deck["layout"][0]):  # type: ignore
         column_layout = QtWidgets.QHBoxLayout()
         row_layout.addLayout(column_layout)
 
-        for _column in range(deck["layout"][1]):
+        for _column in range(deck["layout"][1]):  # type: ignore
             button = QtWidgets.QToolButton(base_widget)
             button.setCheckable(True)
             button.index = index
@@ -208,12 +208,12 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.window_shown: bool = True
 
-    def closeEvent(self, event):  # noqa: N802 - Part of QT signature.
+    def closeEvent(self, event) -> None:  # noqa: N802 - Part of QT signature.
         self.window_shown = False
         self.hide()
         event.ignore()
 
-    def systray_clicked(self, _status=None):
+    def systray_clicked(self, _status=None) -> None:
         self.hide()
         if self.window_shown:
             self.window_shown = False
@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
         self.window_shown = True
 
 
-def queue_text_change(ui, text):
+def queue_text_change(ui, text: str) -> None:
     global text_timer
 
     if text_timer:
@@ -237,7 +237,7 @@ def queue_text_change(ui, text):
     text_timer.start(500)
 
 
-def start():
+def start(_exit: bool = False) -> None:
     app = QApplication(sys.argv)
 
     logo = QIcon(LOGO)
@@ -280,7 +280,10 @@ def start():
     api.render()
     tray.show()
     main_window.show()
-    return sys.exit(app.exec_())
+    if exit:
+        return
+    else:
+        sys.exit(app.exec_())
 
 
 if __name__ == "__main__":

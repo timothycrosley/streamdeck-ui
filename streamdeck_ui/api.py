@@ -8,18 +8,17 @@ from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
 from pynput.keyboard import Controller, Key
-from StreamDeck.DeviceManager import DeviceManager
-from StreamDeck.Devices.StreamDeck import StreamDeck
-from StreamDeck.ImageHelpers import PILHelper
+from StreamDeck import DeviceManager, ImageHelpers
+from StreamDeck.Devices import StreamDeck
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
 image_cache: Dict[str, memoryview] = {}
-decks: Dict[str, StreamDeck] = {}
+decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
 
-def _key_change_callback(deck_id: str, _deck: StreamDeck, key: int, state: bool) -> None:
+def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     if state:
         keyboard = Controller()
         page = get_page(deck_id)
@@ -95,7 +94,7 @@ def export_config(output_file: str) -> None:
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     """Opens and then returns all known stream deck devices"""
-    for deck in DeviceManager().enumerate():
+    for deck in DeviceManager.DeviceManager().enumerate():
         deck.open()
         deck.reset()
         deck_id = deck.get_serial_number()
@@ -112,7 +111,7 @@ def ensure_decks_connected() -> None:
     """Reconnects to any decks that lost connection. If they did, re-renders them."""
     for deck_serial, deck in decks.copy().items():
         if not deck.connected():
-            for new_deck in DeviceManager().enumerate():
+            for new_deck in DeviceManager.DeviceManager().enumerate():
                 try:
                     new_deck.open()
                     new_deck_serial = new_deck.get_serial_number()
@@ -272,7 +271,7 @@ def render() -> None:
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
     """Renders an individual key image"""
-    image = PILHelper.create_image(deck)
+    image = ImageHelpers.PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
     if icon:
@@ -297,7 +296,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
-    return PILHelper.to_native_format(deck, image)
+    return ImageHelpers.PILHelper.to_native_format(deck, image)
 
 
 if os.path.isfile(STATE_FILE):

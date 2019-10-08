@@ -3,3 +3,5 @@ exclude_lines =
     pragma: no cover
 omit =
     *tests*
+    streamdeck_ui/ui_main.py
+

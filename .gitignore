@@ -85,4 +85,5 @@ docs/preconvert
 site/
 out
 poetry.lock
+.hypothesis
 
