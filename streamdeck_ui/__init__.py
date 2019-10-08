@@ -1,5 +1,5 @@
 """**streamdeck_ui**
 
-A service, Web Interface, and UI for interacting with your computer using a Stream Deck
+A Linux compatible UI for the Elgato Stream Deck.
 """
-__version__ = "0.0.3"
+__version__ = "1.0.0"

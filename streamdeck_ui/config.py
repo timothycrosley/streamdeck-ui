@@ -1,3 +1,4 @@
+"""Defines shared configuration variables for the streamdeck_ui project"""
 import os
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

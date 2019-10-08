@@ -57,7 +57,7 @@ As mentioned in the echo in the last line, make sure you unplug and replug your 
 Once complete, you should be able to install streamdeck_ui:
 
 ```bash
-pip3 install streamdeck_ui --user
+sudo pip3 install streamdeck_ui
 ```
 
 You can then launch `streamdeck` to start configuring your device.
