@@ -16,5 +16,5 @@ OR
 
 Changelog
 =========
-## 1.0.0 - TBD
+## 1.0.1 - October 8th 2019
 - Initial API stable release.

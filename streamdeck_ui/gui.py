@@ -281,7 +281,7 @@ def start(_exit: bool = False) -> None:
     api.render()
     tray.show()
     main_window.show()
-    if exit:
+    if _exit:
         return
     else:
         sys.exit(app.exec_())

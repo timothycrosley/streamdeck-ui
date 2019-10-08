@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 from pynput.keyboard import Controller, Key
 from StreamDeck import DeviceManager, ImageHelpers
 from StreamDeck.Devices import StreamDeck
+from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
