@@ -14,3 +14,5 @@ _________________
 
 **streamdeck_ui** A Linux compatible UI for the Elgato Stream Deck.
 
+![Streamdeck UI Usage Example](https://raw.github.com/timothycrosley/streamdeck-ui/master/art/example.gif)
+
