@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "streamdeck_ui"
+version = "0.0.3"
+description = "A service, Web Interface, and UI for interacting with your computer using a Stream Deck"
+authors = ["Timothy Crosley <timothy.crosley@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+streamdeck = "^0.5.0"
+pillow = "^6.1"
+hidapi = "^0.7.99"
+pynput = "^1.4"
+pyside2 = "^5.13"
+
+[tool.poetry.dev-dependencies]
+vulture = "^1.0"
+bandit = "^1.6"
+safety = "^1.8"
+isort = "^4.3"
+flake8-bugbear = "^19.8"
+black = {version = "^18.3-alpha.0", allows-prereleases = true}
+mypy = "^0.720.0"
+ipython = "^7.7"
+pytest = "^5.0"
+pytest-cov = "^2.7"
+pytest-mock = "^1.10"
+pep8-naming = "^0.8.2"
+portray = "^1.3.0"
+jupyter = "^1.0"
+ipdb = "^0.12.2"
+hypothesis-auto = "^1.1"
+
+[tool.poetry.scripts]
+streamdeck = "streamdeck_ui.gui:start"
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+

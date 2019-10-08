@@ -1,0 +1,656 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+    
+    
+      
+        <title>streamdeck-ui</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/application.30686662.css">
+      
+        <link rel="stylesheet" href="assets/stylesheets/application-palette.a8b3c06d.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#4caf50">
+      
+    
+    
+      <script src="assets/javascripts/modernizr.74668098.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="assets/fonts/material-icons.css">
+    
+    
+    
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="green" data-md-color-accent="lightgreen">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#key-features" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="." title="streamdeck-ui" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              streamdeck-ui
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Home
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+<a href="https://github.com/timothycrosley/streamdeck-ui/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    streamdeck-ui
+  </div>
+</a>
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main" role="main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="." title="streamdeck-ui" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    streamdeck-ui
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+<a href="https://github.com/timothycrosley/streamdeck-ui/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    streamdeck-ui
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Home
+      </label>
+    
+    <a href="." title="Home" class="md-nav__link md-nav__link--active">
+      Home
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    Key Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linux-quick-start" class="md-nav__link">
+    Linux Quick Start
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generic-quick-start" class="md-nav__link">
+    Generic Quick Start
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="CHANGELOG/" title="Changelog" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Contributing
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Contributing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="docs/contributing/1.-contributing-guide/" title="1. Contributing Guide" class="md-nav__link">
+      1. Contributing Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="docs/contributing/2.-coding-standard/" title="2. Coding Standard" class="md-nav__link">
+      2. Coding Standard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="docs/contributing/3.-code-of-conduct/" title="3. Code Of Conduct" class="md-nav__link">
+      3. Code Of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="docs/contributing/4.-acknowledgements/" title="4. Acknowledgements" class="md-nav__link">
+      4. Acknowledgements
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      Reference
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Reference
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1">
+    
+    <label class="md-nav__link" for="nav-4-1">
+      Streamdeck Ui
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        Streamdeck Ui
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="reference/streamdeck_ui/api/" title="API" class="md-nav__link">
+      API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="reference/streamdeck_ui/config/" title="Config" class="md-nav__link">
+      Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="reference/streamdeck_ui/gui/" title="Gui" class="md-nav__link">
+      Gui
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="reference/streamdeck_ui/" title="Index" class="md-nav__link">
+      Index
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="reference/streamdeck_ui/ui_main/" title="Ui Main" class="md-nav__link">
+      Ui Main
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    Key Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linux-quick-start" class="md-nav__link">
+    Linux Quick Start
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generic-quick-start" class="md-nav__link">
+    Generic Quick Start
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/timothycrosley/streamdeck-ui/edit/master/README.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>Home</h1>
+                
+                <p><a href="https://timothycrosley.github.io/streamdeck-ui/"><img alt="streamdeck_ui - Linux compatible UI for the Elgato Stream Deck" src="https://raw.githubusercontent.com/timothycrosley/streamdeck-ui/master/art/logo_large.png" /></a></p>
+<hr />
+<p><a href="http://badge.fury.io/py/streamdeck_ui"><img alt="PyPI version" src="https://badge.fury.io/py/streamdeck_ui.svg" /></a>
+<a href="https://travis-ci.org/timothycrosley/streamdeck_ui"><img alt="Build Status" src="https://travis-ci.org/timothycrosley/streamdeck_ui.svg?branch=master" /></a>
+<a href="https://codecov.io/gh/timothycrosley/streamdeck_ui"><img alt="codecov" src="https://codecov.io/gh/timothycrosley/streamdeck_ui/branch/master/graph/badge.svg" /></a>
+<a href="https://gitter.im/timothycrosley/streamdeck_ui?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img alt="Join the chat at https://gitter.im/timothycrosley/streamdeck_ui" src="https://badges.gitter.im/timothycrosley/streamdeck_ui.svg" /></a>
+<a href="https://pypi.python.org/pypi/streamdeck_ui/"><img alt="License" src="https://img.shields.io/github/license/mashape/apistatus.svg" /></a>
+<a href="https://pepy.tech/project/streamdeck_ui"><img alt="Downloads" src="https://pepy.tech/badge/streamdeck_ui" /></a></p>
+<hr />
+<p><a href="https://timothycrosley.github.io/streamdeck_ui/">Read Latest Documentation</a> - <a href="https://github.com/timothycrosley/streamdeck_ui/">Browse GitHub Code Repository</a></p>
+<hr />
+<p><strong>streamdeck_ui</strong> A Linux compatible UI for the Elgato Stream Deck.</p>
+<p><img alt="Streamdeck UI Usage Example" src="https://raw.github.com/timothycrosley/streamdeck-ui/master/art/example.gif" /></p>
+<h2 id="key-features">Key Features</h2>
+<ul>
+<li><strong>Linux Compatible</strong>: Enables usage of all Stream Deck devices on Linux without needing to code.</li>
+<li><strong>Multi-device</strong>: Enables connecting and configuring multiple Stream Deck devices on one computer.</li>
+<li><strong>Brightness Control</strong>: Supports controlling the brightness from both the configuration UI and buttons on the device itself.</li>
+<li><strong>Configurable Button Display</strong>: Icons + Text, Icon Only, and Text Only configurable per button on the Stream Deck.</li>
+<li><strong>Multi-Action Support</strong>: Run commands, write text and press hotkey combinations at the press of a single button on your Stream Deck.</li>
+<li><strong>Button Pages</strong>: streamdeck_ui supports multiple pages of buttons and dynamically setting up buttons to switch between those pages.</li>
+<li><strong>Auto Reconnect</strong>: Automatically and gracefully reconnects, in the case the device is unplugged and replugged in.</li>
+<li><strong>Import/Export</strong>: Supports saving and restoring Stream Deck configuration.</li>
+</ul>
+<p>Communication with the Streamdeck is powered by the <a href="https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library">Python Elgato Stream Deck Library</a>.</p>
+<h2 id="linux-quick-start">Linux Quick Start</h2>
+<p>To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries and give your user access to the Stream Deck devices.</p>
+<p><a href="https://github.com/timothycrosley/streamdeck-ui/blob/master/scripts/ubuntu_install.sh">Here</a> is a simple script for doing that on Ubuntu:</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/bin/bash -xe</span>
+
+sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+
+sudo usermod -a -G plugdev <span class="sb">`</span>whoami<span class="sb">`</span>
+
+sudo tee /etc/udev/rules.d/99-streamdeck.rules <span class="s">&lt;&lt; EOF</span>
+<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;0060&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
+<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;0063&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
+<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;006c&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
+<span class="s">EOF</span>
+
+sudo udevadm control --reload-rules
+
+<span class="nb">echo</span> <span class="s2">&quot;Unplug and replug in device for the new udev rules to take effect&quot;</span>
+</pre></div>
+
+
+<p>As mentioned in the echo in the last line, make sure you unplug and replug your device before continuing.
+Once complete, you should be able to install streamdeck_ui:</p>
+<div class="codehilite"><pre><span></span>pip3 install streamdeck_ui --user
+</pre></div>
+
+
+<p>You can then launch <code>streamdeck</code> to start configuring your device.</p>
+<div class="codehilite"><pre><span></span>streamdeck
+</pre></div>
+
+
+<p>It's recommended that you include <code>streamdeck</code> in your windowing environments list of applications to auto-start.</p>
+<h2 id="generic-quick-start">Generic Quick Start</h2>
+<p>On other Operating Systems, or if you already have the required libraries and permissions, you should be able to install and run streamdeck_ui:</p>
+<div class="codehilite"><pre><span></span>pip3 install streamdeck_ui --user
+streamdeck
+</pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+        
+          <a href="CHANGELOG/" title="Changelog" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Changelog
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Powered by
+        <a href="http://timothycrosley.github.io/portray">portray.</a>
+        You too can
+        <a href="http://timothycrosley.github.io/portray">
+          portray</a>
+        your Python project well using automatic documentation.
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="assets/javascripts/application.ac79c3b0.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
+      
+    
+  </body>
+</html>
