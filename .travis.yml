@@ -9,6 +9,6 @@ matrix:
   - os: osx
     language: generic
 script:
-- bash scripts/test.sh
+- bash scripts/test.sh > /dev/null
 after_script:
 - bash <(curl -s https://codecov.io/bash)
