@@ -16,5 +16,8 @@ OR
 
 Changelog
 =========
+## 1.0.2 - November 25th 2019
+- Updated driver requirement to enable full compatiblity with XL.
+
 ## 1.0.1 - October 8th 2019
 - Initial API stable release.
