@@ -1,7 +1,7 @@
 #!/bin/bash -xe
-
+echo "Installing libraries"
 sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
-
+echo "Adding udev rules and reloading"
 sudo usermod -a -G plugdev `whoami`
 
 sudo tee /etc/udev/rules.d/99-streamdeck.rules << EOF
@@ -13,3 +13,6 @@ EOF
 sudo udevadm control --reload-rules
 
 echo "Unplug and replug in device for the new udev rules to take effect"
+echo "Installing streamdeck_ui"
+pip3 install --user streamdeck_ui
+echo "If the installation was successful, run 'streamdeck' to start."
