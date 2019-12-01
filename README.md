@@ -1,4 +1,4 @@
-[![streamdeck_ui - Linux compatible UI for the Elgato Stream Deck](https://raw.githubusercontent.com/timothycrosley/streamdeck-ui/master/art/logo_large.png)](https://timothycrosley.github.io/streamdeck-ui/)
+[![streamdeck_ui - Linux compatible UI for the Elgato Stream Deck](art/logo_large.png)](https://timothycrosley.github.io/streamdeck-ui/)
 _________________
 
 [![PyPI version](https://badge.fury.io/py/streamdeck-ui.svg)](http://badge.fury.io/py/streamdeck-ui)
@@ -14,7 +14,7 @@ _________________
 
 **streamdeck_ui** A Linux compatible UI for the Elgato Stream Deck.
 
-![Streamdeck UI Usage Example](https://raw.github.com/timothycrosley/streamdeck-ui/master/art/example.gif)
+![Streamdeck UI Usage Example](art/example.gif)
 
 ## Key Features
 
@@ -30,37 +30,47 @@ _________________
 Communication with the Streamdeck is powered by the [Python Elgato Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library).
 
 ## Linux Quick Start
-
-To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries and give your user access to the Stream Deck devices.
-
-[Here](https://github.com/timothycrosley/streamdeck-ui/blob/master/scripts/ubuntu_install.sh) is a simple script for doing that on Ubuntu:
-
+### Precooked Scripts
+There are scripts for setting up streamdeck_ui on [Debian/Ubuntu](scripts/ubuntu_install.sh) and [Fedora](scripts/fedora_install.sh).
+### Manual installation
+To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries.
+The name of those libraries will differ depending on your Operating System.  
+Debian / Ubuntu:
 ```bash
-#!/bin/bash -xe
+sudo apt-get install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+```
+Fedora:
+```bash
+sudo dnf install python3-devel libusb-devel
+```
 
-sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+To use streamdeck_ui without root permissions, you have to give your user full access to the device.
 
+Add your user to the 'plugdev' group:
+```bash
 sudo usermod -a -G plugdev `whoami`
-
-sudo tee /etc/udev/rules.d/99-streamdeck.rules << EOF
+```
+Add the udev rules using your favorite text editor:
+```bash
+sudo nano /etc/udev/rules.d/99-streamdeck.rules
+```
+Paste the following lines:
+```
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
-EOF
-
+```
+Reload the rules:
+```
 sudo udevadm control --reload-rules
-
-echo "Unplug and replug in device for the new udev rules to take effect"
 ```
-
-As mentioned in the echo in the last line, make sure you unplug and replug your device before continuing.
-Once complete, you should be able to install streamdeck_ui:
-
+Make sure you unplug and replug your device before continuing.
+Once complete, you should be able to install streamdeck_ui.
+Installing the application itself is done via pip: To install the app system-wide, run:
 ```bash
-sudo pip3 install streamdeck_ui
+pip3 install --user streamdeck_ui
 ```
-
 You can then launch `streamdeck` to start configuring your device.
 
 ```bash
@@ -71,7 +81,8 @@ It's recommended that you include `streamdeck` in your windowing environment's l
 
 ## Generic Quick Start
 
-On other Operating Systems, or if you already have the required libraries and permissions, you should be able to install and run streamdeck_ui:
+On other Operating Systems, you'll need to install the required [dependencies](https://github.com/abcminiuser/python-elgato-streamdeck#package-dependencies) of the library.
+After that, use pip to install the app:
 
 ```bash
 pip3 install streamdeck_ui --user
