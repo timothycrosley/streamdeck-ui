@@ -43,6 +43,7 @@ Fedora:
 ```bash
 sudo dnf install python3-devel libusb-devel
 ```
+If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
 
 To use streamdeck_ui without root permissions, you have to give your user full access to the device.
 
