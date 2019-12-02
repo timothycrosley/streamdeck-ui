@@ -22,6 +22,6 @@ addons:
 services:
   - xvfb
 script:
-- bash scripts/test.sh > /dev/null
+- bash scripts/test.sh
 after_script:
 - bash <(curl -s https://codecov.io/bash)
