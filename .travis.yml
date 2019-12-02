@@ -19,7 +19,8 @@ addons:
       - libhidapi-hidraw0
       - libudev-dev
       - libusb-1.0-0-dev
-
+services:
+  - xvfb
 script:
 - bash scripts/test.sh > /dev/null
 after_script:
