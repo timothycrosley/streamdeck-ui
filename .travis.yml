@@ -13,6 +13,13 @@ matrix:
     python: 3.8
   - os: osx
     language: generic
+addons:
+  apt:
+    packages:
+      - libhidapi-hidraw0
+      - libudev-dev
+      - libusb-1.0-0-dev
+
 script:
 - bash scripts/test.sh > /dev/null
 after_script:
