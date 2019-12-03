@@ -1,8 +1,14 @@
+import sys
 from unittest.mock import MagicMock
 
+import pytest
 from hypothesis_auto import auto_pytest_magic
 
 from streamdeck_ui import api, gui
+
+pytestmark = pytest.mark.skipif(
+    sys.platform == "linux", reason="tests for mac only due to travis issues"
+)
 
 gui.selected_button = MagicMock()
 
