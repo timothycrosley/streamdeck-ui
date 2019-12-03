@@ -9,11 +9,19 @@ matrix:
   - os: linux
     python: 3.7
     env: DEPLOY=yes
-  - os: linux
-    python: 3.8
   - os: osx
     language: generic
+addons:
+  apt:
+    packages:
+      - libhidapi-hidraw0
+      - libudev-dev
+      - libusb-1.0-0-dev
+      - libegl1-mesa
+      - libx11-xcb1
+services:
+  - xvfb
 script:
-- bash scripts/test.sh > /dev/null
+- bash scripts/test.sh
 after_script:
 - bash <(curl -s https://codecov.io/bash)
