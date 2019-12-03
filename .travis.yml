@@ -17,6 +17,7 @@ addons:
       - libhidapi-hidraw0
       - libudev-dev
       - libusb-1.0-0-dev
+      - libegl1-mesa
 services:
   - xvfb
 script:
