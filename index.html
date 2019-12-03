@@ -256,6 +256,26 @@
     Linux Quick Start
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#precooked-scripts" class="md-nav__link">
+    Precooked Scripts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-installation" class="md-nav__link">
+    Manual installation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -498,6 +518,26 @@
     Linux Quick Start
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#precooked-scripts" class="md-nav__link">
+    Precooked Scripts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-installation" class="md-nav__link">
+    Manual installation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -528,7 +568,7 @@
                 
                   <h1>Home</h1>
                 
-                <p><a href="https://timothycrosley.github.io/streamdeck-ui/"><img alt="streamdeck_ui - Linux compatible UI for the Elgato Stream Deck" src="https://raw.githubusercontent.com/timothycrosley/streamdeck-ui/master/art/logo_large.png" /></a></p>
+                <p><a href="https://timothycrosley.github.io/streamdeck-ui/"><img alt="streamdeck_ui - Linux compatible UI for the Elgato Stream Deck" src="art/logo_large.png" /></a></p>
 <hr />
 <p><a href="http://badge.fury.io/py/streamdeck-ui"><img alt="PyPI version" src="https://badge.fury.io/py/streamdeck-ui.svg" /></a>
 <a href="https://travis-ci.org/timothycrosley/streamdeck-ui"><img alt="Build Status" src="https://travis-ci.org/timothycrosley/streamdeck-ui.svg?branch=master" /></a>
@@ -540,7 +580,7 @@
 <p><a href="https://timothycrosley.github.io/streamdeck-ui/">Read Latest Documentation</a> - <a href="https://github.com/timothycrosley/streamdeck-ui/">Browse GitHub Code Repository</a></p>
 <hr />
 <p><strong>streamdeck_ui</strong> A Linux compatible UI for the Elgato Stream Deck.</p>
-<p><img alt="Streamdeck UI Usage Example" src="https://raw.github.com/timothycrosley/streamdeck-ui/master/art/example.gif" /></p>
+<p><img alt="Streamdeck UI Usage Example" src="art/example.gif" /></p>
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Linux Compatible</strong>: Enables usage of all Stream Deck devices on Linux without needing to code.</li>
@@ -554,29 +594,50 @@
 </ul>
 <p>Communication with the Streamdeck is powered by the <a href="https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library">Python Elgato Stream Deck Library</a>.</p>
 <h2 id="linux-quick-start">Linux Quick Start</h2>
-<p>To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries and give your user access to the Stream Deck devices.</p>
-<p><a href="https://github.com/timothycrosley/streamdeck-ui/blob/master/scripts/ubuntu_install.sh">Here</a> is a simple script for doing that on Ubuntu:</p>
-<div class="codehilite"><pre><span></span><span class="ch">#!/bin/bash -xe</span>
-
-sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
-
-sudo usermod -a -G plugdev <span class="sb">`</span>whoami<span class="sb">`</span>
-
-sudo tee /etc/udev/rules.d/99-streamdeck.rules <span class="s">&lt;&lt; EOF</span>
-<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;0060&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
-<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;0063&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
-<span class="s">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, ATTRS{idProduct}==&quot;006c&quot;, MODE:=&quot;666&quot;, GROUP=&quot;plugdev&quot;</span>
-<span class="s">EOF</span>
-
-sudo udevadm control --reload-rules
-
-<span class="nb">echo</span> <span class="s2">&quot;Unplug and replug in device for the new udev rules to take effect&quot;</span>
+<h3 id="precooked-scripts">Precooked Scripts</h3>
+<p>There are scripts for setting up streamdeck_ui on <a href="scripts/ubuntu_install.sh">Debian/Ubuntu</a> and <a href="scripts/fedora_install.sh">Fedora</a>.</p>
+<h3 id="manual-installation">Manual installation</h3>
+<p>To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries.
+The name of those libraries will differ depending on your Operating System.<br />
+Debian / Ubuntu:</p>
+<div class="codehilite"><pre><span></span>sudo apt-get install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
 </pre></div>
 
 
-<p>As mentioned in the echo in the last line, make sure you unplug and replug your device before continuing.
-Once complete, you should be able to install streamdeck_ui:</p>
-<div class="codehilite"><pre><span></span>sudo pip3 install streamdeck_ui
+<p>Fedora:</p>
+<div class="codehilite"><pre><span></span>sudo dnf install python3-devel libusb-devel
+</pre></div>
+
+
+<p>If you're using GNOME shell, you might need to manually install an extension that adds <a href="https://extensions.gnome.org/extension/615/appindicator-support/">KStatusNotifierItem/AppIndicator Support</a> to make the tray icon show up.</p>
+<p>To use streamdeck_ui without root permissions, you have to give your user full access to the device.</p>
+<p>Add your user to the 'plugdev' group:</p>
+<div class="codehilite"><pre><span></span>sudo usermod -a -G plugdev <span class="sb">`</span>whoami<span class="sb">`</span>
+</pre></div>
+
+
+<p>Add the udev rules using your favorite text editor:</p>
+<div class="codehilite"><pre><span></span>sudo nano /etc/udev/rules.d/99-streamdeck.rules
+</pre></div>
+
+
+<p>Paste the following lines:</p>
+<div class="codehilite"><pre><span></span><span class="n">SUBSYSTEM</span><span class="o">==</span><span class="ss">&quot;usb&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idVendor</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0fd9&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idProduct</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0060&quot;</span><span class="p">,</span> <span class="k">MODE</span><span class="p">:</span><span class="o">=</span><span class="ss">&quot;666&quot;</span><span class="p">,</span> <span class="k">GROUP</span><span class="o">=</span><span class="ss">&quot;plugdev&quot;</span>
+<span class="n">SUBSYSTEM</span><span class="o">==</span><span class="ss">&quot;usb&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idVendor</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0fd9&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idProduct</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0063&quot;</span><span class="p">,</span> <span class="k">MODE</span><span class="p">:</span><span class="o">=</span><span class="ss">&quot;666&quot;</span><span class="p">,</span> <span class="k">GROUP</span><span class="o">=</span><span class="ss">&quot;plugdev&quot;</span>
+<span class="n">SUBSYSTEM</span><span class="o">==</span><span class="ss">&quot;usb&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idVendor</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0fd9&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idProduct</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;006c&quot;</span><span class="p">,</span> <span class="k">MODE</span><span class="p">:</span><span class="o">=</span><span class="ss">&quot;666&quot;</span><span class="p">,</span> <span class="k">GROUP</span><span class="o">=</span><span class="ss">&quot;plugdev&quot;</span>
+<span class="n">SUBSYSTEM</span><span class="o">==</span><span class="ss">&quot;usb&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idVendor</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;0fd9&quot;</span><span class="p">,</span> <span class="n">ATTRS</span><span class="err">{</span><span class="n">idProduct</span><span class="err">}</span><span class="o">==</span><span class="ss">&quot;006d&quot;</span><span class="p">,</span> <span class="k">MODE</span><span class="p">:</span><span class="o">=</span><span class="ss">&quot;666&quot;</span><span class="p">,</span> <span class="k">GROUP</span><span class="o">=</span><span class="ss">&quot;plugdev&quot;</span>
+</pre></div>
+
+
+<p>Reload the rules:</p>
+<div class="codehilite"><pre><span></span><span class="n">sudo</span> <span class="n">udevadm</span> <span class="n">control</span> <span class="c1">--reload-rules</span>
+</pre></div>
+
+
+<p>Make sure you unplug and replug your device before continuing.
+Once complete, you should be able to install streamdeck_ui.
+Installing the application itself is done via pip: To install the app system-wide, run:</p>
+<div class="codehilite"><pre><span></span>pip3 install --user streamdeck_ui
 </pre></div>
 
 
@@ -587,7 +648,8 @@ Once complete, you should be able to install streamdeck_ui:</p>
 
 <p>It's recommended that you include <code>streamdeck</code> in your windowing environment's list of applications to auto-start.</p>
 <h2 id="generic-quick-start">Generic Quick Start</h2>
-<p>On other Operating Systems, or if you already have the required libraries and permissions, you should be able to install and run streamdeck_ui:</p>
+<p>On other Operating Systems, you'll need to install the required <a href="https://github.com/abcminiuser/python-elgato-streamdeck#package-dependencies">dependencies</a> of the library.
+After that, use pip to install the app:</p>
 <div class="codehilite"><pre><span></span>pip3 install streamdeck_ui --user
 streamdeck
 </pre></div>
