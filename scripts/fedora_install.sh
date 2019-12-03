@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 echo "Installing libraries"
-sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+sudo dnf install python3-devel libusb-devel
 echo "Adding udev rules and reloading"
 sudo usermod -a -G plugdev `whoami`
 
