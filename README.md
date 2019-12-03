@@ -68,7 +68,7 @@ sudo udevadm control --reload-rules
 ```
 Make sure you unplug and replug your device before continuing.
 Once complete, you should be able to install streamdeck_ui.
-Installing the application itself is done via pip: To install the app system-wide, run:
+Installing the application itself is done via pip:
 ```bash
 pip3 install --user streamdeck_ui
 ```
