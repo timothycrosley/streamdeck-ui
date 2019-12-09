@@ -72,6 +72,13 @@ Installing the application itself is done via pip:
 ```bash
 pip3 install --user streamdeck_ui
 ```
+Make sure to include `$HOME/.local/bin` to your PATH.  
+If you haven't already, add
+```bash
+PATH=$PATH:$HOME/.local/bin
+```
+to the bottom your shell config file (most likely .bashrc in your home directory)
+
 You can then launch `streamdeck` to start configuring your device.
 
 ```bash
