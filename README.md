@@ -37,11 +37,11 @@ To use streamdeck_ui on Linux, you will need first to install some pre-requisite
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
 ```bash
-sudo apt-get install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+sudo apt-get install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
 ```
 Fedora:
 ```bash
-sudo dnf install python3-devel libusb-devel
+sudo dnf install python3-devel libusb-devel python3-pip
 ```
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
 
