@@ -19,7 +19,7 @@ from PySide2.QtWidgets import (
 )
 
 from streamdeck_ui import api
-from streamdeck_ui.config import LOGO, PROJECT_PATH
+from streamdeck_ui.config import LOGO, PROJECT_PATH, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 
 BUTTON_SYTLE = """
@@ -242,6 +242,11 @@ def queue_text_change(ui, text: str) -> None:
 def start(_exit: bool = False) -> None:
     app = QApplication(sys.argv)
 
+    first_start = False
+    if not os.path.isfile(STATE_FILE):
+        first_start = True
+        
+
     logo = QIcon(LOGO)
     main_window = MainWindow()
     ui = main_window.ui
@@ -295,7 +300,9 @@ def start(_exit: bool = False) -> None:
 
     api.render()
     tray.show()
-    main_window.show()
+    if first_start:
+        main_window.show()
+    
     if _exit:
         return
     else:
