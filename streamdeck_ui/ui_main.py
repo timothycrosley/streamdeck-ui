@@ -194,7 +194,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(
-            QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1)
+            QtWidgets.QApplication.translate("MainWindow", "Stream Deck UI", None, -1)
         )
         self.label_4.setText(
             QtWidgets.QApplication.translate("MainWindow", "Brightness:", None, -1)
