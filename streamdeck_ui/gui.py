@@ -1,6 +1,7 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
 import sys
+import time
 from functools import partial
 
 from PySide2 import QtWidgets
@@ -317,7 +318,17 @@ def start(_exit: bool = False, _show_ui: bool = True) -> None:
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
-    for deck_id, deck in api.open_decks().items():
+
+    items = api.open_decks().items()
+    print("wait for device(s)")
+    
+    while len(items) == 0:
+        time.sleep(3)
+        items = api.open_decks().items()
+    
+    print("found " + str(len(items)))
+    
+    for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
     build_device(ui)
