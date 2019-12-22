@@ -250,8 +250,11 @@ def start(_exit: bool = False) -> None:
     tray.activated.connect(main_window.systray_clicked)
 
     menu = QMenu()
+    action_show = QAction("Show")
+    action_show.triggered.connect(main_window.show)
     action_exit = QAction("Exit")
     action_exit.triggered.connect(app.exit)
+    menu.addAction(action_show)
     menu.addAction(action_exit)
 
     tray.setContextMenu(menu)
@@ -284,6 +287,7 @@ def start(_exit: bool = False) -> None:
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
+    ui.actionExit.triggered.connect(app.exit)
 
     timer = QTimer()
     timer.timeout.connect(partial(sync, ui))
