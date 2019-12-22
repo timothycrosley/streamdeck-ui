@@ -2,6 +2,7 @@
 import json
 import os
 import threading
+from pathlib import Path
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, List, Tuple, Union
@@ -27,7 +28,11 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
 
         command = get_button_command(deck_id, page, key)
         if command:
-            Popen(command.split(" "))
+            try:
+                Popen(command.split(" "),cwd=Path.home())
+            except:
+                #catch invalid commands
+                pass
 
         keys = get_button_keys(deck_id, page, key)
         if keys:
