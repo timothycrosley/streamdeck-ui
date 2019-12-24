@@ -15,6 +15,8 @@ from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+import urllib.request
+import io
 
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
@@ -282,6 +284,9 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     draw = ImageDraw.Draw(image)
 
     if icon:
+        if icon.startswith("http"):
+            with urllib.request.urlopen(icon) as url:
+                icon = io.BytesIO(url.read())
         rgba_icon = Image.open(icon).convert("RGBA")
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
