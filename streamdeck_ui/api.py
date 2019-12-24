@@ -18,7 +18,11 @@ from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, 
 import urllib.request
 import io
 
+from PySide2.QtCore import QTimer
+
+
 image_cache: Dict[str, memoryview] = {}
+http_timer: Dict[str, QTimer] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
@@ -158,6 +162,12 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
     """Returns the text set for the specified button"""
     return _button_state(deck_id, page, button).get("text", "")
 
+def get_new_http_icon(deck, key, button_settings ):
+    """Get new Image from http source"""
+    image = _render_key_image(deck, **button_settings)
+    image_cache[key] = image
+    render()
+    
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
@@ -272,10 +282,17 @@ def render() -> None:
             key = f"{deck_id}.{page}.{button_id}"
             if key in image_cache:
                 image = image_cache[key]
+                deck.set_key_image(button_id, image)
             else:
-                image = _render_key_image(deck, **button_settings)
-                image_cache[key] = image
-            deck.set_key_image(button_id, image)
+                if "icon" in button_settings and button_settings['icon'].startswith("http"):
+                    if key not in http_timer:
+                        http_timer[key] = QTimer()
+                        http_timer[key].timeout.connect(partial(get_new_http_icon, deck, key, button_settings ))
+                        http_timer[key].start(button_settings.get("interval") if "interval" in button_settings else 10000 )
+                else:
+                    image = _render_key_image(deck, **button_settings)
+                    image_cache[key] = image
+                    deck.set_key_image(button_id, image)
 
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
