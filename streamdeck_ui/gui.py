@@ -298,6 +298,7 @@ def start(_exit: bool = False) -> None:
     timer.timeout.connect(partial(sync, ui))
     timer.start(1000)
 
+    api.init_http_images()
     api.render()
     tray.show()
     if first_start:

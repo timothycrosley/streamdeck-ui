@@ -14,7 +14,7 @@ from StreamDeck import DeviceManager, ImageHelpers
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE, PAGE_COUNT
 import urllib.request
 import io
 
@@ -266,6 +266,22 @@ def set_page(deck_id: str, page: int) -> None:
     render()
     _save_state()
 
+def init_http_images():
+    for deck_id, deck_state in state.items():
+        deck = decks.get(deck_id, None)
+
+        for page in range(0, PAGE_COUNT):
+            for button_id, button_settings in (
+                deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
+            ):
+                key = f"{deck_id}.{page}.{button_id}"
+                if "icon" in button_settings and button_settings['icon'].startswith("http"):
+                    if key not in http_timer:
+                        http_timer[key] = QTimer()
+                        http_timer[key].timeout.connect(partial(get_new_http_icon, deck, key, button_settings ))
+                        http_timer[key].start(button_settings.get("interval") if "interval" in button_settings else 10000 )
+                        image = _render_key_image(deck, text="?")
+                        image_cache[key] = image
 
 def render() -> None:
     """renders all decks"""
@@ -282,17 +298,10 @@ def render() -> None:
             key = f"{deck_id}.{page}.{button_id}"
             if key in image_cache:
                 image = image_cache[key]
-                deck.set_key_image(button_id, image)
             else:
-                if "icon" in button_settings and button_settings['icon'].startswith("http"):
-                    if key not in http_timer:
-                        http_timer[key] = QTimer()
-                        http_timer[key].timeout.connect(partial(get_new_http_icon, deck, key, button_settings ))
-                        http_timer[key].start(button_settings.get("interval") if "interval" in button_settings else 10000 )
-                else:
-                    image = _render_key_image(deck, **button_settings)
-                    image_cache[key] = image
-                    deck.set_key_image(button_id, image)
+                image = _render_key_image(deck, **button_settings)
+                image_cache[key] = image
+            deck.set_key_image(button_id, image)
 
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
