@@ -108,14 +108,19 @@ def import_config(config_file: str) -> None:
 
 
 def export_config(output_file: str) -> None:
-    with open(output_file, "w") as state_file:
-        state_file.write(
-            json.dumps(
-                {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
-                indent=4,
-                separators=(",", ": "),
+    try:
+        with open(output_file+".tmp", "w") as state_file:
+            state_file.write(
+                json.dumps(
+                    {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
+                    indent=4,
+                    separators=(",", ": "),
+                )
             )
-        )
+    except:
+        pass    
+    else:
+        os.replace(output_file+".tmp", output_file)
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
