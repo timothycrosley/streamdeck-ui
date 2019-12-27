@@ -313,7 +313,10 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
         if icon.startswith("http"):
             with urllib.request.urlopen(icon) as url:
                 icon = io.BytesIO(url.read())
-        rgba_icon = Image.open(icon).convert("RGBA")
+        try:
+            rgba_icon = Image.open(icon).convert("RGBA")
+        except:
+            rgba_icon = Image.new("RGBA", (300, 300))    
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
 
