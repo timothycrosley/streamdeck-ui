@@ -284,6 +284,7 @@ def init_http_images():
                     if key not in http_timer:
                         http_timer[key] = QTimer()
                         http_timer[key].timeout.connect(partial(get_new_http_icon, deck, key, button_settings ))
+                        http_timer[key].singleShot(0, partial(get_new_http_icon, deck, key, button_settings ))
                         http_timer[key].start(button_settings.get("interval") if "interval" in button_settings else 10000 )
                         image = _render_key_image(deck, text="?")
                         image_cache[key] = image
