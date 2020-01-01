@@ -32,6 +32,7 @@ jupyter = "^1.0"
 ipdb = "^0.12.2"
 hypothesis-auto = "^1.1"
 cruft = "^1.1"
+pydantic = "^0.32.2"
 numpy = "^1.16.2"
 
 [tool.poetry.scripts]
