@@ -26,4 +26,4 @@ script:
 after_script:
 - bash <(curl -s https://codecov.io/bash)
 before_install:
-- if [ "$TRAVIS_OS_NAME" = "osx" ];  then open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ];  then open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.15.pkg; fi
