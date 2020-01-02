@@ -10,6 +10,7 @@ matrix:
     python: 3.7
     env: DEPLOY=yes
   - os: osx
+    osx_image: xcode10.1
     language: generic
 addons:
   apt:
@@ -25,5 +26,3 @@ script:
 - bash scripts/test.sh
 after_script:
 - bash <(curl -s https://codecov.io/bash)
-before_install:
-- if [ "$TRAVIS_OS_NAME" = "osx" ];  then open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.15.pkg; fi
