@@ -2,6 +2,7 @@
 import json
 import os
 import threading
+from pathlib import Path
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, List, Tuple, Union
@@ -13,23 +14,43 @@ from StreamDeck import DeviceManager, ImageHelpers
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE, PAGE_COUNT
+import urllib.request
+import io
+
+from PySide2.QtCore import QTimer
+
 
 image_cache: Dict[str, memoryview] = {}
+http_timer: Dict[str, QTimer] = {}
+command_handler: Dict[str, Popen] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
 
-def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
+def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, button_id: int, state: bool) -> None:
     if state:
         keyboard = Controller()
         page = get_page(deck_id)
+        key = f"{deck_id}.{page}.{button_id}"
 
-        command = get_button_command(deck_id, page, key)
+        command = get_button_command(deck_id, page, button_id)
         if command:
-            Popen(command.split(" "))
+            try:
+                if key in command_handler:
+                    command_handler[key].kill()
+                    command_handler[key].communicate()
+                    command_handler.pop(key)
+                else:
+                    command_handler[key] = Popen(command.split(" "),cwd=Path.home())
+            except:
+                #catch invalid commands
+                pass
+            if _button_state(deck_id, page, button_id).get("toggle", False):
+                image_cache.pop(key)
+                render()
 
-        keys = get_button_keys(deck_id, page, key)
+        keys = get_button_keys(deck_id, page, button_id)
         if keys:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
@@ -38,15 +59,15 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
                 for key_name in section.split("+"):
                     keyboard.release(getattr(Key, key_name.lower(), key_name))
 
-        write = get_button_write(deck_id, page, key)
+        write = get_button_write(deck_id, page, button_id)
         if write:
             keyboard.type(write)
 
-        brightness_change = get_button_change_brightness(deck_id, page, key)
+        brightness_change = get_button_change_brightness(deck_id, page, button_id)
         if brightness_change:
             change_brightness(deck_id, brightness_change)
 
-        switch_page = get_button_switch_page(deck_id, page, key)
+        switch_page = get_button_switch_page(deck_id, page, button_id)
         if switch_page:
             set_page(deck_id, switch_page - 1)
 
@@ -84,14 +105,19 @@ def import_config(config_file: str) -> None:
 
 
 def export_config(output_file: str) -> None:
-    with open(output_file, "w") as state_file:
-        state_file.write(
-            json.dumps(
-                {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
-                indent=4,
-                separators=(",", ": "),
+    try:
+        with open(output_file+".tmp", "w") as state_file:
+            state_file.write(
+                json.dumps(
+                    {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
+                    indent=4,
+                    separators=(",", ": "),
+                )
             )
-        )
+    except:
+        pass    
+    else:
+        os.replace(output_file+".tmp", output_file)
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
@@ -151,6 +177,12 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
     """Returns the text set for the specified button"""
     return _button_state(deck_id, page, button).get("text", "")
 
+def get_new_http_icon(deck, key, button_settings ):
+    """Get new Image from http source"""
+    image = _render_key_image(deck, **button_settings)
+    image_cache[key] = image
+    render()
+    
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
@@ -249,6 +281,23 @@ def set_page(deck_id: str, page: int) -> None:
     render()
     _save_state()
 
+def init_http_images():
+    for deck_id, deck_state in state.items():
+        deck = decks.get(deck_id, None)
+
+        for page in range(0, PAGE_COUNT):
+            for button_id, button_settings in (
+                deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
+            ):
+                key = f"{deck_id}.{page}.{button_id}"
+                if "icon" in button_settings and button_settings['icon'].startswith("http"):
+                    if key not in http_timer:
+                        http_timer[key] = QTimer()
+                        http_timer[key].timeout.connect(partial(get_new_http_icon, deck, key, button_settings ))
+                        http_timer[key].singleShot(0, partial(get_new_http_icon, deck, key, button_settings ))
+                        http_timer[key].start(button_settings.get("interval") if "interval" in button_settings else 10000 )
+                        image = _render_key_image(deck, text="?")
+                        image_cache[key] = image
 
 def render() -> None:
     """renders all decks"""
@@ -266,18 +315,28 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key]
             else:
-                image = _render_key_image(deck, **button_settings)
+                alpha = 0
+                if _button_state(deck_id, page, button_id).get("toggle", False):
+                    if key not in command_handler:
+                        alpha = 0.6
+                image = _render_key_image(deck, alpha=alpha, **button_settings)
                 image_cache[key] = image
             deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, alpha: int = 0, **kwargs):
     """Renders an individual key image"""
     image = ImageHelpers.PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
     if icon:
-        rgba_icon = Image.open(icon).convert("RGBA")
+        try:
+            if icon.startswith("http"):
+                with urllib.request.urlopen(icon) as url:
+                    icon = io.BytesIO(url.read())
+            rgba_icon = Image.open(icon).convert("RGBA")
+        except:
+            rgba_icon = Image.new("RGBA", (300, 300))    
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
 
@@ -297,6 +356,8 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
         else:
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
         draw.text(label_pos, text=text, font=true_font, fill="white")
+
+    image = Image.blend(image, ImageHelpers.PILHelper.create_image(deck), alpha)
 
     return ImageHelpers.PILHelper.to_native_format(deck, image)
 

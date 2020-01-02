@@ -288,6 +288,7 @@
     </property>
     <addaction name="actionImport"/>
     <addaction name="actionExport"/>
+    <addaction name="action_exit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -300,6 +301,11 @@
   <action name="actionExport">
    <property name="text">
     <string>Export</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

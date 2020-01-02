@@ -184,8 +184,12 @@ class Ui_MainWindow(object):
         self.actionImport.setObjectName("actionImport")
         self.actionExport = QtWidgets.QAction(MainWindow)
         self.actionExport.setObjectName("actionExport")
+        self.actionExit = QtWidgets.QAction(MainWindow)
+        self.actionExit.setObjectName("actionExit")
         self.menuFile.addAction(self.actionImport)
         self.menuFile.addAction(self.actionExport)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionExit)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -194,7 +198,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(
-            QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1)
+            QtWidgets.QApplication.translate("MainWindow", "Stream Deck UI", None, -1)
         )
         self.label_4.setText(
             QtWidgets.QApplication.translate("MainWindow", "Brightness:", None, -1)
@@ -264,4 +268,7 @@ class Ui_MainWindow(object):
         )
         self.actionExport.setText(
             QtWidgets.QApplication.translate("MainWindow", "Export", None, -1)
+        )
+        self.actionExit.setText(
+            QtWidgets.QApplication.translate("MainWindow", "Exit", None, -1)
         )
