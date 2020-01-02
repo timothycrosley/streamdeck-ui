@@ -269,6 +269,4 @@ class Ui_MainWindow(object):
         self.actionExport.setText(
             QtWidgets.QApplication.translate("MainWindow", "Export", None, -1)
         )
-        self.actionExit.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Exit", None, -1)
-        )
+        self.actionExit.setText(QtWidgets.QApplication.translate("MainWindow", "Exit", None, -1))
