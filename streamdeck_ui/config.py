@@ -8,3 +8,4 @@ DEFAULT_FONT = os.path.join("roboto", "Roboto-Regular.ttf")
 STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
 CONFIG_FILE_VERSION = 1  # Update only if backward incompatible changes are made to the config file
 PAGE_COUNT = 10
+EXTERNAL_ICON_SCHEMAS = ("http://", "https://")
