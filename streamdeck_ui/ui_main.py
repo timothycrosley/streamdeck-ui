@@ -3,13 +3,12 @@
 # Form implementation generated from reading ui file 'streamdeck_ui/main.ui',
 # licensing of 'streamdeck_ui/main.ui' applies.
 #
-# Created: Sun Oct  6 02:46:55 2019
-#      by: pyside2-uic  running on PySide2 5.13.1
+# Created: Sat Feb 15 12:29:53 2020
+#      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
 from PySide2 import QtCore, QtGui, QtWidgets
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -27,14 +26,10 @@ class Ui_MainWindow(object):
         self.device_list.setMinimumSize(QtCore.QSize(400, 0))
         self.device_list.setObjectName("device_list")
         self.horizontalLayout_3.addWidget(self.device_list)
-        spacerItem = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
@@ -42,9 +37,7 @@ class Ui_MainWindow(object):
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_3.addWidget(self.label_4)
         self.brightness = QtWidgets.QSlider(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.brightness.sizePolicy().hasHeightForWidth())
@@ -172,7 +165,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 844, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 844, 27))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -184,8 +177,11 @@ class Ui_MainWindow(object):
         self.actionImport.setObjectName("actionImport")
         self.actionExport = QtWidgets.QAction(MainWindow)
         self.actionExport.setObjectName("actionExport")
+        self.actionExit = QtWidgets.QAction(MainWindow)
+        self.actionExit.setObjectName("actionExit")
         self.menuFile.addAction(self.actionImport)
         self.menuFile.addAction(self.actionExport)
+        self.menuFile.addAction(self.actionExit)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -193,75 +189,29 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(
-            QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1)
-        )
-        self.label_4.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Brightness:", None, -1)
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_1),
-            QtWidgets.QApplication.translate("MainWindow", "Page 1", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_2),
-            QtWidgets.QApplication.translate("MainWindow", "2", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_3),
-            QtWidgets.QApplication.translate("MainWindow", "3", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_4),
-            QtWidgets.QApplication.translate("MainWindow", "4", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_5),
-            QtWidgets.QApplication.translate("MainWindow", "5", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_6),
-            QtWidgets.QApplication.translate("MainWindow", "6", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_7),
-            QtWidgets.QApplication.translate("MainWindow", "7", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_8),
-            QtWidgets.QApplication.translate("MainWindow", "8", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.page_9),
-            QtWidgets.QApplication.translate("MainWindow", "9", None, -1),
-        )
-        self.pages.setTabText(
-            self.pages.indexOf(self.tab_10),
-            QtWidgets.QApplication.translate("MainWindow", "10", None, -1),
-        )
-        self.groupBox.setTitle(
-            QtWidgets.QApplication.translate("MainWindow", "Configure Button", None, -1)
-        )
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
+        self.label_4.setText(QtWidgets.QApplication.translate("MainWindow", "Brightness:", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_1), QtWidgets.QApplication.translate("MainWindow", "Page 1", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_2), QtWidgets.QApplication.translate("MainWindow", "2", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_3), QtWidgets.QApplication.translate("MainWindow", "3", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_4), QtWidgets.QApplication.translate("MainWindow", "4", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_5), QtWidgets.QApplication.translate("MainWindow", "5", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_6), QtWidgets.QApplication.translate("MainWindow", "6", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_7), QtWidgets.QApplication.translate("MainWindow", "7", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_8), QtWidgets.QApplication.translate("MainWindow", "8", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.page_9), QtWidgets.QApplication.translate("MainWindow", "9", None, -1))
+        self.pages.setTabText(self.pages.indexOf(self.tab_10), QtWidgets.QApplication.translate("MainWindow", "10", None, -1))
+        self.groupBox.setTitle(QtWidgets.QApplication.translate("MainWindow", "Configure Button", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("MainWindow", "Image:", None, -1))
         self.imageButton.setText(QtWidgets.QApplication.translate("MainWindow", "Choose", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("MainWindow", "Text:", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("MainWindow", "Command:", None, -1))
-        self.label_5.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Press Keys:", None, -1)
-        )
-        self.label_6.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Write Text:", None, -1)
-        )
-        self.label_8.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Switch Page:", None, -1)
-        )
-        self.label_7.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Brightness +/-:", None, -1)
-        )
+        self.label_5.setText(QtWidgets.QApplication.translate("MainWindow", "Press Keys:", None, -1))
+        self.label_6.setText(QtWidgets.QApplication.translate("MainWindow", "Write Text:", None, -1))
+        self.label_8.setText(QtWidgets.QApplication.translate("MainWindow", "Switch Page:", None, -1))
+        self.label_7.setText(QtWidgets.QApplication.translate("MainWindow", "Brightness +/-:", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
-        self.actionImport.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Import", None, -1)
-        )
-        self.actionExport.setText(
-            QtWidgets.QApplication.translate("MainWindow", "Export", None, -1)
-        )
+        self.actionImport.setText(QtWidgets.QApplication.translate("MainWindow", "Import", None, -1))
+        self.actionExport.setText(QtWidgets.QApplication.translate("MainWindow", "Export", None, -1))
+        self.actionExit.setText(QtWidgets.QApplication.translate("MainWindow", "Exit", None, -1))
+

@@ -279,7 +279,7 @@
      <x>0</x>
      <y>0</y>
      <width>844</width>
-     <height>30</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -288,6 +288,7 @@
     </property>
     <addaction name="actionImport"/>
     <addaction name="actionExport"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -300,6 +301,11 @@
   <action name="actionExport">
    <property name="text">
     <string>Export</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

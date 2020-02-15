@@ -273,6 +273,7 @@ def start(_exit: bool = False) -> None:
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
+    ui.actionExit.triggered.connect(app.exit)
 
     timer = QTimer()
     timer.timeout.connect(partial(sync, ui))
