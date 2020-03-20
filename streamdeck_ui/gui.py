@@ -90,6 +90,11 @@ def select_image(window) -> None:
     api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
     redraw_buttons(window.ui)
 
+def clear_image(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.set_button_icon(deck_id, _page(window.ui), selected_button.index, None)
+    redraw_buttons(window.ui)
+
 
 def redraw_buttons(ui) -> None:
     deck_id = _deck_id(ui)
@@ -262,6 +267,7 @@ def start(_exit: bool = False) -> None:
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
+    ui.clearImageButton.clicked.connect(partial(clear_image, main_window))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)

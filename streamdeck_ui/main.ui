@@ -173,7 +173,7 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <layout class="QFormLayout" name="formLayout">
+            <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
               <widget class="QLabel" name="label">
                <property name="text">
@@ -182,11 +182,22 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QPushButton" name="imageButton">
-               <property name="text">
-                <string>Choose</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
+                <widget class="QPushButton" name="imageButton">
+                 <property name="text">
+                  <string>Choose</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="clearImageButton">
+                 <property name="text">
+                  <string>Clear</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_2">
@@ -217,16 +228,6 @@
              </item>
              <item row="3" column="1">
               <widget class="QLineEdit" name="keys"/>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Write Text:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QPlainTextEdit" name="write"/>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_8">
@@ -262,6 +263,16 @@
                </property>
               </widget>
              </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Write Text:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QPlainTextEdit" name="write"/>
+             </item>
             </layout>
            </item>
           </layout>
@@ -279,7 +290,7 @@
      <x>0</x>
      <y>0</y>
      <width>844</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
