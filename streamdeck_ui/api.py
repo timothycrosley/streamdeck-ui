@@ -32,11 +32,16 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
         keys = get_button_keys(deck_id, page, key)
         if keys:
             keys = keys.strip().replace(" ", "")
-            for section in keys.split(","):
-                for key_name in section.split("+"):
-                    keyboard.press(getattr(Key, key_name.lower(), key_name))
-                for key_name in section.split("+"):
-                    keyboard.release(getattr(Key, key_name.lower(), key_name))
+            try:
+                for section in keys.split(","):
+                    for key_name in section.split("+"):
+                        k = getattr(Key, key_name.lower(), key_name)
+                        keyboard.press(k)
+                    for key_name in section.split("+"):
+                        k = getattr(Key, key_name.lower(), key_name)
+                        keyboard.release(k)
+            except:
+                print("Bad Hotkey:", k)
 
         write = get_button_write(deck_id, page, key)
         if write:
