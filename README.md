@@ -51,8 +51,10 @@ Add your user to the 'plugdev' group:
 ```bash
 sudo usermod -a -G plugdev `whoami`
 ```
-Add the udev rules using your favorite text editor:
+Add the udev rules using your text editor:
 ```bash
+sudoedit /etc/udev/rules.d/99-streamdeck.rules
+# If that doesn't work, try:
 sudo nano /etc/udev/rules.d/99-streamdeck.rules
 ```
 Paste the following lines:
