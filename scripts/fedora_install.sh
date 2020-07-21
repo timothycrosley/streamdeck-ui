@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 echo "Installing libraries"
-sudo dnf install python3-devel libusb-devel libusbx-devel libudev-devel
+sudo dnf install python3-devel libusb-devel libusbx-devel libudev-devel systemd-devel
 echo "Adding udev rules and reloading"
 sudo usermod -a -G plugdev `whoami`
 

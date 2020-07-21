@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 echo "Installing libraries"
-sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev
+sudo apt install qt5-default libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
 echo "Adding udev rules and reloading"
 sudo usermod -a -G plugdev `whoami`
 

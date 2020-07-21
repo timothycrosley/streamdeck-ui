@@ -37,7 +37,7 @@ To use streamdeck_ui on Linux, you will need first to install some pre-requisite
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
 ```bash
-sudo apt-get install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
+sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
 ```
 Fedora:
 ```bash
@@ -51,16 +51,18 @@ Add your user to the 'plugdev' group:
 ```bash
 sudo usermod -a -G plugdev `whoami`
 ```
-Add the udev rules using your favorite text editor:
+Add the udev rules using your text editor:
 ```bash
+sudoedit /etc/udev/rules.d/99-streamdeck.rules
+# If that doesn't work, try:
 sudo nano /etc/udev/rules.d/99-streamdeck.rules
 ```
 Paste the following lines:
 ```
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="660", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="660", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="660", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="660", GROUP="plugdev"
 ```
 Reload the rules:
 ```
