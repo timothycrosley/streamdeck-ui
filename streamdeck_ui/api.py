@@ -1,6 +1,7 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
 import json
 import os
+import time
 import threading
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
@@ -35,6 +36,7 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
             for section in keys.split(","):
                 for key_name in section.split("+"):
                     keyboard.press(getattr(Key, key_name.lower(), key_name))
+                time.sleep(0.5)
                 for key_name in section.split("+"):
                     keyboard.release(getattr(Key, key_name.lower(), key_name))
 
