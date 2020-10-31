@@ -144,21 +144,61 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 live_functions = []
 
 
+class LiveFunction:
+
+    def __init__(self, deck_id: str, page: int, button: int, function_to_run, args):
+        self.deck_id = deck_id
+        self.page = page
+        self.button = button
+        self.function = function_to_run
+        self.function_args = args
+
+    def __eq__(self, other):
+        if self.deck_id != other.deck_id:
+            return False
+
+        if self.page != other.page:
+            return False
+
+        if self.button != other.button:
+            return False
+
+        if self.function != other.function:
+            return False
+
+        if self.function_args != other.function_args:
+            return False
+
+        return True
+
+    def __hash__(self):
+        return hash(f"{self.deck_id}{self.page}{self.button}")
+
+    def remove_all_from_btn(self):
+        lf_to_remove = []
+        for live_function in live_functions:
+            if self.deck_id == live_function.deck_id and self.page == live_function.page and self.button == live_function.button:
+                lf_to_remove.append(live_function)
+
+        for lf in lf_to_remove:
+            live_functions.remove(lf)
+
+
 def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> None:
     """Set the button to display live time every second"""
     import threading
-    from datetime import datetime
 
-    live_function = {
-        "deck_id": deck_id,
-        "page": page,
-        "button": button,
-        "function": _get_current_time,
-        "*args": ["%H:%M:%S"]
-    }
+    live_function = LiveFunction(deck_id, page, button, _get_current_time, ["%H:%M:%S"])
+
+    if not start:
+        live_function.remove_all_from_btn()
+
+        # Clear Text
+        set_button_info(deck_id, page, button, "")
+        return
 
     # Already registered, skip and carry on
-    if any(f["deck_id"] == deck_id and f["page"] == page and f["button"] == button for f in live_functions):
+    if live_function in live_functions:
         return
 
     live_functions.append(live_function)
@@ -263,18 +303,9 @@ def _start_live_updater():
     import time
 
     while len(live_functions) > 0:
-        print(len(live_functions))
         for live_function in live_functions:
-            deck_id = live_function["deck_id"]
-            page = live_function["page"]
-            btn_index = live_function["button"]
-
-            function_to_run = live_function["function"]
-            args = live_function["*args"]
-
-            result = function_to_run(*args)
-            print(f"RESULT: {result}")
-            set_button_info(deck_id, page, btn_index, result)
+            result = live_function.function(*live_function.function_args)
+            set_button_info(live_function.deck_id, live_function.page, live_function.button, result)
 
         time.sleep(1)
 
