@@ -19,6 +19,8 @@ image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
+thread_status = {}
+
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     if state:
@@ -139,6 +141,40 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
+def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display live time every second, based on results from the given function"""
+    import threading
+
+    # Ensure we don't kick off multiple threads at once
+    thread_name = f"{deck_id}-{page}-{button}-time"
+
+    # Check to see if this thread is already running
+    if any(thread.name == thread_name for thread in threading.enumerate()):
+        if not start:
+            # Kill the thread via flag
+            thread_status[thread_name] = False
+
+            # Clear Text
+            set_button_text(deck_id, page, button, "")
+        return
+
+    thread_status[thread_name] = True
+    thread = threading.Thread(name=thread_name, target=_run_live_time, args=(thread_name, deck_id, page, button))
+    thread.daemon = True
+    thread.start()
+
+
+def _run_live_time(thread_name: str, deck_id: str, page: int, button: int) -> None:
+    from datetime import datetime
+    import time
+
+    while thread_status[thread_name]:
+        result = datetime.now().strftime("%H:%M:%S")
+        set_button_text(deck_id, page, button, result)
+
+        time.sleep(1)
+
+
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     _button_state(deck_id, page, button)["text"] = text
@@ -197,6 +233,17 @@ def set_button_switch_page(deck_id: str, page: int, button: int, switch_page: in
 def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
     """Returns the page switch set for the specified button. 0 implies no page switch."""
     return _button_state(deck_id, page, button).get("switch_page", 0)
+
+
+def set_button_information_index(deck_id: str, page: int, button: int, info_index: int) -> None:
+    """Sets the Information index for the given button"""
+    _button_state(deck_id, page, button)["information"] = info_index
+    _save_state()
+
+
+def get_button_information_index(deck_id: str, page: int, button: int) -> int:
+    """Returns the index of the 'Information' dropdown for the specified button."""
+    return _button_state(deck_id, page, button).get("information", 0)
 
 
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:

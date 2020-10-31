@@ -1,4 +1,5 @@
 """Defines the QT powered interface for configuring Stream Decks"""
+from datetime import datetime
 import os
 import sys
 from functools import partial
@@ -105,6 +106,20 @@ def set_brightness(ui, value: int) -> None:
     api.set_brightness(deck_id, value)
 
 
+def set_information(ui, index: int, button=None) -> None:
+    if not button:
+        button = selected_button
+    deck_id = _deck_id(ui)
+    api.set_button_information_index(deck_id, _page(ui), button.index, index)
+
+    if index == 1:
+        api.set_button_live_time(deck_id, _page(ui), button.index, True)
+    else:
+        api.set_button_live_time(deck_id, _page(ui), button.index, False)
+
+    ui.text.setText(api.get_button_text(deck_id, _page(ui), button.index))
+
+
 def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
@@ -122,6 +137,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+    ui.information.setCurrentIndex(api.get_button_information_index(deck_id, _page(ui), button_id))
 
 
 def build_buttons(ui, tab) -> None:
@@ -159,6 +175,10 @@ def build_buttons(ui, tab) -> None:
         button.clicked.connect(
             lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
         )
+
+        info_index = api.get_button_information_index(deck_id, _page(ui), button.index)
+        if info_index != 0:
+            set_information(ui, info_index, button)
 
     redraw_buttons(ui)
     tab.hide()
@@ -263,6 +283,7 @@ def start(_exit: bool = False) -> None:
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
+    ui.information.currentIndexChanged.connect(partial(set_information, ui))
     for deck_id, deck in api.open_decks().items():
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
