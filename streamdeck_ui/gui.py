@@ -112,12 +112,12 @@ def set_brightness(ui, value: int) -> None:
     api.set_brightness(deck_id, value)
 
 
-def set_information(ui, index: int, button=None) -> None:
+def set_information(ui, index: int, button=None, build: bool=False) -> None:
     if not button:
         button = selected_button
     deck_id = _deck_id(ui)
     prev_information_index = api.get_button_information_index(deck_id, _page(ui), button.index)
-    if prev_information_index == index:
+    if prev_information_index == index and not build:
         return
 
     api.set_button_information_index(deck_id, _page(ui), button.index, index)
@@ -202,7 +202,7 @@ def build_buttons(ui, tab) -> None:
 
         info_index = api.get_button_information_index(deck_id, _page(ui), button.index)
         if info_index != 0:
-            set_information(ui, info_index, button)
+            set_information(ui, info_index, button, build=True)
 
     redraw_buttons(ui)
     tab.hide()
