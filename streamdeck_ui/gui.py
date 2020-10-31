@@ -97,6 +97,12 @@ def redraw_buttons(ui) -> None:
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
+        # Give "info" priority
+        info = api.get_button_info(deck_id, _page(ui), button.index)
+        if info:
+            button.setText(info)
+            continue
+
         button.setText(api.get_button_text(deck_id, _page(ui), button.index))
         button.setIcon(QIcon(api.get_button_icon(deck_id, _page(ui), button.index)))
 
@@ -110,6 +116,10 @@ def set_information(ui, index: int, button=None) -> None:
     if not button:
         button = selected_button
     deck_id = _deck_id(ui)
+    prev_information_index = api.get_button_information_index(deck_id, _page(ui), button.index)
+    if prev_information_index == index:
+        return
+
     api.set_button_information_index(deck_id, _page(ui), button.index, index)
 
     if index == 1:
@@ -138,13 +148,20 @@ def button_clicked(ui, clicked_button, buttons) -> None:
 
     deck_id = _deck_id(ui)
     button_id = selected_button.index
-    ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+    text = api.get_button_text(deck_id, _page(ui), button_id)
+    ui.text.setText(text)
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
     ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
-    ui.information.setCurrentIndex(api.get_button_information_index(deck_id, _page(ui), button_id))
+
+    info_index = api.get_button_information_index(deck_id, _page(ui), button_id)
+    if info_index == 0:
+        api.set_button_info(deck_id, _page(ui), button_id, "")
+    ui.information.setCurrentIndex(info_index)
+
+    redraw_buttons(ui)
 
 
 def build_buttons(ui, tab) -> None:

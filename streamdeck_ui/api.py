@@ -155,7 +155,7 @@ def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> N
             thread_status[thread_name] = False
 
             # Clear Text
-            set_button_text(deck_id, page, button, "")
+            set_button_info(deck_id, page, button, "")
         return
 
     thread_status[thread_name] = True
@@ -170,7 +170,7 @@ def _run_live_time(thread_name: str, deck_id: str, page: int, button: int) -> No
 
     while thread_status[thread_name]:
         result = datetime.now().strftime("%H:%M:%S")
-        set_button_text(deck_id, page, button, result)
+        set_button_info(deck_id, page, button, result)
 
         time.sleep(1)
 
@@ -271,6 +271,19 @@ def get_button_icon(deck_id: str, page: int, button: int) -> str:
     return _button_state(deck_id, page, button).get("icon", "")
 
 
+def set_button_info(deck_id: str, page: int, button: int, info: str) -> None:
+    """Set the information associated with a button"""
+    _button_state(deck_id, page, button)["information"] = info
+    image_cache.pop(f"{deck_id}.{page}.{button}", None)
+    render()
+    _save_state()
+
+
+def get_button_info(deck_id: str, page: int, button: int) -> str:
+    """Returns the information set for the specified button"""
+    return _button_state(deck_id, page, button).get("information", "")
+
+
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
     """Sets the brightness changing associated with a button"""
     _button_state(deck_id, page, button)["brightness_change"] = amount
@@ -307,13 +320,13 @@ def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
 
 def set_button_information_index(deck_id: str, page: int, button: int, info_index: int) -> None:
     """Sets the Information index for the given button"""
-    _button_state(deck_id, page, button)["information"] = info_index
+    _button_state(deck_id, page, button)["information_index"] = info_index
     _save_state()
 
 
 def get_button_information_index(deck_id: str, page: int, button: int) -> int:
     """Returns the index of the 'Information' dropdown for the specified button."""
-    return _button_state(deck_id, page, button).get("information", 0)
+    return _button_state(deck_id, page, button).get("information_index", 0)
 
 
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
@@ -388,10 +401,14 @@ def render() -> None:
             deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(deck, icon: str = "", text: str = "", information: str = "", font: str = DEFAULT_FONT, **kwargs):
     """Renders an individual key image"""
     image = ImageHelpers.PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
+
+    # Give information priority over text
+    if information:
+        text = information
 
     if icon:
         rgba_icon = Image.open(icon).convert("RGBA")
