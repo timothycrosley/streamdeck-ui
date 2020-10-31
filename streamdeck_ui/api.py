@@ -230,11 +230,14 @@ def _get_current_time(date_format: str):
 
 def set_button_live_hour(deck_id: str, page: int, button: int, start: bool) -> None:
     """Set the button to display the current hour"""
+    # Set Font
+    _button_state(deck_id, page, button)["font_size"] = 48
     _set_button_live_info(deck_id, page, button, start, _get_current_time, ["%H"])
 
 
 def set_button_live_minute(deck_id: str, page: int, button: int, start: bool) -> None:
     """Set the button to display the current minute"""
+    _button_state(deck_id, page, button)["font_size"] = 48
     _set_button_live_info(deck_id, page, button, start, _get_current_time, ["%M"])
 
 
@@ -410,6 +413,8 @@ def _render_key_image(deck, icon: str = "", text: str = "", information: str = "
     image = ImageHelpers.PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
+    font_size = kwargs.get("font_size") if kwargs.get("font_size") else 14
+
     # Give information priority over text
     if information:
         text = information
@@ -428,12 +433,12 @@ def _render_key_image(deck, icon: str = "", text: str = "", information: str = "
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), font_size)
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
             label_pos = ((image.width - label_w) // 2, image.height - 20)
         else:
-            label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
+            label_pos = ((image.width - label_w) // 2, ((image.height - label_h) // 2))
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
     return ImageHelpers.PILHelper.to_native_format(deck, image)
