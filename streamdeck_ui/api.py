@@ -141,27 +141,41 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
+live_functions = []
+
+
 def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> None:
     """Set the button to display live time every second"""
     import threading
+    from datetime import datetime
 
-    # Ensure we don't kick off multiple threads at once
-    thread_name = f"{deck_id}-{page}-{button}-time"
+    live_function = {
+        "deck_id": deck_id,
+        "page": page,
+        "button": button,
+        "function": _get_current_time,
+        "*args": ["%H:%M:%S"]
+    }
 
-    # Check to see if this thread is already running
-    if any(thread.name == thread_name for thread in threading.enumerate()):
-        if not start:
-            # Kill the thread via flag
-            thread_status[thread_name] = False
-
-            # Clear Text
-            set_button_info(deck_id, page, button, "")
+    # Already registered, skip and carry on
+    if any(f["deck_id"] == deck_id and f["page"] == page and f["button"] == button for f in live_functions):
         return
 
-    thread_status[thread_name] = True
-    thread = threading.Thread(name=thread_name, target=_run_live_time, args=(thread_name, deck_id, page, button))
+    live_functions.append(live_function)
+
+    # Ensure we don't kick off multiple threads at once
+    thread_name = "live_updater"
+    if any(thread.name == thread_name for thread in threading.enumerate()):
+        return
+
+    thread = threading.Thread(name=thread_name, target=_start_live_updater)
     thread.daemon = True
     thread.start()
+
+
+def _get_current_time(date_format: str):
+    from datetime import datetime
+    return datetime.now().strftime(date_format)
 
 
 def _run_live_time(thread_name: str, deck_id: str, page: int, button: int) -> None:
@@ -241,6 +255,26 @@ def _run_live_minute(thread_name: str, deck_id: str, page: int, button: int) -> 
     while thread_status[thread_name]:
         result = datetime.now().strftime("%M")
         set_button_text(deck_id, page, button, result)
+
+        time.sleep(1)
+
+
+def _start_live_updater():
+    import time
+
+    while len(live_functions) > 0:
+        print(len(live_functions))
+        for live_function in live_functions:
+            deck_id = live_function["deck_id"]
+            page = live_function["page"]
+            btn_index = live_function["button"]
+
+            function_to_run = live_function["function"]
+            args = live_function["*args"]
+
+            result = function_to_run(*args)
+            print(f"RESULT: {result}")
+            set_button_info(deck_id, page, btn_index, result)
 
         time.sleep(1)
 
