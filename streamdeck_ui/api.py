@@ -142,7 +142,7 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 
 
 def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> None:
-    """Set the button to display live time every second, based on results from the given function"""
+    """Set the button to display live time every second"""
     import threading
 
     # Ensure we don't kick off multiple threads at once
@@ -170,6 +170,76 @@ def _run_live_time(thread_name: str, deck_id: str, page: int, button: int) -> No
 
     while thread_status[thread_name]:
         result = datetime.now().strftime("%H:%M:%S")
+        set_button_text(deck_id, page, button, result)
+
+        time.sleep(1)
+
+
+def set_button_live_hour(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display the current hour"""
+    import threading
+
+    # Ensure we don't kick off multiple threads at once
+    thread_name = f"{deck_id}-{page}-{button}-hour"
+
+    # Check to see if this thread is already running
+    if any(thread.name == thread_name for thread in threading.enumerate()):
+        if not start:
+            # Kill the thread via flag
+            thread_status[thread_name] = False
+
+            # Clear Text
+            set_button_text(deck_id, page, button, "")
+        return
+
+    thread_status[thread_name] = True
+    thread = threading.Thread(name=thread_name, target=_run_live_hour, args=(thread_name, deck_id, page, button))
+    thread.daemon = True
+    thread.start()
+
+
+def _run_live_hour(thread_name: str, deck_id: str, page: int, button: int) -> None:
+    from datetime import datetime
+    import time
+
+    while thread_status[thread_name]:
+        result = datetime.now().strftime("%H")
+        set_button_text(deck_id, page, button, result)
+
+        time.sleep(1)
+
+
+def set_button_live_minute(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display the current minute"""
+    import threading
+
+    # Ensure we don't kick off multiple threads at once
+    btn_prefix = f"{deck_id}-{page}-{button}"
+    thread_name = f"{btn_prefix}-minute"
+
+    # Check to see if this thread is already running
+    if any(thread.name.startswith(btn_prefix) for thread in threading.enumerate()):
+        # Kill the thread via flag
+        thread_status[thread_name] = False
+
+        # Clear Text
+        set_button_text(deck_id, page, button, "")
+
+        if not start:
+            return
+
+    thread_status[thread_name] = True
+    thread = threading.Thread(name=thread_name, target=_run_live_minute, args=(thread_name, deck_id, page, button))
+    thread.daemon = True
+    thread.start()
+
+
+def _run_live_minute(thread_name: str, deck_id: str, page: int, button: int) -> None:
+    from datetime import datetime
+    import time
+
+    while thread_status[thread_name]:
+        result = datetime.now().strftime("%M")
         set_button_text(deck_id, page, button, result)
 
         time.sleep(1)

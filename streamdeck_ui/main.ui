@@ -294,6 +294,16 @@
                  <string>Current Time (H:M:S)</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Current Time (H)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Current Time (M)</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>

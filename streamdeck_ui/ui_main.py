@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'streamdeck_ui/main.ui',
 # licensing of 'streamdeck_ui/main.ui' applies.
 #
-# Created: Fri Oct 30 20:27:39 2020
+# Created: Sat Oct 31 08:17:32 2020
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -174,6 +174,8 @@ class Ui_MainWindow(object):
         self.information.setObjectName("information")
         self.information.addItem("")
         self.information.addItem("")
+        self.information.addItem("")
+        self.information.addItem("")
         self.formLayout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.information)
         self.verticalLayout_3.addLayout(self.formLayout)
         self.horizontalLayout.addWidget(self.groupBox)
@@ -227,6 +229,8 @@ class Ui_MainWindow(object):
         self.label_91.setText(QtWidgets.QApplication.translate("MainWindow", "Information:", None, -1))
         self.information.setItemText(0, QtWidgets.QApplication.translate("MainWindow", "N/A", None, -1))
         self.information.setItemText(1, QtWidgets.QApplication.translate("MainWindow", "Current Time (H:M:S)", None, -1))
+        self.information.setItemText(2, QtWidgets.QApplication.translate("MainWindow", "Current Time (H)", None, -1))
+        self.information.setItemText(3, QtWidgets.QApplication.translate("MainWindow", "Current Time (M)", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.actionImport.setText(QtWidgets.QApplication.translate("MainWindow", "Import", None, -1))
         self.actionExport.setText(QtWidgets.QApplication.translate("MainWindow", "Export", None, -1))

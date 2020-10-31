@@ -113,7 +113,14 @@ def set_information(ui, index: int, button=None) -> None:
     api.set_button_information_index(deck_id, _page(ui), button.index, index)
 
     if index == 1:
+        # Current Time (H:M:S)
         api.set_button_live_time(deck_id, _page(ui), button.index, True)
+    elif index == 2:
+        # Current Time (H)
+        api.set_button_live_hour(deck_id, _page(ui), button.index, True)
+    elif index == 3:
+        # Current Time (M)
+        api.set_button_live_minute(deck_id, _page(ui), button.index, True)
     else:
         api.set_button_live_time(deck_id, _page(ui), button.index, False)
 
