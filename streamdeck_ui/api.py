@@ -19,6 +19,8 @@ image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
+live_functions: List = []
+
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     if state:
@@ -139,6 +141,114 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
+class LiveFunction:
+
+    def __init__(self, deck_id: str, page: int, button: int, function_to_run, args):
+        self.deck_id = deck_id
+        self.page = page
+        self.button = button
+        self.function = function_to_run
+        self.function_args = args
+
+    def __eq__(self, other):
+        if self.deck_id != other.deck_id:
+            return False
+
+        if self.page != other.page:
+            return False
+
+        if self.button != other.button:
+            return False
+
+        if self.function != other.function:
+            return False
+
+        if self.function_args != other.function_args:
+            return False
+
+        return True
+
+    def __hash__(self):
+        return hash(f"{self.deck_id}{self.page}{self.button}")
+
+    def remove_all_from_btn(self):
+        lf_to_remove = []
+        for live_function in live_functions:
+            if self.deck_id == live_function.deck_id and self.page == live_function.page and self.button == live_function.button:
+                lf_to_remove.append(live_function)
+
+        for lf in lf_to_remove:
+            live_functions.remove(lf)
+
+    def btn_has_diff_function_running(self):
+        return any(self.deck_id == f.deck_id and self.page == f.page and self.button == f.button and (self.function != f.function or self.function_args != f.function_args) for f in live_functions)
+
+
+def _set_button_live_info(deck_id: str, page: int, button: int, start: bool, func, *args):
+    import threading
+
+    live_function = LiveFunction(deck_id, page, button, func, *args)
+
+    if not start:
+        live_function.remove_all_from_btn()
+
+        # Clear Text
+        set_button_info(deck_id, page, button, "")
+        return
+
+    if live_function.btn_has_diff_function_running():
+        live_function.remove_all_from_btn()
+
+    # Already registered, skip and carry on
+    if live_function in live_functions:
+        return
+
+    live_functions.append(live_function)
+
+    # Ensure we don't kick off multiple threads at once
+    thread_name = "live_updater"
+    if any(thread.name == thread_name for thread in threading.enumerate()):
+        return
+
+    thread = threading.Thread(name=thread_name, target=_start_live_updater)
+    thread.daemon = True
+    thread.start()
+
+
+def set_button_live_time(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display live time every second"""
+    _set_button_live_info(deck_id, page, button, start, _get_current_time, ["%H:%M:%S"])
+
+
+def _get_current_time(date_format: str):
+    from datetime import datetime
+    return datetime.now().strftime(date_format)
+
+
+def set_button_live_hour(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display the current hour"""
+    # Set Font
+    _button_state(deck_id, page, button)["font_size"] = 48
+    _set_button_live_info(deck_id, page, button, start, _get_current_time, ["%H"])
+
+
+def set_button_live_minute(deck_id: str, page: int, button: int, start: bool) -> None:
+    """Set the button to display the current minute"""
+    _button_state(deck_id, page, button)["font_size"] = 48
+    _set_button_live_info(deck_id, page, button, start, _get_current_time, ["%M"])
+
+
+def _start_live_updater():
+    import time
+
+    while len(live_functions) > 0:
+        for live_function in live_functions:
+            result = live_function.function(*live_function.function_args)
+            set_button_info(live_function.deck_id, live_function.page, live_function.button, result)
+
+        time.sleep(1)
+
+
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     _button_state(deck_id, page, button)["text"] = text
@@ -163,6 +273,19 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
 def get_button_icon(deck_id: str, page: int, button: int) -> str:
     """Returns the icon set for a particular button"""
     return _button_state(deck_id, page, button).get("icon", "")
+
+
+def set_button_info(deck_id: str, page: int, button: int, info: str) -> None:
+    """Set the information associated with a button"""
+    _button_state(deck_id, page, button)["information"] = info
+    image_cache.pop(f"{deck_id}.{page}.{button}", None)
+    render()
+    _save_state()
+
+
+def get_button_info(deck_id: str, page: int, button: int) -> str:
+    """Returns the information set for the specified button"""
+    return _button_state(deck_id, page, button).get("information", "")
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
@@ -197,6 +320,17 @@ def set_button_switch_page(deck_id: str, page: int, button: int, switch_page: in
 def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
     """Returns the page switch set for the specified button. 0 implies no page switch."""
     return _button_state(deck_id, page, button).get("switch_page", 0)
+
+
+def set_button_information_index(deck_id: str, page: int, button: int, info_index: int) -> None:
+    """Sets the Information index for the given button"""
+    _button_state(deck_id, page, button)["information_index"] = info_index
+    _save_state()
+
+
+def get_button_information_index(deck_id: str, page: int, button: int) -> int:
+    """Returns the index of the 'Information' dropdown for the specified button."""
+    return _button_state(deck_id, page, button).get("information_index", 0)
 
 
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
@@ -271,10 +405,16 @@ def render() -> None:
             deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(deck, icon: str = "", text: str = "", information: str = "", font: str = DEFAULT_FONT, **kwargs):
     """Renders an individual key image"""
     image = ImageHelpers.PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
+
+    font_size = kwargs.get("font_size") if kwargs.get("font_size") else 14
+
+    # Give information priority over text
+    if information:
+        text = information
 
     if icon:
         rgba_icon = Image.open(icon).convert("RGBA")
@@ -290,12 +430,12 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), font_size)
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
             label_pos = ((image.width - label_w) // 2, image.height - 20)
         else:
-            label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
+            label_pos = ((image.width - label_w) // 2, ((image.height - label_h) // 2))
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
     return ImageHelpers.PILHelper.to_native_format(deck, image)
