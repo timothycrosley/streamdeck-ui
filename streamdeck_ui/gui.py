@@ -1,5 +1,4 @@
 """Defines the QT powered interface for configuring Stream Decks"""
-from datetime import datetime
 import os
 import sys
 from functools import partial

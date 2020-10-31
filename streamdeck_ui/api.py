@@ -19,7 +19,7 @@ image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
-thread_status = {}
+live_functions: List = []
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
@@ -139,9 +139,6 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
     buttons = state.setdefault(deck_id, {}).setdefault("buttons", {})
     buttons_state = buttons.setdefault(page, {})  # type: ignore
     return buttons_state.setdefault(button, {})  # type: ignore
-
-
-live_functions = []
 
 
 class LiveFunction:
