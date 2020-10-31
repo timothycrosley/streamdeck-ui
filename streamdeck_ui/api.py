@@ -183,6 +183,9 @@ class LiveFunction:
         for lf in lf_to_remove:
             live_functions.remove(lf)
 
+    def btn_has_diff_function_running(self):
+        return any(self.deck_id == f.deck_id and self.page == f.page and self.button == f.button and (self.function != f.function or self.function_args != f.function_args) for f in live_functions)
+
 
 def _set_button_live_info(deck_id: str, page: int, button: int, start: bool, func, *args):
     import threading
@@ -195,6 +198,9 @@ def _set_button_live_info(deck_id: str, page: int, button: int, start: bool, fun
         # Clear Text
         set_button_info(deck_id, page, button, "")
         return
+
+    if live_function.btn_has_diff_function_running():
+        live_function.remove_all_from_btn()
 
     # Already registered, skip and carry on
     if live_function in live_functions:
