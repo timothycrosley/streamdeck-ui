@@ -1,7 +1,7 @@
 #!/bin/sh
 #replace YOUR_USERNAME with your linux user name
 #place this script in /usr/lib/systemd/system-sleep/
-#make it executable with chmod+x restart_streamdeck_wakeup.sh
+#make it executable with chmod +x restart_streamdeck_wakeup.sh
 #systemd automatically execute it at wake-up
 
 case "$1" in
