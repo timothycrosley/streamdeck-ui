@@ -18,16 +18,21 @@ from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, 
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+processes: Dict[str, Popen] = []
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
+    global processes
+    for process in processes:
+        process.poll()
+
     if state:
         keyboard = Controller()
         page = get_page(deck_id)
 
         command = get_button_command(deck_id, page, key)
         if command:
-            Popen(command.split(" "))
+            processes.append(Popen(command.split(" ")))
 
         keys = get_button_keys(deck_id, page, key)
         if keys:
