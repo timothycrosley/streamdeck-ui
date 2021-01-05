@@ -22,8 +22,8 @@ from streamdeck_ui.config import LOGO, PROJECT_PATH
 from streamdeck_ui.ui_main import Ui_MainWindow
 
 BUTTON_SYTLE = """
-    QToolButton{background-color:black;}
-    QToolButton:checked{background-color:darkGray;}
+    QToolButton{background-color:black; color:white;}
+    QToolButton:checked{background-color:darkGray; color:black;}
     QToolButton:focus{border:none; }
 """
 
