@@ -170,6 +170,19 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
     return buttons_state.setdefault(button, {})  # type: ignore
 
 
+def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int) -> None:
+    """Swaps the properties of the source and target buttons"""
+    temp = state[deck_id]["buttons"][page][source_button]
+    state[deck_id]["buttons"][page][source_button] = state[deck_id]["buttons"][page][target_button]
+    state[deck_id]["buttons"][page][target_button] = temp
+
+    # Clear the cache so images will be recreated on render
+    image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
+    image_cache.pop(f"{deck_id}.{page}.{target_button}", None)
+
+    _save_state()
+    render()
+
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     _button_state(deck_id, page, button)["text"] = text
