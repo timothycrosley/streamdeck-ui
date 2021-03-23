@@ -7,12 +7,13 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6"
-streamdeck = "^0.6.3"
+python = ">=3.8,<3.10"
+streamdeck = "^0.8.3"
 pillow = "^6.1"
 hidapi = "^0.7.99"
 pynput = "^1.4"
 pyside2 = "^5.13"
+python3-xlib = "^0.15"
 
 [tool.poetry.dev-dependencies]
 vulture = "^1.0"
