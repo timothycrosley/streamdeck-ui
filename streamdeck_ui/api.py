@@ -1,15 +1,14 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
 import json
 import os
-import threading
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple, Union
 from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
 from pynput.keyboard import Controller, Key
-from StreamDeck import DeviceManager, ImageHelpers
+from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
@@ -273,7 +272,7 @@ def render() -> None:
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
     """Renders an individual key image"""
-    image = ImageHelpers.PILHelper.create_image(deck)
+    image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
     if icon:
@@ -298,7 +297,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
-    return ImageHelpers.PILHelper.to_native_format(deck, image)
+    return PILHelper.to_native_format(deck, image)
 
 
 if os.path.isfile(STATE_FILE):

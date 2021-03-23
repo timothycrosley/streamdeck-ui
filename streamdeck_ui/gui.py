@@ -6,7 +6,6 @@ from functools import partial
 from PySide2 import QtWidgets
 from PySide2.QtCore import QSize, Qt, QTimer
 from PySide2.QtGui import QIcon
-from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
@@ -18,7 +17,7 @@ from PySide2.QtWidgets import (
 )
 
 from streamdeck_ui import api
-from streamdeck_ui.config import LOGO, PROJECT_PATH
+from streamdeck_ui.config import LOGO
 from streamdeck_ui.ui_main import Ui_MainWindow
 
 BUTTON_SYTLE = """
