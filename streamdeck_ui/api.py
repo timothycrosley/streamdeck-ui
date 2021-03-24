@@ -1,8 +1,8 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
 import json
 import os
-from functools import partial
 import shlex
+from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Tuple, Union
 from warnings import warn
