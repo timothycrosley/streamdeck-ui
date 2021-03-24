@@ -2,11 +2,15 @@
 _________________
 
 [![PyPI version](https://badge.fury.io/py/streamdeck-ui.svg)](http://badge.fury.io/py/streamdeck-ui)
-[![Build Status](https://travis-ci.org/timothycrosley/streamdeck-ui.svg?branch=master)](https://travis-ci.org/timothycrosley/streamdeck-ui)
+[![Test Status](https://github.com/timothycrosley/streamdeck_ui/workflows/Test/badge.svg?branch=develop)](https://github.com/timothycrosley/streamdeck_ui/actions?query=workflow%3ATest)
+[![Lint Status](https://github.com/timothycrosley/streamdeck_ui/workflows/Lint/badge.svg?branch=develop)](https://github.com/timothycrosley/streamdeck_ui/actions?query=workflow%3ALint)
 [![codecov](https://codecov.io/gh/timothycrosley/streamdeck-ui/branch/master/graph/badge.svg)](https://codecov.io/gh/timothycrosley/streamdeck-ui)
 [![Join the chat at https://gitter.im/timothycrosley/streamdeck-ui](https://badges.gitter.im/timothycrosley/streamdeck-ui.svg)](https://gitter.im/timothycrosley/streamdeck-ui?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://pypi.python.org/pypi/streamdeck-ui/)
 [![Downloads](https://pepy.tech/badge/streamdeck-ui)](https://pepy.tech/project/streamdeck-ui)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://timothycrosley.github.io/isort/)
+ 
 _________________
 
 [Read Latest Documentation](https://timothycrosley.github.io/streamdeck-ui/) - [Browse GitHub Code Repository](https://github.com/timothycrosley/streamdeck-ui/)
