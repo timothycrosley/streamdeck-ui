@@ -1,16 +1,14 @@
 #!/bin/bash -xe
 echo "Installing libraries"
 sudo apt install qt5-default libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
+
 echo "Adding udev rules and reloading"
-sudo usermod -a -G plugdev `whoami`
-
-sudo tee /etc/udev/rules.d/99-streamdeck.rules << EOF
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+sudo tee /etc/udev/rules.d/70-streamdeck.rules << EOF
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
 EOF
-
 sudo udevadm control --reload-rules
 
 echo "Unplug and replug in device for the new udev rules to take effect"
