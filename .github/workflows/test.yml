@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.8]
-        os: [ubuntu-latest, ubuntu-18.04, macos-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -53,6 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
           python -m pip install hidapi
+          python -m pip install python-xlib
           poetry install
       - name: Test
         shell: bash
