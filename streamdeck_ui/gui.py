@@ -237,7 +237,7 @@ def queue_text_change(ui, text: str) -> None:
     text_timer.start(500)
 
 
-def start(_exit: bool = False) -> None:
+def start(_exit: bool = False, _show_ui: bool = True) -> None:
     app = QApplication(sys.argv)
 
     logo = QIcon(LOGO)
@@ -280,7 +280,10 @@ def start(_exit: bool = False) -> None:
 
     api.render()
     tray.show()
-    main_window.show()
+
+    if _show_ui:
+        main_window.show()
+
     if _exit:
         return
     else:
@@ -288,4 +291,12 @@ def start(_exit: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    start()
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print(f"Usage: {os.path.basename(sys.argv[0])}")
+        print("Flags:")
+        print("  -h, --help:\tShow this message")
+        print("  -n, --no-ui:\tRun the program without showing a UI")
+    elif "-n" in sys.argv or "--no-ui" in sys.argv:
+        start(_show_ui=False)
+    else:
+        start()
