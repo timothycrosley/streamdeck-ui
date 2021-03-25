@@ -109,6 +109,13 @@ def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     }
 
 
+def close_decks() -> None:
+    """Closes open decks for input/ouput."""
+    for _deck_serial, deck in decks.items():
+        if deck.connected():
+            deck.close()
+
+
 def ensure_decks_connected() -> None:
     """Reconnects to any decks that lost connection. If they did, re-renders them."""
     for deck_serial, deck in decks.copy().items():

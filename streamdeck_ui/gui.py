@@ -287,7 +287,9 @@ def start(_exit: bool = False, _show_ui: bool = True) -> None:
     if _exit:
         return
     else:
-        sys.exit(app.exec_())
+        app.exec_()
+        api.close_decks()
+        sys.exit()
 
 
 if __name__ == "__main__":
