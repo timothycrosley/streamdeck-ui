@@ -292,11 +292,11 @@ def start(_exit: bool = False, _show_ui: bool = True) -> None:
 
 if __name__ == "__main__":
     if "-h" in sys.argv or "--help" in sys.argv:
-        print(f"Usage: {sys.argv[0]}")
+        print(f"Usage: {os.path.basename(sys.argv[0])}")
         print("Flags:")
-        print("\t-h/--help: Show this message")
-        print("\t-n/--no-ui: Run the program without showing a UI")
+        print("  -h, --help:\tShow this message")
+        print("  -n, --no-ui:\tRun the program without showing a UI")
     elif "-n" in sys.argv or "--no-ui" in sys.argv:
-        start(_show_ui = False)
+        start(_show_ui=False)
     else:
         start()
