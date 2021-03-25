@@ -11,7 +11,7 @@ python = ">=3.8,<3.10"
 streamdeck = "^0.8.3"
 pillow = "^8.1"
 hidapi = "^0.10.1"
-pynput = "^1.4"
+pynput = "^1.7"
 pyside2 = "^5.13"
 python3-xlib = "^0.15"
 
