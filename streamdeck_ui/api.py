@@ -21,13 +21,18 @@ state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = 
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
+    """ Callback whenever a key is pressed. This is method runs the various actions defined
+        for the key being pressed, sequentially. """
     if state:
         keyboard = Controller()
         page = get_page(deck_id)
 
         command = get_button_command(deck_id, page, key)
         if command:
-            Popen(shlex.split(command))
+            try:
+                Popen(shlex.split(command))
+            except Exception as error:
+                print(f"The command '{command}' failed: {error}")
 
         keys = get_button_keys(deck_id, page, key)
         if keys:
@@ -36,18 +41,34 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
                 section_keys = [
                     key_name.lower().replace("plus", "+") for key_name in section.split("+")
                 ]
+                # Translate string to enum, or just the string itself if not found
+                section_keys = [getattr(Key, key_name, key_name) for key_name in section_keys]
+
                 for key_name in section_keys:
-                    keyboard.press(getattr(Key, key_name, key_name))
+                    try:
+                        keyboard.press(key_name)
+                    except Exception:
+                        print(f"Could not press key '{key_name}'")
+
                 for key_name in section_keys:
-                    keyboard.release(getattr(Key, key_name, key_name))
+                    try:
+                        keyboard.release(key_name)
+                    except Exception:
+                        print(f"Could not release key '{key_name}'")
 
         write = get_button_write(deck_id, page, key)
         if write:
-            keyboard.type(write)
+            try:
+                keyboard.type(write)
+            except Exception as error:
+                print(f"Could not complete the write command: {error}")
 
         brightness_change = get_button_change_brightness(deck_id, page, key)
         if brightness_change:
-            change_brightness(deck_id, brightness_change)
+            try:
+                change_brightness(deck_id, brightness_change)
+            except Exception as error:
+                print(f"Could not change brightness: {error}")
 
         switch_page = get_button_switch_page(deck_id, page, key)
         if switch_page:
