@@ -33,10 +33,11 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
         if keys:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
-                for key_name in section.split("+"):
-                    keyboard.press(getattr(Key, key_name.lower(), key_name))
-                for key_name in section.split("+"):
-                    keyboard.release(getattr(Key, key_name.lower(), key_name))
+                section_keys = [key_name.lower().replace('plus', '+') for key_name in section.split("+")]
+                for key_name in section_keys:
+                    keyboard.press(getattr(Key, key_name, key_name))
+                for key_name in section_keys:
+                    keyboard.release(getattr(Key, key_name, key_name))
 
         write = get_button_write(deck_id, page, key)
         if write:
