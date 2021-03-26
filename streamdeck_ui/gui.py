@@ -4,8 +4,8 @@ import sys
 from functools import partial
 
 from PySide2 import QtWidgets
-from PySide2.QtCore import QSize, Qt, QTimer, QMimeData
-from PySide2.QtGui import QIcon, QDrag
+from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
+from PySide2.QtGui import QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
@@ -38,13 +38,14 @@ text_timer = None
 
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop """
+
     def __init__(self, parent, ui):
         super(DraggableButton, self).__init__(parent)
 
         self.setAcceptDrops(True)
         self.ui = ui
 
-    def mouseMoveEvent(self, e):
+    def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
 
         if e.buttons() != Qt.LeftButton:
             return
@@ -54,7 +55,7 @@ class DraggableButton(QtWidgets.QToolButton):
         drag.setMimeData(mimedata)
         drag.exec_(Qt.MoveAction)
 
-    def dropEvent(self, e):
+    def dropEvent(self, e):  # noqa: N802 - Part of QT signature.
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
@@ -73,14 +74,14 @@ class DraggableButton(QtWidgets.QToolButton):
 
         redraw_buttons(self.ui)
 
-    def dragEnterEvent(self, e):
-        if (type(self) is DraggableButton):
+    def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
+        if type(self) is DraggableButton:
             e.setAccepted(True)
             self.setStyleSheet(BUTTON_DRAG_STYLE)
         else:
             e.setAccepted(False)
 
-    def dragLeaveEvent(self, e):
+    def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
         self.setStyleSheet(BUTTON_STYLE)
 
 

@@ -4,7 +4,7 @@ import os
 import shlex
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple, Union, cast
 from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
@@ -172,9 +172,11 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 
 def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int) -> None:
     """Swaps the properties of the source and target buttons"""
-    temp = state[deck_id]["buttons"][page][source_button]
-    state[deck_id]["buttons"][page][source_button] = state[deck_id]["buttons"][page][target_button]
-    state[deck_id]["buttons"][page][target_button] = temp
+    temp = cast(dict, state[deck_id]["buttons"])[page][source_button]
+    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(
+        dict, state[deck_id]["buttons"]
+    )[page][target_button]
+    cast(dict, state[deck_id]["buttons"])[page][target_button] = temp
 
     # Clear the cache so images will be recreated on render
     image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
@@ -182,6 +184,7 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
 
     _save_state()
     render()
+
 
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
