@@ -33,7 +33,9 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
         if keys:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
-                section_keys = [key_name.lower().replace('plus', '+') for key_name in section.split("+")]
+                section_keys = [
+                    key_name.lower().replace("plus", "+") for key_name in section.split("+")
+                ]
                 for key_name in section_keys:
                     keyboard.press(getattr(Key, key_name, key_name))
                 for key_name in section_keys:
