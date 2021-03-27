@@ -17,6 +17,7 @@ OR
 Changelog
 =========
 ## 1.0.3 - TBD
+- Wait for Stream Deck to be attached on startup.
 - Drag and drop support for rearranging buttons around in UI.
 - Supports `plus` in the Key Press action to output `+`.
 - Fixed `core dumped` error when closing.
