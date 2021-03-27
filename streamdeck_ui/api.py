@@ -109,7 +109,7 @@ def import_config(config_file: str) -> None:
 
 def export_config(output_file: str) -> None:
     try:
-        with open(output_file+".tmp", "w") as state_file:
+        with open(output_file + ".tmp", "w") as state_file:
             state_file.write(
                 json.dumps(
                     {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
@@ -117,10 +117,11 @@ def export_config(output_file: str) -> None:
                     separators=(",", ": "),
                 )
             )
-    except:
-        pass    
+    except Exception as error:
+        print(f"The configuration file '{output_file}' was not updated. Error: {error}")
+        raise
     else:
-        os.replace(output_file+".tmp", output_file)
+        os.replace(output_file + ".tmp", output_file)
 
 
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
