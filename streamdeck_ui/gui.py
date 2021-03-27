@@ -320,14 +320,12 @@ def start(_exit: bool = False, _show_ui: bool = True) -> None:
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
 
     items = api.open_decks().items()
-    print("wait for device(s)")
-    
-    while len(items) == 0:
-        time.sleep(3)
-        items = api.open_decks().items()
-    
-    print("found " + str(len(items)))
-    
+    if len(items) == 0:
+        print("Waiting for Stream Deck(s)...")
+        while len(items) == 0:
+            time.sleep(3)
+            items = api.open_decks().items()
+
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
 
