@@ -45,7 +45,7 @@ sudo apt install libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
 ```
 Fedora:
 ```bash
-sudo dnf install python3-devel libusb-devel python3-pip libusbx-devel libudev-devel
+sudo dnf install python3-devel libusb-devel python3-pip libusbx-devel libudev-devel hidapi
 ```
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
 
