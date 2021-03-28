@@ -23,6 +23,15 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.python-version }}-
 
+      - name: Ubuntu Poetry cache
+        uses: actions/cache@v2
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            poetry-${{ matrix.os }}-${{ matrix.python-version }}
+
       - name: macOS cache
         uses: actions/cache@v1
         if: startsWith(matrix.os, 'macOS')
@@ -55,11 +64,18 @@ jobs:
           python -m pip install hidapi
           python -m pip install python-xlib
           poetry install
+
+      # This works on Ubuntu, it has not been tested on MacOS or Windows
       - name: Test
-        shell: bash
-        run: |
-          poetry run pytest tests/ -s --cov=streamdeck_ui/ --cov-report=term-missing ${@-}
-          poetry run coverage xml
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: bash -c "poetry run pytest tests/ -s --cov=streamdeck_ui/ --cov-report=term-missing ${@-}"
+      
+      - name: Generate Coverage Report
+        run: poetry run coverage xml
+
       - name: Report Coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8'
-        uses: codecov/codecov-action@v1.0.6
+        uses: codecov/codecov-action@v1
+        with:
+          files: ./coverage.xml
