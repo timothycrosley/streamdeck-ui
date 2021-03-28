@@ -124,6 +124,7 @@ amixer -D pulse sset Master 20%+
 Simulates key press combinations (hot keys). The basic format is a group of keys, seperated by a `+` sign to press simultaneously. Seperate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
 > Use `comma` or `plus` if you want to actually *output* `,` or `+` respectively.
+> Use `delay` to add a short (0.5 seconds) delay. 
 
 #### Examples
 - `F11` - Press F11. If you have focus on a browser this will toggle full screen.
@@ -131,6 +132,8 @@ Simulates key press combinations (hot keys). The basic format is a group of keys
 - `ctrl+w` - Closes the current browser tab.
 - `cmd+left` - View split on left. Note `cmd` is the **super** key (equivalent of the Windows key).
 - `alt+plus` - Presses the alt and the `+` key at the same time.
+- `alt+delay+F4` - Press alt, then wait 0.5 seconds, then press F4. Release both.
+- `1,delay,delay,2,delay,delay,3` - Type 123 with a second delay between keypresses.
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 

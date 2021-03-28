@@ -2,6 +2,7 @@
 import json
 import os
 import shlex
+import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Tuple, Union, cast
@@ -26,6 +27,8 @@ def _replace_special_keys(key):
         return "+"
     if key.lower() == "comma":
         return ","
+    if key.lower() == "delay":
+        return "delay"
     return key
 
 
@@ -52,17 +55,23 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
                 section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
 
                 # Translate string to enum, or just the string itself if not found
-                section_keys = [getattr(Key, key_name, key_name) for key_name in section_keys]
+                section_keys = [
+                    getattr(Key, key_name.lower(), key_name) for key_name in section_keys
+                ]
 
                 for key_name in section_keys:
                     try:
-                        keyboard.press(key_name)
+                        if key_name == "delay":
+                            time.sleep(0.5)
+                        else:
+                            keyboard.press(key_name)
                     except Exception:
                         print(f"Could not press key '{key_name}'")
 
                 for key_name in section_keys:
                     try:
-                        keyboard.release(key_name)
+                        if key_name != "delay":
+                            keyboard.release(key_name)
                     except Exception:
                         print(f"Could not release key '{key_name}'")
 
