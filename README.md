@@ -100,7 +100,7 @@ streamdeck
 ```
 ## Help
 ### Command
-Enter a value in the command field to execute a command. For example, `gnome-terminal` will launch a new terminal on Ubuntu or `obs` will launch OBS.
+Enter a value in the command field to execute a command. For example, `gnome-terminal` will launch a new terminal on Ubuntu/Fedora or `obs` will launch OBS.
 
 #### Some examples (Ubuntu)
 You can use a tool like `xdotool` to interact with other applications.
