@@ -139,3 +139,4 @@ The standard list of keys can be found [at the source](https://pynput.readthedoc
 - On Ubuntu, the **Key Press** `ctrl+alt+t` [doesn't work](https://github.com/moses-palmer/pynput/issues/333
 ). However using the **Command** `gnome-terminal` achieves the same result.
 - Version [1.0.2](https://pypi.org/project/streamdeck-ui/) lacks error handling when executing **Command** and **Key Press** actions. As a result, you have to be careful - an invalid command or key press makes everything else also stop working. The upcoming 1.0.3 release will resolve this.
+- Some users have reported that the Stream Deck does not work on all their USB ports, as it draws quite a bit of power. Try a different port.
