@@ -349,7 +349,11 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     draw = ImageDraw.Draw(image)
 
     if icon:
-        rgba_icon = Image.open(icon).convert("RGBA")
+        try:
+            rgba_icon = Image.open(icon).convert("RGBA")
+        except (OSError, IOError) as icon_error:
+            print(f"Unable to load icon {icon} with error {icon_error}")
+            rgba_icon = Image.new("RGBA", (300, 300))
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
 

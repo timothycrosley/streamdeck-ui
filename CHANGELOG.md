@@ -17,6 +17,7 @@ OR
 Changelog
 =========
 ## 1.0.3 - TBD
+- Missing icon error handling added.
 - Supports `delay` in Key Press action to add a 0.5 second delay.
 - Avoid losing config if exception during write.
 - Wait for Stream Deck to be attached on startup.
