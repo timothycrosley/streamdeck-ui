@@ -121,15 +121,16 @@ Change the system volume up (or down) by a certain percentage. Assumes you're us
 amixer -D pulse sset Master 20%+
 ```
 ### Press Keys
-Simulates key press combinations. The basic format is a series of keys, seperated by a `+` sign to press simultaneously. Seperate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold alt, followed by F4 and release both. Then press and release f. 
+Simulates key press combinations (hot keys). The basic format is a group of keys, seperated by a `+` sign to press simultaneously. Seperate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
-> Note the key is case insensitive. Both `a` and `A` will press the `a` key.
+> Use `comma` or `plus` if you want to actually *output* `,` or `+` respectively.
 
 #### Examples
 - `F11` - Press F11. If you have focus on a browser this will toggle full screen.
 - `alt+F4` - Closes the current window.
 - `ctrl+w` - Closes the current browser tab.
-- `cmd+left` - Presses the super key and left - view split on left.
+- `cmd+left` - View split on left. Note `cmd` is the **super** key (equivalent of the Windows key).
+- `alt+plus` - Presses the alt and the `+` key at the same time.
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 

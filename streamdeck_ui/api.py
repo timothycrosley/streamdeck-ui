@@ -20,6 +20,15 @@ decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 
 
+def _replace_special_keys(key):
+    """Replaces special keywords the user can use with their character equivalent."""
+    if key.lower() == "plus":
+        return "+"
+    if key.lower() == "comma":
+        return ","
+    return key
+
+
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     """ Callback whenever a key is pressed. This is method runs the various actions defined
         for the key being pressed, sequentially. """
@@ -38,9 +47,10 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
         if keys:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
-                section_keys = [
-                    key_name.lower().replace("plus", "+") for key_name in section.split("+")
-                ]
+                # Since + and , are used to delimit our section and keys to press,
+                # they need to be substituded with keywords.
+                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+
                 # Translate string to enum, or just the string itself if not found
                 section_keys = [getattr(Key, key_name, key_name) for key_name in section_keys]
 
