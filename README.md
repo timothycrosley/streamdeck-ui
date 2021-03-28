@@ -98,3 +98,44 @@ After that, use pip to install the app:
 pip3 install streamdeck_ui --user
 streamdeck
 ```
+## Help
+### Command
+Enter a value in the command field to execute a command. For example, `gnome-terminal` will launch a new terminal on Ubuntu or `obs` will launch OBS.
+
+#### Some examples (Ubuntu)
+You can use a tool like `xdotool` to interact with other applications.
+
+Find the window with a title starting with `Meet - ` and bring it to focus. This helps if you have a Google Meet session on a tab somewhere but you lost it behind another window. 
+```bash
+xdotool search --name '^Meet - .+$' windowactivate 
+```
+> The meeting tab must be active one if you have multiple tabs open, since the window title is set by the currently active tab.
+
+Find the window with a title starting with `Meet - ` and then send `ctrl+d` to it. This has the effect of toggling the mute button in Google Meet.
+```bash
+xdotool search --name '^Meet - .+$' windowactivate --sync key ctrl+d
+```
+
+Change the system volume up (or down) by a certain percentage. Assumes you're using PulseAudio/Alsa Mixer.
+```
+amixer -D pulse sset Master 20%+
+```
+### Press Keys
+Simulates key press combinations. The basic format is a series of keys, seperated by a `+` sign to press simultaneously. Seperate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold alt, followed by F4 and release both. Then press and release f. 
+
+> Note the key is case insensitive. Both `a` and `A` will press the `a` key.
+
+#### Examples
+- `F11` - Press F11. If you have focus on a browser this will toggle full screen.
+- `alt+F4` - Closes the current window.
+- `ctrl+w` - Closes the current browser tab.
+- `cmd+left` - Presses the super key and left - view split on left.
+
+The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
+
+## Known issues
+
+- Streamdeck uses [pynput](https://github.com/moses-palmer/pynput) for simulating **Key Presses** but it lacks proper [support for Wayland](https://github.com/moses-palmer/pynput/issues/189). Your mileage on Fedora will vary! Generally your results will be good when using X (Ubuntu/Linux Mint). [This thread](https://github.com/timothycrosley/streamdeck-ui/issues/47) may be useful.
+- On Ubuntu, the **Key Press** `ctrl+alt+t` [doesn't work](https://github.com/moses-palmer/pynput/issues/333
+). However using the **Command** `gnome-terminal` achieves the same result.
+- Version [1.0.2](https://pypi.org/project/streamdeck-ui/) lacks error handling when executing **Command** and **Key Press** actions. As a result, you have to be careful - an invalid command or key press makes everything else also stop working. The upcoming 1.0.3 release will resolve this.
