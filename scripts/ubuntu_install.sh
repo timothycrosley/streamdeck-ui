@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 echo "Installing libraries"
-sudo apt install qt5-default libhidapi-hidraw0 libudev-dev libusb-1.0-0-dev python3-pip
+sudo apt install python3-pip libhidapi-hidraw0
 
 echo "Adding udev rules and reloading"
 sudo tee /etc/udev/rules.d/70-streamdeck.rules << EOF
