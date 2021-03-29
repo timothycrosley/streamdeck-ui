@@ -41,7 +41,7 @@ To use streamdeck_ui on Linux, you will need first to install some pre-requisite
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
 ```bash
-sudo apt install python3-pip libhidapi-hidraw0 
+sudo apt install python3-pip libhidapi-libusb0 qt5-default
 ```
 Fedora:
 ```bash
