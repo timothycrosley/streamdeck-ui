@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 echo "Installing libraries"
-sudo dnf install python3-devel libusb-devel libusbx-devel libudev-devel systemd-devel hidapi
+sudo dnf install python3-pip python3-devel hidapi
 
 echo "Adding udev rules and reloading"
 sudo tee /etc/udev/rules.d/70-streamdeck.rules << EOF
