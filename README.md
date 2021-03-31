@@ -97,6 +97,9 @@ After that, use pip to install the app:
 pip3 install streamdeck_ui --user
 streamdeck
 ```
+
+See the guide for [CentOS 7](docs/centos.md)
+
 ## Help
 ### Command
 Enter a value in the command field to execute a command. For example, `gnome-terminal` will launch a new terminal on Ubuntu/Fedora or `obs` will launch OBS.
