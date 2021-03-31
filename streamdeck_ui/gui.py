@@ -13,9 +13,9 @@ from PySide2.QtWidgets import (
     QFileDialog,
     QMainWindow,
     QMenu,
+    QMessageBox,
     QSizePolicy,
     QSystemTrayIcon,
-    QMessageBox
 )
 
 from streamdeck_ui import api
