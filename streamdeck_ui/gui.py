@@ -15,6 +15,7 @@ from PySide2.QtWidgets import (
     QMenu,
     QSizePolicy,
     QSystemTrayIcon,
+    QMessageBox
 )
 
 from streamdeck_ui import api
@@ -138,12 +139,33 @@ def change_page(ui, page: int) -> None:
 
 
 def select_image(window) -> None:
-    file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", os.path.expanduser("~"), "Image Files (*.png *.jpg *.bmp)"
-    )[0]
     deck_id = _deck_id(window.ui)
-    api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
-    redraw_buttons(window.ui)
+    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
+    if not image:
+        image = os.path.expanduser("~")
+
+    file_name = QFileDialog.getOpenFileName(
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp)"
+    )[0]
+    if file_name:
+        deck_id = _deck_id(window.ui)
+        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
+        redraw_buttons(window.ui)
+
+
+def remove_image(window) -> None:
+    deck_id = _deck_id(window.ui)
+    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
+    if image:
+        confirm = QMessageBox(window)
+        confirm.setWindowTitle("Remove image")
+        confirm.setText("Are you sure you want to remove the image for this button?")
+        confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        confirm.setIcon(QMessageBox.Question)
+        button = confirm.exec_()
+        if button == QMessageBox.Yes:
+            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")
+            redraw_buttons(window.ui)
 
 
 def redraw_buttons(ui) -> None:
@@ -318,6 +340,7 @@ def start(_exit: bool = False, _show_ui: bool = True) -> None:
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
+    ui.removeButton.clicked.connect(partial(remove_image, main_window))
 
     items = api.open_decks().items()
     if len(items) == 0:

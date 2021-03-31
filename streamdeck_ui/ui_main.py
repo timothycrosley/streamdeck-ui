@@ -68,10 +68,17 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
         self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setSpacing(6)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.horizontalLayout.setContentsMargins(-1, 20, -1, -1)
         self.pages = QTabWidget(self.centralwidget)
         self.pages.setObjectName(u"pages")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.pages.sizePolicy().hasHeightForWidth())
+        self.pages.setSizePolicy(sizePolicy2)
         self.pages.setAutoFillBackground(False)
         self.pages.setStyleSheet(u"b")
         self.page_1 = QWidget()
@@ -130,7 +137,6 @@ class Ui_MainWindow(object):
         self.groupBox = QGroupBox(self.centralwidget)
         self.groupBox.setObjectName(u"groupBox")
         self.groupBox.setMinimumSize(QSize(250, 0))
-        self.groupBox.setMaximumSize(QSize(250, 16777215))
         self.verticalLayout_3 = QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.formLayout = QFormLayout()
@@ -140,10 +146,35 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(6)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.imageButton = QPushButton(self.groupBox)
         self.imageButton.setObjectName(u"imageButton")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.imageButton)
+        self.horizontalLayout_2.addWidget(self.imageButton)
+
+        self.removeButton = QPushButton(self.groupBox)
+        self.removeButton.setObjectName(u"removeButton")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
+        self.removeButton.setSizePolicy(sizePolicy3)
+        self.removeButton.setMaximumSize(QSize(30, 16777215))
+        icon = QIcon()
+        iconThemeName = u"edit-clear"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon = QIcon.fromTheme(iconThemeName)
+        else:
+            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+        
+        self.removeButton.setIcon(icon)
+
+        self.horizontalLayout_2.addWidget(self.removeButton)
+
+
+        self.formLayout.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_2)
 
         self.label_2 = QLabel(self.groupBox)
         self.label_2.setObjectName(u"label_2")
@@ -175,16 +206,6 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
 
-        self.label_6 = QLabel(self.groupBox)
-        self.label_6.setObjectName(u"label_6")
-
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
-
-        self.write = QPlainTextEdit(self.groupBox)
-        self.write.setObjectName(u"write")
-
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
-
         self.label_8 = QLabel(self.groupBox)
         self.label_8.setObjectName(u"label_8")
 
@@ -209,12 +230,24 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(5, QFormLayout.FieldRole, self.change_brightness)
 
+        self.label_6 = QLabel(self.groupBox)
+        self.label_6.setObjectName(u"label_6")
+
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
+
+        self.write = QPlainTextEdit(self.groupBox)
+        self.write.setObjectName(u"write")
+
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
+
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
 
         self.horizontalLayout.addWidget(self.groupBox)
 
+        self.horizontalLayout.setStretch(0, 2)
+        self.horizontalLayout.setStretch(1, 1)
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
@@ -224,7 +257,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 844, 27))
+        self.menubar.setGeometry(QRect(0, 0, 844, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         MainWindow.setMenuBar(self.menubar)
@@ -235,6 +268,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menuFile.addAction(self.actionImport)
         self.menuFile.addAction(self.actionExport)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
 
         self.retranslateUi(MainWindow)
@@ -263,13 +297,17 @@ class Ui_MainWindow(object):
         self.pages.setTabText(self.pages.indexOf(self.tab_10), QCoreApplication.translate("MainWindow", u"10", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Configure Button", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Image:", None))
-        self.imageButton.setText(QCoreApplication.translate("MainWindow", u"Choose", None))
+        self.imageButton.setText(QCoreApplication.translate("MainWindow", u"Image...", None))
+#if QT_CONFIG(tooltip)
+        self.removeButton.setToolTip(QCoreApplication.translate("MainWindow", u"Remove the image from the button", None))
+#endif // QT_CONFIG(tooltip)
+        self.removeButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 

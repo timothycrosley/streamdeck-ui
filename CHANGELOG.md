@@ -17,6 +17,9 @@ OR
 Changelog
 =========
 ## 1.0.3 - TBD
+- Separator added between Exit and other menu items.
+- Image button defaults to previous image path, if there is one.
+- Remove image button added. Cancelling image selection no longer removes image.
 - Missing icon error handling added.
 - Supports `delay` in Key Press action to add a 0.5 second delay.
 - Avoid losing config if exception during write.
