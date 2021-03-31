@@ -33,7 +33,7 @@ python3.8 --version
 Install all the dependencies
 ``` console
 pip3.8 install streamdeck==0.8.3 pynput==1.7.3 pyside2==5.15.2 python3-xlib==0.15 pillow==8.1.2 --user
-pip3.8 install -i https://test.pypi.org/simple/ streamdeck-ui==1.0.3 --user
+pip3.8 install -i https://test.pypi.org/simple/ streamdeck-ui==1.0.4 --user
 PATH=$PATH:$HOME/.local/bin
 ```
 

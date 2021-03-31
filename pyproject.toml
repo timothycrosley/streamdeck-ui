@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streamdeck_ui"
-version = "1.0.3"
+version = "1.0.4"
 description = "A service, Web Interface, and UI for interacting with your computer using a Stream Deck"
 authors = ["Timothy Crosley <timothy.crosley@gmail.com>"]
 license = "MIT"
