@@ -16,6 +16,10 @@ OR
 
 Changelog
 =========
+## 1.0.5 (test.pypi.org)
+- Fix race condition where streamdeck buttons get scrambled.
+- Avoid uncessary writes to settings file.
+- Fix missing remove image button.
 ## 1.0.4 (test.pypi.org)
 - Separator added between Exit and other menu items.
 - Image button defaults to previous image path, if there is one.
