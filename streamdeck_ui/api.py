@@ -2,8 +2,8 @@
 import json
 import os
 import shlex
-import time
 import threading
+import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Tuple, Union, cast
