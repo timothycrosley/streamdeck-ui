@@ -220,8 +220,8 @@
                   <string/>
                  </property>
                  <property name="icon">
-                  <iconset theme="edit-clear">
-                   <normaloff>.</normaloff>.</iconset>
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/icons/icons/cross.png</normaloff>:/icons/icons/cross.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -349,6 +349,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

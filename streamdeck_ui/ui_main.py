@@ -9,9 +9,10 @@
 ################################################################################
 
 from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore 
+from PySide2.QtGui import * # type: ignore
 from PySide2.QtWidgets import * # type: ignore
 
+from  . import resources_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -163,12 +164,7 @@ class Ui_MainWindow(object):
         self.removeButton.setSizePolicy(sizePolicy3)
         self.removeButton.setMaximumSize(QSize(30, 16777215))
         icon = QIcon()
-        iconThemeName = u"edit-clear"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon = QIcon.fromTheme(iconThemeName)
-        else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+        icon.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
         self.removeButton.setIcon(icon)
 
         self.horizontalLayout_2.addWidget(self.removeButton)
