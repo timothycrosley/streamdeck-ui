@@ -3,6 +3,7 @@ import json
 import os
 import shlex
 import time
+import threading
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Tuple, Union, cast
@@ -19,6 +20,7 @@ from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, 
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+streamdecks_lock = threading.Lock()
 
 
 def _replace_special_keys(key):
@@ -213,10 +215,11 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
 
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
-    _button_state(deck_id, page, button)["text"] = text
-    image_cache.pop(f"{deck_id}.{page}.{button}", None)
-    render()
-    _save_state()
+    if get_button_text(deck_id, page, button) != text:
+        _button_state(deck_id, page, button)["text"] = text
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
 
 
 def get_button_text(deck_id: str, page: int, button: int) -> str:
@@ -226,10 +229,11 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
-    _button_state(deck_id, page, button)["icon"] = icon
-    image_cache.pop(f"{deck_id}.{page}.{button}", None)
-    render()
-    _save_state()
+    if get_button_icon(deck_id, page, button) != icon:
+        _button_state(deck_id, page, button)["icon"] = icon
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
 
 
 def get_button_icon(deck_id: str, page: int, button: int) -> str:
@@ -239,9 +243,10 @@ def get_button_icon(deck_id: str, page: int, button: int) -> str:
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
     """Sets the brightness changing associated with a button"""
-    _button_state(deck_id, page, button)["brightness_change"] = amount
-    render()
-    _save_state()
+    if get_button_change_brightness(deck_id, page, button) != amount:
+        _button_state(deck_id, page, button)["brightness_change"] = amount
+        render()
+        _save_state()
 
 
 def get_button_change_brightness(deck_id: str, page: int, button: int) -> int:
@@ -251,8 +256,9 @@ def get_button_change_brightness(deck_id: str, page: int, button: int) -> int:
 
 def set_button_command(deck_id: str, page: int, button: int, command: str) -> None:
     """Sets the command associated with the button"""
-    _button_state(deck_id, page, button)["command"] = command
-    _save_state()
+    if get_button_command(deck_id, page, button) != command:
+        _button_state(deck_id, page, button)["command"] = command
+        _save_state()
 
 
 def get_button_command(deck_id: str, page: int, button: int) -> str:
@@ -262,8 +268,9 @@ def get_button_command(deck_id: str, page: int, button: int) -> str:
 
 def set_button_switch_page(deck_id: str, page: int, button: int, switch_page: int) -> None:
     """Sets the page switch associated with the button"""
-    _button_state(deck_id, page, button)["switch_page"] = switch_page
-    _save_state()
+    if get_button_switch_page(deck_id, page, button) != switch_page:
+        _button_state(deck_id, page, button)["switch_page"] = switch_page
+        _save_state()
 
 
 def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
@@ -273,8 +280,9 @@ def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
 
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
     """Sets the keys associated with the button"""
-    _button_state(deck_id, page, button)["keys"] = keys
-    _save_state()
+    if get_button_keys(deck_id, page, button) != keys:
+        _button_state(deck_id, page, button)["keys"] = keys
+        _save_state()
 
 
 def get_button_keys(deck_id: str, page: int, button: int) -> str:
@@ -284,8 +292,9 @@ def get_button_keys(deck_id: str, page: int, button: int) -> str:
 
 def set_button_write(deck_id: str, page: int, button: int, write: str) -> None:
     """Sets the text meant to be written when button is pressed"""
-    _button_state(deck_id, page, button)["write"] = write
-    _save_state()
+    if get_button_write(deck_id, page, button) != write:
+        _button_state(deck_id, page, button)["write"] = write
+        _save_state()
 
 
 def get_button_write(deck_id: str, page: int, button: int) -> str:
@@ -295,9 +304,10 @@ def get_button_write(deck_id: str, page: int, button: int) -> str:
 
 def set_brightness(deck_id: str, brightness: int) -> None:
     """Sets the brightness for every button on the deck"""
-    decks[deck_id].set_brightness(brightness)
-    state.setdefault(deck_id, {})["brightness"] = brightness
-    _save_state()
+    if get_brightness(deck_id) != brightness:
+        decks[deck_id].set_brightness(brightness)
+        state.setdefault(deck_id, {})["brightness"] = brightness
+        _save_state()
 
 
 def get_brightness(deck_id: str) -> int:
@@ -317,9 +327,10 @@ def get_page(deck_id: str) -> int:
 
 def set_page(deck_id: str, page: int) -> None:
     """Sets the current page shown on the stream deck"""
-    state.setdefault(deck_id, {})["page"] = page
-    render()
-    _save_state()
+    if get_page(deck_id) != page:
+        state.setdefault(deck_id, {})["page"] = page
+        render()
+        _save_state()
 
 
 def render() -> None:
@@ -340,7 +351,9 @@ def render() -> None:
             else:
                 image = _render_key_image(deck, **button_settings)
                 image_cache[key] = image
-            deck.set_key_image(button_id, image)
+
+            with streamdecks_lock:
+                deck.set_key_image(button_id, image)
 
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
