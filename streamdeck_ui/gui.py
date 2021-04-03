@@ -237,10 +237,6 @@ def build_buttons(ui, tab) -> None:
             lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
         )
 
-    redraw_buttons(ui)
-    tab.hide()
-    tab.show()
-
 
 def export_config(window) -> None:
     file_name = QFileDialog.getSaveFileName(
@@ -275,6 +271,11 @@ def build_device(ui, _device_index=None) -> None:
         page.setStyleSheet("background-color: black")
         build_buttons(ui, page)
 
+    # Set the active page for this device
+    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+
+    # Draw the buttons for the active page
+    redraw_buttons(ui)
     sync(ui)
     _highlight_first_button(ui)
 
