@@ -325,7 +325,7 @@ def start(_exit: bool = False) -> None:
         print("  -n, --no-ui\tRun the program without showing a UI")
         return
     elif "-n" in sys.argv or "--no-ui" in sys.argv:
-        show_ui=False
+        show_ui = False
 
     app = QApplication(sys.argv)
 
