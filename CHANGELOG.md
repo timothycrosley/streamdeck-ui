@@ -19,6 +19,7 @@ Changelog
 ## 1.0.6 (test.pypi.org)
 - Require Pillow 8.2.
 - Fix button image rendering on startup.
+- Fix command line args not working.
 ## 1.0.5 (test.pypi.org)
 - Fix race condition where streamdeck buttons get scrambled.
 - Avoid uncessary writes to settings file.
