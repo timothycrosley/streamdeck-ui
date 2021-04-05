@@ -18,6 +18,7 @@ Changelog
 =========
 ## 1.0.7 (test.pypi.org)
 - Update to streamdeck 0.8.4 to improve reliability.
+- Reset to standby image on exit. Helps to know if streamdeck-ui is running or not.
 ## 1.0.6 (test.pypi.org)
 - Require Pillow 8.2.
 - Fix button image rendering on startup.
