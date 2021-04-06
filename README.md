@@ -36,7 +36,7 @@ Communication with the Streamdeck is powered by the [Python Elgato Stream Deck L
 ### Precooked Scripts
 There are scripts for setting up streamdeck_ui on [Debian/Ubuntu](scripts/ubuntu_install.sh) and [Fedora](scripts/fedora_install.sh).
 ### Manual installation
-To use streamdeck_ui on Linux, you will need first to install some pre-requisite system libraries.
+To use streamdeck_ui on Linux, you will need first to install some prerequisite system libraries.
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
 ```bash
@@ -123,7 +123,7 @@ Change the system volume up (or down) by a certain percentage. Assumes you're us
 amixer -D pulse sset Master 20%+
 ```
 ### Press Keys
-Simulates key press combinations (hot keys). The basic format is a group of keys, seperated by a `+` sign to press simultaneously. Seperate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
+Simulates key press combinations (hot keys). The basic format is a group of keys, separated by a `+` sign to press simultaneously. Separate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
 > Use `comma` or `plus` if you want to actually *output* `,` or `+` respectively.
 > Use `delay` to add a short (0.5 seconds) delay. 
@@ -135,7 +135,7 @@ Simulates key press combinations (hot keys). The basic format is a group of keys
 - `cmd+left` - View split on left. Note `cmd` is the **super** key (equivalent of the Windows key).
 - `alt+plus` - Presses the alt and the `+` key at the same time.
 - `alt+delay+F4` - Press alt, then wait 0.5 seconds, then press F4. Release both.
-- `1,delay,delay,2,delay,delay,3` - Type 123 with a second delay between keypresses.
+- `1,delay,delay,2,delay,delay,3` - Type 123 with a second delay between key presses.
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 
