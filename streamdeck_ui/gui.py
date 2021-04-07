@@ -1,9 +1,14 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
+import shlex
 import sys
+import threading
 import time
 from functools import partial
+from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from typing import Dict
 
+from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
 from PySide2.QtGui import QDrag, QIcon
@@ -36,6 +41,11 @@ BUTTON_DRAG_STYLE = """
 
 selected_button: QtWidgets.QToolButton
 text_timer = None
+
+# FIXME: This must be a dictionary too. Perhaps dictionary
+# holding various deck properties or an OO approach.
+display_dimmed = True
+display_timers: Dict[str, QTimer] = {}
 
 
 class DraggableButton(QtWidgets.QToolButton):
@@ -87,6 +97,131 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
+# FIXME: Hack to make fade working. Only works with
+# one streamdeck. Doesn't keypress while fading out.
+next_change = None
+
+
+def _dim_display(deck_id: str, brightness: int) -> None:
+    global display_dimmed
+    global next_change
+
+    if brightness:
+        brightness = brightness - 1
+        api.decks[deck_id].set_brightness(brightness)
+        next_change = QTimer()
+        next_change.setSingleShot(True)
+        next_change.timeout.connect(partial(_dim_display, deck_id, brightness))
+        next_change.start(10)
+    else:
+        display_dimmed = True
+    print(f"Timer fired on {threading.get_ident()}")
+
+
+def set_display_timer(deck_id: str) -> None:
+    global display_timers
+
+    display_timer = display_timers.get(deck_id, None)
+    if display_timer:
+        display_timer.stop()
+
+    timeout = api.get_display_timeout(deck_id)
+    if timeout:
+        display_timer = QTimer()
+        display_timer.setSingleShot(True)
+        display_timer.timeout.connect(partial(_dim_display, deck_id, api.get_brightness(deck_id)))
+        display_timer.start(timeout * 1000)
+        display_timers[deck_id] = display_timer
+
+
+def _replace_special_keys(key):
+    """Replaces special keywords the user can use with their character equivalent."""
+    if key.lower() == "plus":
+        return "+"
+    if key.lower() == "comma":
+        return ","
+    if key.lower() == "delay":
+        return "delay"
+    return key
+
+
+def wakeup_display(deck_id: str) -> bool:
+    global display_dimmed
+
+    set_display_timer(deck_id)
+
+    if display_dimmed:
+        api.decks[deck_id].set_brightness(api.get_brightness(deck_id))
+        display_dimmed = False
+        return True
+
+    return False
+
+
+def handle_keypress(deck_id: str, key: int, state: bool) -> None:
+    print(f"Handle keypress thread ID {threading.get_ident()}")
+
+    if state:
+
+        if wakeup_display(deck_id):
+            return
+
+        keyboard = Controller()
+        page = api.get_page(deck_id)
+
+        command = api.get_button_command(deck_id, page, key)
+        if command:
+            try:
+                Popen(shlex.split(command))
+            except Exception as error:
+                print(f"The command '{command}' failed: {error}")
+
+        keys = api.get_button_keys(deck_id, page, key)
+        if keys:
+            keys = keys.strip().replace(" ", "")
+            for section in keys.split(","):
+                # Since + and , are used to delimit our section and keys to press,
+                # they need to be substituded with keywords.
+                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+
+            # Translate string to enum, or just the string itself if not found
+            section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
+
+            for key_name in section_keys:
+                try:
+                    if key_name == "delay":
+                        time.sleep(0.5)
+                    else:
+                        keyboard.press(key_name)
+                except Exception:
+                    print(f"Could not press key '{key_name}'")
+
+            for key_name in section_keys:
+                try:
+                    if key_name != "delay":
+                        keyboard.release(key_name)
+                except Exception:
+                    print(f"Could not release key '{key_name}'")
+
+        write = api.get_button_write(deck_id, page, key)
+        if write:
+            try:
+                keyboard.type(write)
+            except Exception as error:
+                print(f"Could not complete the write command: {error}")
+
+        brightness_change = api.get_button_change_brightness(deck_id, page, key)
+        if brightness_change:
+            try:
+                api.change_brightness(deck_id, brightness_change)
+            except Exception as error:
+                print(f"Could not change brightness: {error}")
+
+        switch_page = api.get_button_switch_page(deck_id, page, key)
+        if switch_page:
+            api.set_page(deck_id, switch_page - 1)
+
+
 def _deck_id(ui) -> str:
     return ui.device_list.itemData(ui.device_list.currentIndex())
 
@@ -133,9 +268,11 @@ def _highlight_first_button(ui) -> None:
 
 
 def change_page(ui, page: int) -> None:
-    api.set_page(_deck_id(ui), page)
+    deck_id = _deck_id(ui)
+    api.set_page(deck_id, page)
     redraw_buttons(ui)
     _highlight_first_button(ui)
+    wakeup_display(deck_id)
 
 
 def select_image(window) -> None:
@@ -180,6 +317,7 @@ def redraw_buttons(ui) -> None:
 def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
+    wakeup_display(deck_id)
 
 
 def button_clicked(ui, clicked_button, buttons) -> None:
@@ -199,6 +337,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+    wakeup_display(deck_id)
 
 
 def build_buttons(ui, tab) -> None:
@@ -353,6 +492,8 @@ def start(_exit: bool = False) -> None:
     ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
 
+    api.streamdesk_keys.key_pressed.connect(handle_keypress)
+
     items = api.open_decks().items()
     if len(items) == 0:
         print("Waiting for Stream Deck(s)...")
@@ -362,6 +503,8 @@ def start(_exit: bool = False) -> None:
 
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+        set_display_timer(deck_id)
+        wakeup_display(deck_id)
 
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))

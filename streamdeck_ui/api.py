@@ -5,12 +5,12 @@ import shlex
 import threading
 import time
 from functools import partial
-from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Tuple, Union, cast
 from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
 from pynput.keyboard import Controller, Key
+from PySide2.QtCore import QObject, Signal
 from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
@@ -21,6 +21,17 @@ image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 streamdecks_lock = threading.Lock()
+key_event_lock = threading.Lock()
+
+# Signals emit values. We're going to use this to let
+# the front end know a key is pressed (happens on background thread)
+
+
+class KeySignalEmitter(QObject):
+    key_pressed = Signal(str, int, bool)
+
+
+streamdesk_keys = KeySignalEmitter()
 
 
 def _replace_special_keys(key):
@@ -37,63 +48,25 @@ def _replace_special_keys(key):
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     """ Callback whenever a key is pressed. This is method runs the various actions defined
         for the key being pressed, sequentially. """
-    if state:
-        keyboard = Controller()
-        page = get_page(deck_id)
+    global streamdesk_keys
+    # Stream Desk key events fire on a background thread. Emit a signal
+    # to bring it back to UI thread, so we can use Qt objects for timers etc.
+    # Since multiple keys could fire simultaniously, we need to protect
+    # shared state with a lock
+    with key_event_lock:
+        print(f"_key_change_callback thread ID {threading.get_ident()}")
+        streamdesk_keys.key_pressed.emit(deck_id, key, state)
 
-        command = get_button_command(deck_id, page, key)
-        if command:
-            try:
-                Popen(shlex.split(command))
-            except Exception as error:
-                print(f"The command '{command}' failed: {error}")
 
-        keys = get_button_keys(deck_id, page, key)
-        if keys:
-            keys = keys.strip().replace(" ", "")
-            for section in keys.split(","):
-                # Since + and , are used to delimit our section and keys to press,
-                # they need to be substituded with keywords.
-                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+def get_display_timeout(deck_id: str) -> int:
+    """ Returns the amount of time in seconds before the display gets dimmed."""
+    return cast(int, state.get(deck_id, {}).get("display_timeout", 0))
 
-                # Translate string to enum, or just the string itself if not found
-                section_keys = [
-                    getattr(Key, key_name.lower(), key_name) for key_name in section_keys
-                ]
 
-                for key_name in section_keys:
-                    try:
-                        if key_name == "delay":
-                            time.sleep(0.5)
-                        else:
-                            keyboard.press(key_name)
-                    except Exception:
-                        print(f"Could not press key '{key_name}'")
-
-                for key_name in section_keys:
-                    try:
-                        if key_name != "delay":
-                            keyboard.release(key_name)
-                    except Exception:
-                        print(f"Could not release key '{key_name}'")
-
-        write = get_button_write(deck_id, page, key)
-        if write:
-            try:
-                keyboard.type(write)
-            except Exception as error:
-                print(f"Could not complete the write command: {error}")
-
-        brightness_change = get_button_change_brightness(deck_id, page, key)
-        if brightness_change:
-            try:
-                change_brightness(deck_id, brightness_change)
-            except Exception as error:
-                print(f"Could not change brightness: {error}")
-
-        switch_page = get_button_switch_page(deck_id, page, key)
-        if switch_page:
-            set_page(deck_id, switch_page - 1)
+def set_display_timeout(deck_id: str, timeout: int) -> None:
+    """ Sets the amount of time in seconds before the display gets dimmed."""
+    state.setdefault(deck_id, {})["timeout"] = timeout
+    _save_state()
 
 
 def _save_state():
