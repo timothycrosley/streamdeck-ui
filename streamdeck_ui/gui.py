@@ -6,7 +6,7 @@ import threading
 import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict
+from typing import Dict, Callable
 
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
@@ -42,10 +42,64 @@ BUTTON_DRAG_STYLE = """
 selected_button: QtWidgets.QToolButton
 text_timer = None
 
-# FIXME: This must be a dictionary too. Perhaps dictionary
-# holding various deck properties or an OO approach.
-display_dimmed = True
-display_timers: Dict[str, QTimer] = {}
+
+# TODO: When the actual dimmer value changes, update it
+# TODO: When the timeout changes, update it
+class Dimmer:
+    timeout = 0
+    brightness = 0
+    __dimmer_brightness = 0
+    __timer = None
+    __change_timer = None
+
+    def __init__(self, timeout: int, brightness: int, brightness_callback: Callable[[int], None]):
+        """ Constructs a new Dimmer instance
+        
+        :param int timeout: The time in seconds before the dimmer starts.
+        :param int brightness: The normal brightness level.
+        :param Callable[[int], None] brightness_callback: Callback that receives the current 
+                                                          brightness level.
+         """
+        self.timeout = timeout
+        self.brightness = brightness
+        self.brightness_callback = brightness_callback
+
+    def reset(self) -> bool:
+        """ Reset the dimmer and start counting down again. If it was busy dimming, it will
+        immediately stop dimming. Callback fires to set brightness back to normal."""
+        if self.__timer:
+            self.__timer.stop()
+
+        if self.__change_timer:
+            self.__change_timer.stop()
+
+        if self.timeout:
+            self.__timer = QTimer()
+            self.__timer.setSingleShot(True)
+            self.__timer.timeout.connect(partial(self.dim))
+            self.__timer.start(self.timeout * 1000)
+
+        if self.__dimmer_brightness != self.brightness:
+            self.brightness_callback(self.brightness)
+            self.__dimmer_brightness = self.brightness
+            return True
+
+        return False
+
+    def dim(self):
+        """ Move the brightness level down by one and schedule another dim event """
+        if self.__dimmer_brightness:
+            self.__dimmer_brightness = self.__dimmer_brightness - 1
+            self.brightness_callback(self.__dimmer_brightness)
+            self.__change_timer = QTimer()
+            self.__change_timer.setSingleShot(True)
+            self.__change_timer.timeout.connect(partial(self.dim))
+            self.__change_timer.start(10)
+        else:
+            self.__change_timer = None
+
+
+dimmers: Dict[str, Dimmer] = {}
 
 
 class DraggableButton(QtWidgets.QToolButton):
@@ -97,43 +151,6 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
-# FIXME: Hack to make fade working. Only works with
-# one streamdeck. Doesn't keypress while fading out.
-next_change = None
-
-
-def _dim_display(deck_id: str, brightness: int) -> None:
-    global display_dimmed
-    global next_change
-
-    if brightness:
-        brightness = brightness - 1
-        api.decks[deck_id].set_brightness(brightness)
-        next_change = QTimer()
-        next_change.setSingleShot(True)
-        next_change.timeout.connect(partial(_dim_display, deck_id, brightness))
-        next_change.start(10)
-    else:
-        display_dimmed = True
-    print(f"Timer fired on {threading.get_ident()}")
-
-
-def set_display_timer(deck_id: str) -> None:
-    global display_timers
-
-    display_timer = display_timers.get(deck_id, None)
-    if display_timer:
-        display_timer.stop()
-
-    timeout = api.get_display_timeout(deck_id)
-    if timeout:
-        display_timer = QTimer()
-        display_timer.setSingleShot(True)
-        display_timer.timeout.connect(partial(_dim_display, deck_id, api.get_brightness(deck_id)))
-        display_timer.start(timeout * 1000)
-        display_timers[deck_id] = display_timer
-
-
 def _replace_special_keys(key):
     """Replaces special keywords the user can use with their character equivalent."""
     if key.lower() == "plus":
@@ -145,25 +162,12 @@ def _replace_special_keys(key):
     return key
 
 
-def wakeup_display(deck_id: str) -> bool:
-    global display_dimmed
-
-    set_display_timer(deck_id)
-
-    if display_dimmed:
-        api.decks[deck_id].set_brightness(api.get_brightness(deck_id))
-        display_dimmed = False
-        return True
-
-    return False
-
-
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
     print(f"Handle keypress thread ID {threading.get_ident()}")
 
     if state:
 
-        if wakeup_display(deck_id):
+        if dimmers[deck_id].reset():
             return
 
         keyboard = Controller()
@@ -272,7 +276,7 @@ def change_page(ui, page: int) -> None:
     api.set_page(deck_id, page)
     redraw_buttons(ui)
     _highlight_first_button(ui)
-    wakeup_display(deck_id)
+    dimmers[deck_id].reset()
 
 
 def select_image(window) -> None:
@@ -317,7 +321,8 @@ def redraw_buttons(ui) -> None:
 def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
-    wakeup_display(deck_id)
+    dimmers[deck_id].brightness = value
+    dimmers[deck_id].reset()
 
 
 def button_clicked(ui, clicked_button, buttons) -> None:
@@ -337,7 +342,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
-    wakeup_display(deck_id)
+    dimmers[deck_id].reset()
 
 
 def build_buttons(ui, tab) -> None:
@@ -455,6 +460,10 @@ def queue_text_change(ui, text: str) -> None:
     text_timer.start(500)
 
 
+def change_brightness(deck_id: str, brightness: int):
+    api.decks[deck_id].set_brightness(brightness)
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -503,8 +512,8 @@ def start(_exit: bool = False) -> None:
 
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-        set_display_timer(deck_id)
-        wakeup_display(deck_id)
+        dimmers[deck_id] = Dimmer(api.get_display_timeout(deck_id), api.get_brightness(deck_id), partial(change_brightness, deck_id))
+        dimmers[deck_id].reset()
 
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
