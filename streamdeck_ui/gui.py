@@ -2,11 +2,10 @@
 import os
 import shlex
 import sys
-import threading
 import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict, Callable
+from typing import Callable, Dict
 
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
@@ -43,7 +42,6 @@ selected_button: QtWidgets.QToolButton
 text_timer = None
 
 
-# TODO: When the actual dimmer value changes, update it
 # TODO: When the timeout changes, update it
 class Dimmer:
     timeout = 0
@@ -54,10 +52,10 @@ class Dimmer:
 
     def __init__(self, timeout: int, brightness: int, brightness_callback: Callable[[int], None]):
         """ Constructs a new Dimmer instance
-        
+
         :param int timeout: The time in seconds before the dimmer starts.
         :param int brightness: The normal brightness level.
-        :param Callable[[int], None] brightness_callback: Callback that receives the current 
+        :param Callable[[int], None] brightness_callback: Callback that receives the current
                                                           brightness level.
          """
         self.timeout = timeout
@@ -163,7 +161,6 @@ def _replace_special_keys(key):
 
 
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
-    print(f"Handle keypress thread ID {threading.get_ident()}")
 
     if state:
 
@@ -512,7 +509,11 @@ def start(_exit: bool = False) -> None:
 
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-        dimmers[deck_id] = Dimmer(api.get_display_timeout(deck_id), api.get_brightness(deck_id), partial(change_brightness, deck_id))
+        dimmers[deck_id] = Dimmer(
+            api.get_display_timeout(deck_id),
+            api.get_brightness(deck_id),
+            partial(change_brightness, deck_id),
+        )
         dimmers[deck_id].reset()
 
     build_device(ui)

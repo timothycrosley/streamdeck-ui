@@ -1,15 +1,12 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
 import json
 import os
-import shlex
 import threading
-import time
 from functools import partial
 from typing import Dict, Tuple, Union, cast
 from warnings import warn
 
 from PIL import Image, ImageDraw, ImageFont
-from pynput.keyboard import Controller, Key
 from PySide2.QtCore import QObject, Signal
 from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
@@ -22,9 +19,6 @@ decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
-
-# Signals emit values. We're going to use this to let
-# the front end know a key is pressed (happens on background thread)
 
 
 class KeySignalEmitter(QObject):
@@ -48,13 +42,11 @@ def _replace_special_keys(key):
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     """ Callback whenever a key is pressed. This is method runs the various actions defined
         for the key being pressed, sequentially. """
-    global streamdesk_keys
     # Stream Desk key events fire on a background thread. Emit a signal
     # to bring it back to UI thread, so we can use Qt objects for timers etc.
     # Since multiple keys could fire simultaniously, we need to protect
     # shared state with a lock
     with key_event_lock:
-        print(f"_key_change_callback thread ID {threading.get_ident()}")
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
 
 
