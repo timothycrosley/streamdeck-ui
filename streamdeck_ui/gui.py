@@ -479,7 +479,7 @@ def show_settings(window) -> None:
     deck_id = _deck_id(ui)
     settings = SettingsDialog(window)
 
-    settings.ui.label_streamdeck = deck_id
+    settings.ui.label_streamdeck.setText(deck_id)
     settings.ui.brightness.setValue(api.get_brightness(deck_id))
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
     if settings.exec_():
