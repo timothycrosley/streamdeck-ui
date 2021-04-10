@@ -14,6 +14,7 @@ from PySide2.QtGui import QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
+    QDialog,
     QFileDialog,
     QMainWindow,
     QMenu,
@@ -25,6 +26,7 @@ from PySide2.QtWidgets import (
 from streamdeck_ui import api
 from streamdeck_ui.config import LOGO
 from streamdeck_ui.ui_main import Ui_MainWindow
+from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 BUTTON_STYLE = """
     QToolButton{background-color:black; color:white;}
@@ -402,7 +404,6 @@ def import_config(window) -> None:
 
 def sync(ui) -> None:
     api.ensure_decks_connected()
-    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
 
@@ -458,7 +459,35 @@ def queue_text_change(ui, text: str) -> None:
 
 
 def change_brightness(deck_id: str, brightness: int):
+    """Changes the brightness of the given streamdeck, but does not save
+    the state."""
     api.decks[deck_id].set_brightness(brightness)
+
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ui = Ui_SettingsDialog()
+        self.ui.setupUi(self)
+        self.show()
+
+
+def show_settings(window) -> None:
+    """Shows the settings dialog and allows the user the change deck specific
+    settings. Settings are not saved until OK is clicked."""
+    ui = window.ui
+    deck_id = _deck_id(ui)
+    settings = SettingsDialog(window)
+
+    settings.ui.label_streamdeck = deck_id
+    settings.ui.brightness.setValue(api.get_brightness(deck_id))
+    settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
+    if settings.exec_():
+        # Commit changes
+        set_brightness(window.ui, settings.ui.brightness.value())
+    else:
+        # User cancelled, reset to original brightness
+        change_brightness(deck_id, api.get_brightness(deck_id))
 
 
 def start(_exit: bool = False) -> None:
@@ -495,8 +524,8 @@ def start(_exit: bool = False) -> None:
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
+    ui.settingsButton.clicked.connect(partial(show_settings, main_window))
 
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
