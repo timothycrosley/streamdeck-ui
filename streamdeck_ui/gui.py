@@ -42,7 +42,7 @@ BUTTON_DRAG_STYLE = """
 
 selected_button: QtWidgets.QToolButton
 text_timer = None
-settings_dimmer_options = {
+dimmer_options = {
     "Never": 0,
     "10 Seconds": 10,
     "1 Minute": 60,
@@ -56,7 +56,6 @@ settings_dimmer_options = {
 }
 
 
-# TODO: When the timeout changes, update it
 class Dimmer:
     timeout = 0
     brightness = 0
@@ -76,9 +75,9 @@ class Dimmer:
         self.brightness = brightness
         self.brightness_callback = brightness_callback
 
-    def pause(self) -> None:
-        """ Pauses the dimmer and sets the brightness back to normal. Call
-        reset to resume normal dimming operation. """
+    def stop(self) -> None:
+        """ Stops the dimmer and sets the brightness back to normal. Call
+        reset to start normal dimming operation. """
         if self.__timer:
             self.__timer.stop()
 
@@ -110,7 +109,7 @@ class Dimmer:
         return False
 
     def dim(self):
-        """ Move the brightness level down by one and schedule another dim event """
+        """ Move the brightness level down by one and schedule another dim event. """
         if self.__dimmer_brightness:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
@@ -503,12 +502,12 @@ def show_settings(window) -> None:
     settings = SettingsDialog(window)
     dimmers[deck_id].pause()
 
-    for label, value in settings_dimmer_options.items():
+    for label, value in dimmer_options.items():
         settings.ui.dim.addItem(f"{label}", userData=value)
 
     existing_timeout = api.get_display_timeout(deck_id)
     existing_index = next(
-        (i for i, (k, v) in enumerate(settings_dimmer_options.items()) if v == existing_timeout),
+        (i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout),
         None,
     )
 
