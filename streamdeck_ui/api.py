@@ -57,7 +57,7 @@ def get_display_timeout(deck_id: str) -> int:
 
 def set_display_timeout(deck_id: str, timeout: int) -> None:
     """ Sets the amount of time in seconds before the display gets dimmed."""
-    state.setdefault(deck_id, {})["timeout"] = timeout
+    state.setdefault(deck_id, {})["display_timeout"] = timeout
     _save_state()
 
 
