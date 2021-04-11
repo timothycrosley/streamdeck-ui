@@ -42,6 +42,18 @@ BUTTON_DRAG_STYLE = """
 
 selected_button: QtWidgets.QToolButton
 text_timer = None
+settings_dimmer_options = {
+    "Never": 0,
+    "10 Seconds": 10,
+    "1 Minute": 60,
+    "5 Minutes": 300,
+    "10 Minutes": 600,
+    "15 Minutes": 900,
+    "30 Minutes": 1800,
+    "1 Hour": 3600,
+    "5 Hours": 7200,
+    "10 Hours": 36000,
+}
 
 
 # TODO: When the timeout changes, update it
@@ -63,6 +75,17 @@ class Dimmer:
         self.timeout = timeout
         self.brightness = brightness
         self.brightness_callback = brightness_callback
+
+    def pause(self) -> None:
+        """ Pauses the dimmer and sets the brightness back to normal. Call
+        reset to resume normal dimming operation. """
+        if self.__timer:
+            self.__timer.stop()
+
+        if self.__change_timer:
+            self.__change_timer.stop()
+
+        self.brightness_callback(self.brightness)
 
     def reset(self) -> bool:
         """ Reset the dimmer and start counting down again. If it was busy dimming, it will
@@ -478,16 +501,38 @@ def show_settings(window) -> None:
     ui = window.ui
     deck_id = _deck_id(ui)
     settings = SettingsDialog(window)
+    dimmers[deck_id].pause()
+
+    for label, value in settings_dimmer_options.items():
+        settings.ui.dim.addItem(f"{label}", userData=value)
+
+    existing_timeout = api.get_display_timeout(deck_id)
+    existing_index = next(
+        (i for i, (k, v) in enumerate(settings_dimmer_options.items()) if v == existing_timeout),
+        None,
+    )
+
+    if existing_index is None:
+        settings.ui.dim.addItem(f"Custom: {existing_timeout}s", userData=existing_timeout)
+        existing_index = settings.ui.dim.count() - 1
+        settings.ui.dim.setCurrentIndex(existing_index)
+    else:
+        settings.ui.dim.setCurrentIndex(existing_index)
 
     settings.ui.label_streamdeck.setText(deck_id)
     settings.ui.brightness.setValue(api.get_brightness(deck_id))
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
     if settings.exec_():
         # Commit changes
+        if existing_index != settings.ui.dim.currentIndex():
+            dimmers[deck_id].timeout = settings.ui.dim.currentData()
+            api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
+
+    dimmers[deck_id].reset()
 
 
 def start(_exit: bool = False) -> None:
