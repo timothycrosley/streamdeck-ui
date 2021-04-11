@@ -138,6 +138,8 @@ class DraggableButton(QtWidgets.QToolButton):
         if e.buttons() != Qt.LeftButton:
             return
 
+        dimmers[_deck_id(self.ui)].reset()
+
         mimedata = QMimeData()
         drag = QDrag(self)
         drag.setMimeData(mimedata)
