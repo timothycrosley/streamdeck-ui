@@ -500,7 +500,7 @@ def show_settings(window) -> None:
     ui = window.ui
     deck_id = _deck_id(ui)
     settings = SettingsDialog(window)
-    dimmers[deck_id].pause()
+    dimmers[deck_id].stop()
 
     for label, value in dimmer_options.items():
         settings.ui.dim.addItem(f"{label}", userData=value)
