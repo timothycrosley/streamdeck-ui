@@ -28,17 +28,6 @@ class KeySignalEmitter(QObject):
 streamdesk_keys = KeySignalEmitter()
 
 
-def _replace_special_keys(key):
-    """Replaces special keywords the user can use with their character equivalent."""
-    if key.lower() == "plus":
-        return "+"
-    if key.lower() == "comma":
-        return ","
-    if key.lower() == "delay":
-        return "delay"
-    return key
-
-
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
     """ Callback whenever a key is pressed. This is method runs the various actions defined
         for the key being pressed, sequentially. """

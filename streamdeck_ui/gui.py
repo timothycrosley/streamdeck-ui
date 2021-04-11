@@ -181,8 +181,8 @@ def _replace_special_keys(key):
         return "+"
     if key.lower() == "comma":
         return ","
-    if key.lower() == "delay":
-        return "delay"
+    if key.lower().startswith("delay"):
+        return key.lower()
     return key
 
 
@@ -208,27 +208,48 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
             keys = keys.strip().replace(" ", "")
             for section in keys.split(","):
                 # Since + and , are used to delimit our section and keys to press,
-                # they need to be substituded with keywords.
+                # they need to be substituted with keywords.
                 section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
 
-            # Translate string to enum, or just the string itself if not found
-            section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
+                # Translate string to enum, or just the string itself if not found
+                section_keys = [
+                    getattr(Key, key_name.lower(), key_name) for key_name in section_keys
+                ]
 
-            for key_name in section_keys:
-                try:
-                    if key_name == "delay":
-                        time.sleep(0.5)
+                for key_name in section_keys:
+                    if key_name.startswith("delay"):
+                        sleep_time = key_name.split("delay", 1)[1]
+                        if sleep_time:
+                            try:
+                                sleep_time = float(sleep_time)
+                            except Exception:
+                                print(
+                                    f"Not sleeping, could not convert sleep time to float '{sleep_time}'"
+                                )
+                                sleep_time = None
+                        else:
+                            # default if not specified
+                            sleep_time = 0.5
+
+                        if sleep_time:
+                            try:
+                                time.sleep(sleep_time)
+                            except Exception:
+                                print(
+                                    f"Not sleeping, could not sleep with provided sleep time '{sleep_time}'"
+                                )
                     else:
-                        keyboard.press(key_name)
-                except Exception:
-                    print(f"Could not press key '{key_name}'")
+                        try:
+                            keyboard.press(key_name)
+                        except Exception:
+                            print(f"Could not press key '{key_name}'")
 
-            for key_name in section_keys:
-                try:
-                    if key_name != "delay":
-                        keyboard.release(key_name)
-                except Exception:
-                    print(f"Could not release key '{key_name}'")
+                for key_name in section_keys:
+                    if not key_name.startswith("delay"):
+                        try:
+                            keyboard.release(key_name)
+                        except Exception:
+                            print(f"Could not release key '{key_name}'")
 
         write = api.get_button_write(deck_id, page, key)
         if write:
