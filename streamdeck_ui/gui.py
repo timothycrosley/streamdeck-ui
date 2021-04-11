@@ -241,6 +241,8 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
         if brightness_change:
             try:
                 api.change_brightness(deck_id, brightness_change)
+                dimmers[deck_id].brightness = api.get_brightness(deck_id)
+                dimmers[deck_id].reset()
             except Exception as error:
                 print(f"Could not change brightness: {error}")
 
