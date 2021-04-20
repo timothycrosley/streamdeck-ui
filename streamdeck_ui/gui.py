@@ -1,15 +1,20 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
+import shlex
 import sys
 import time
 from functools import partial
+from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from typing import Callable, Dict
 
+from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
 from PySide2.QtGui import QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
+    QDialog,
     QFileDialog,
     QMainWindow,
     QMenu,
@@ -21,6 +26,7 @@ from PySide2.QtWidgets import (
 from streamdeck_ui import api
 from streamdeck_ui.config import LOGO
 from streamdeck_ui.ui_main import Ui_MainWindow
+from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 BUTTON_STYLE = """
     QToolButton{background-color:black; color:white;}
@@ -36,6 +42,86 @@ BUTTON_DRAG_STYLE = """
 
 selected_button: QtWidgets.QToolButton
 text_timer = None
+dimmer_options = {
+    "Never": 0,
+    "10 Seconds": 10,
+    "1 Minute": 60,
+    "5 Minutes": 300,
+    "10 Minutes": 600,
+    "15 Minutes": 900,
+    "30 Minutes": 1800,
+    "1 Hour": 3600,
+    "5 Hours": 7200,
+    "10 Hours": 36000,
+}
+
+
+class Dimmer:
+    timeout = 0
+    brightness = 0
+    __dimmer_brightness = 0
+    __timer = None
+    __change_timer = None
+
+    def __init__(self, timeout: int, brightness: int, brightness_callback: Callable[[int], None]):
+        """ Constructs a new Dimmer instance
+
+        :param int timeout: The time in seconds before the dimmer starts.
+        :param int brightness: The normal brightness level.
+        :param Callable[[int], None] brightness_callback: Callback that receives the current
+                                                          brightness level.
+         """
+        self.timeout = timeout
+        self.brightness = brightness
+        self.brightness_callback = brightness_callback
+
+    def stop(self) -> None:
+        """ Stops the dimmer and sets the brightness back to normal. Call
+        reset to start normal dimming operation. """
+        if self.__timer:
+            self.__timer.stop()
+
+        if self.__change_timer:
+            self.__change_timer.stop()
+
+        self.brightness_callback(self.brightness)
+
+    def reset(self) -> bool:
+        """ Reset the dimmer and start counting down again. If it was busy dimming, it will
+        immediately stop dimming. Callback fires to set brightness back to normal."""
+        if self.__timer:
+            self.__timer.stop()
+
+        if self.__change_timer:
+            self.__change_timer.stop()
+
+        if self.timeout:
+            self.__timer = QTimer()
+            self.__timer.setSingleShot(True)
+            self.__timer.timeout.connect(partial(self.dim))
+            self.__timer.start(self.timeout * 1000)
+
+        if self.__dimmer_brightness != self.brightness:
+            self.brightness_callback(self.brightness)
+            self.__dimmer_brightness = self.brightness
+            return True
+
+        return False
+
+    def dim(self):
+        """ Move the brightness level down by one and schedule another dim event. """
+        if self.__dimmer_brightness:
+            self.__dimmer_brightness = self.__dimmer_brightness - 1
+            self.brightness_callback(self.__dimmer_brightness)
+            self.__change_timer = QTimer()
+            self.__change_timer.setSingleShot(True)
+            self.__change_timer.timeout.connect(partial(self.dim))
+            self.__change_timer.start(10)
+        else:
+            self.__change_timer = None
+
+
+dimmers: Dict[str, Dimmer] = {}
 
 
 class DraggableButton(QtWidgets.QToolButton):
@@ -51,6 +137,8 @@ class DraggableButton(QtWidgets.QToolButton):
 
         if e.buttons() != Qt.LeftButton:
             return
+
+        dimmers[_deck_id(self.ui)].reset()
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -85,6 +173,82 @@ class DraggableButton(QtWidgets.QToolButton):
 
     def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
         self.setStyleSheet(BUTTON_STYLE)
+
+
+def _replace_special_keys(key):
+    """Replaces special keywords the user can use with their character equivalent."""
+    if key.lower() == "plus":
+        return "+"
+    if key.lower() == "comma":
+        return ","
+    if key.lower() == "delay":
+        return "delay"
+    return key
+
+
+def handle_keypress(deck_id: str, key: int, state: bool) -> None:
+
+    if state:
+
+        if dimmers[deck_id].reset():
+            return
+
+        keyboard = Controller()
+        page = api.get_page(deck_id)
+
+        command = api.get_button_command(deck_id, page, key)
+        if command:
+            try:
+                Popen(shlex.split(command))
+            except Exception as error:
+                print(f"The command '{command}' failed: {error}")
+
+        keys = api.get_button_keys(deck_id, page, key)
+        if keys:
+            keys = keys.strip().replace(" ", "")
+            for section in keys.split(","):
+                # Since + and , are used to delimit our section and keys to press,
+                # they need to be substituded with keywords.
+                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+
+            # Translate string to enum, or just the string itself if not found
+            section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
+
+            for key_name in section_keys:
+                try:
+                    if key_name == "delay":
+                        time.sleep(0.5)
+                    else:
+                        keyboard.press(key_name)
+                except Exception:
+                    print(f"Could not press key '{key_name}'")
+
+            for key_name in section_keys:
+                try:
+                    if key_name != "delay":
+                        keyboard.release(key_name)
+                except Exception:
+                    print(f"Could not release key '{key_name}'")
+
+        write = api.get_button_write(deck_id, page, key)
+        if write:
+            try:
+                keyboard.type(write)
+            except Exception as error:
+                print(f"Could not complete the write command: {error}")
+
+        brightness_change = api.get_button_change_brightness(deck_id, page, key)
+        if brightness_change:
+            try:
+                api.change_brightness(deck_id, brightness_change)
+                dimmers[deck_id].brightness = api.get_brightness(deck_id)
+                dimmers[deck_id].reset()
+            except Exception as error:
+                print(f"Could not change brightness: {error}")
+
+        switch_page = api.get_button_switch_page(deck_id, page, key)
+        if switch_page:
+            api.set_page(deck_id, switch_page - 1)
 
 
 def _deck_id(ui) -> str:
@@ -133,9 +297,11 @@ def _highlight_first_button(ui) -> None:
 
 
 def change_page(ui, page: int) -> None:
-    api.set_page(_deck_id(ui), page)
+    deck_id = _deck_id(ui)
+    api.set_page(deck_id, page)
     redraw_buttons(ui)
     _highlight_first_button(ui)
+    dimmers[deck_id].reset()
 
 
 def select_image(window) -> None:
@@ -180,6 +346,8 @@ def redraw_buttons(ui) -> None:
 def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
+    dimmers[deck_id].brightness = value
+    dimmers[deck_id].reset()
 
 
 def button_clicked(ui, clicked_button, buttons) -> None:
@@ -199,6 +367,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+    dimmers[deck_id].reset()
 
 
 def build_buttons(ui, tab) -> None:
@@ -261,7 +430,6 @@ def import_config(window) -> None:
 
 def sync(ui) -> None:
     api.ensure_decks_connected()
-    ui.brightness.setValue(api.get_brightness(_deck_id(ui)))
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
 
@@ -316,6 +484,60 @@ def queue_text_change(ui, text: str) -> None:
     text_timer.start(500)
 
 
+def change_brightness(deck_id: str, brightness: int):
+    """Changes the brightness of the given streamdeck, but does not save
+    the state."""
+    api.decks[deck_id].set_brightness(brightness)
+
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ui = Ui_SettingsDialog()
+        self.ui.setupUi(self)
+        self.show()
+
+
+def show_settings(window) -> None:
+    """Shows the settings dialog and allows the user the change deck specific
+    settings. Settings are not saved until OK is clicked."""
+    ui = window.ui
+    deck_id = _deck_id(ui)
+    settings = SettingsDialog(window)
+    dimmers[deck_id].stop()
+
+    for label, value in dimmer_options.items():
+        settings.ui.dim.addItem(f"{label}", userData=value)
+
+    existing_timeout = api.get_display_timeout(deck_id)
+    existing_index = next(
+        (i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout),
+        None,
+    )
+
+    if existing_index is None:
+        settings.ui.dim.addItem(f"Custom: {existing_timeout}s", userData=existing_timeout)
+        existing_index = settings.ui.dim.count() - 1
+        settings.ui.dim.setCurrentIndex(existing_index)
+    else:
+        settings.ui.dim.setCurrentIndex(existing_index)
+
+    settings.ui.label_streamdeck.setText(deck_id)
+    settings.ui.brightness.setValue(api.get_brightness(deck_id))
+    settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
+    if settings.exec_():
+        # Commit changes
+        if existing_index != settings.ui.dim.currentIndex():
+            dimmers[deck_id].timeout = settings.ui.dim.currentData()
+            api.set_display_timeout(deck_id, settings.ui.dim.currentData())
+        set_brightness(window.ui, settings.ui.brightness.value())
+    else:
+        # User cancelled, reset to original brightness
+        change_brightness(deck_id, api.get_brightness(deck_id))
+
+    dimmers[deck_id].reset()
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -350,8 +572,10 @@ def start(_exit: bool = False) -> None:
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.brightness.valueChanged.connect(partial(set_brightness, ui))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
+    ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+
+    api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
     items = api.open_decks().items()
     if len(items) == 0:
@@ -362,6 +586,12 @@ def start(_exit: bool = False) -> None:
 
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+        dimmers[deck_id] = Dimmer(
+            api.get_display_timeout(deck_id),
+            api.get_brightness(deck_id),
+            partial(change_brightness, deck_id),
+        )
+        dimmers[deck_id].reset()
 
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))

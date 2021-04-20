@@ -16,6 +16,10 @@ OR
 
 Change log
 ==========
+## 1.1.0
+### Features
+- Automatically dim the display after a configurable amount of time.
+
 ## 1.0.7 - April 6, 2021
 ### Features
 - Drag and drop support for rearranging buttons around in UI.
