@@ -22,12 +22,12 @@ sudo apt install python3-pip
 ```
 
 Next, we will use the pip module installed in the previous step, to install pip for python 3.8. Yea I know, it's weird, installing pip with pip.
-```
+``` console
 python3.8 -m pip install pip
 ```
 
 Before we can run pip, we need to set
-```
+``` console
 PATH=$HOME/.local/bin:$PATH
 ```
 You should also add this to your .bashrc file.
