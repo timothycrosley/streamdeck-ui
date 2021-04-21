@@ -40,11 +40,11 @@ There are scripts for setting up streamdeck_ui on [Debian/Ubuntu](scripts/ubuntu
 To use streamdeck_ui on Linux, you will need first to install some prerequisite system libraries.
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
-```bash
+``` console
 sudo apt install python3-pip libhidapi-libusb0 libxcb-xinerama0
 ```
 Fedora:
-```bash
+``` console
 sudo dnf install python3-pip python3-devel hidapi
 ```
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
@@ -52,38 +52,38 @@ If you're using GNOME shell, you might need to manually install an extension tha
 To use streamdeck_ui without root permissions, you have to give your user full access to the device.
 
 Add the udev rules using your text editor:
-```bash
+``` console
 sudoedit /etc/udev/rules.d/70-streamdeck.rules
 # If that doesn't work, try:
 sudo nano /etc/udev/rules.d/70-streamdeck.rules
 ```
 Paste the following lines:
-```
+``` console
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
 ```
 Reload the rules:
-```
+``` console
 sudo udevadm control --reload-rules
 ```
 Make sure you unplug and replug your device before continuing.
 Once complete, you should be able to install streamdeck_ui.
 Installing the application itself is done via pip:
-```bash
+``` console
 pip3 install streamdeck-ui --user
 ```
 Make sure to include `$HOME/.local/bin` to your PATH.  
 If you haven't already, add
-```bash
+``` console
 PATH=$PATH:$HOME/.local/bin
 ```
 to the bottom your shell config file (most likely .bashrc in your home directory)
 
 You can then launch `streamdeck` to start configuring your device.
 
-```bash
+``` console
 streamdeck
 ```
 
@@ -94,7 +94,7 @@ It's recommended that you include `streamdeck` in your windowing environment's l
 On other Operating Systems, you'll need to install the required [dependencies](https://github.com/abcminiuser/python-elgato-streamdeck#package-dependencies) of the library.
 After that, use pip to install the app:
 
-```bash
+``` console
 pip3 install streamdeck-ui --user
 streamdeck
 ```
@@ -111,18 +111,18 @@ Enter a value in the command field to execute a command. For example, `gnome-ter
 You can use a tool like `xdotool` to interact with other applications.
 
 Find the window with a title starting with `Meet - ` and bring it to focus. This helps if you have a Google Meet session on a tab somewhere but you lost it behind another window. 
-```bash
+``` console
 xdotool search --name '^Meet - .+$' windowactivate 
 ```
 > The meeting tab must be active one if you have multiple tabs open, since the window title is set by the currently active tab.
 
 Find the window with a title starting with `Meet - ` and then send `ctrl+d` to it. This has the effect of toggling the mute button in Google Meet.
-```bash
+``` console
 xdotool search --name '^Meet - .+$' windowactivate --sync key ctrl+d
 ```
 
 Change the system volume up (or down) by a certain percentage. Assumes you're using PulseAudio/Alsa Mixer.
-```
+``` console
 amixer -D pulse sset Master 20%+
 ```
 ### Press Keys
