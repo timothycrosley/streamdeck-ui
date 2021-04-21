@@ -511,8 +511,7 @@ def show_settings(window) -> None:
 
     existing_timeout = api.get_display_timeout(deck_id)
     existing_index = next(
-        (i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout),
-        None,
+        (i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout), None
     )
 
     if existing_index is None:
