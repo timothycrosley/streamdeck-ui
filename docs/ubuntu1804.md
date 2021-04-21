@@ -46,10 +46,17 @@ pip3.8 install streamdeck-ui --user
 We need configure the USB device to be accessible by the currently logged in user, when it is attached:
 ``` console
 sudo nano /etc/udev/rules.d/70-streamdeck.rules
+```
+Paste the following lines:
+``` console
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
+```
+Reload the rules:
+``` console
+sudo udevadm control --reload-rules
 ```
 Remove and plug your Stream Deck in.
 ``` console
