@@ -72,7 +72,7 @@ Make sure you unplug and replug your device before continuing.
 Once complete, you should be able to install streamdeck_ui.
 Installing the application itself is done via pip:
 ```bash
-pip3 install --user streamdeck_ui
+pip3 install streamdeck-ui --user
 ```
 Make sure to include `$HOME/.local/bin` to your PATH.  
 If you haven't already, add
@@ -95,11 +95,13 @@ On other Operating Systems, you'll need to install the required [dependencies](h
 After that, use pip to install the app:
 
 ```bash
-pip3 install streamdeck_ui --user
+pip3 install streamdeck-ui --user
 streamdeck
 ```
 
-See the guide for [CentOS 7](docs/centos.md)
+See the guide for
+* [CentOS 7](docs/centos.md)
+* [Ubuntu 18.04](docs/ubuntu1804.md)
 
 ## Help
 ### Command
