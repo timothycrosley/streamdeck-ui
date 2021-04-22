@@ -16,7 +16,15 @@ OR
 
 Change log
 ==========
-## 1.1.0
+## 1.1.1 
+### Features
+- Open main window from tray with Configure... menu item.
+- Dim the display from tray.
+### Fixes
+- On exit, reset the display to 50% brightness.
+- Documentation for Ubuntu 18.04 added.
+
+## 1.1.0 - April 20, 2021
 ### Features
 - Automatically dim the display after a configurable amount of time.
 
