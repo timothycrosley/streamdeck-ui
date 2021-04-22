@@ -58,8 +58,8 @@ dimmer_options = {
 
 class Dimmer:
     timeout = 0
-    brightness = 0
-    __dimmer_brightness = 0
+    brightness = -1
+    __dimmer_brightness = -1
     __timer = None
     __change_timer = None
 
@@ -84,6 +84,7 @@ class Dimmer:
         if self.__change_timer:
             self.__change_timer.stop()
 
+        self.__dimmer_brightness = self.brightness
         self.brightness_callback(self.brightness)
 
     def reset(self) -> bool:
@@ -98,7 +99,7 @@ class Dimmer:
         if self.timeout:
             self.__timer = QTimer()
             self.__timer.setSingleShot(True)
-            self.__timer.timeout.connect(partial(self.dim))
+            self.__timer.timeout.connect(partial(self.change_brightness))
             self.__timer.start(self.timeout * 1000)
 
         if self.__dimmer_brightness != self.brightness:
@@ -109,13 +110,25 @@ class Dimmer:
         return False
 
     def dim(self):
+        """ Manually initiate a dim event, if the dimmer is currently active.
+            If the dimmer is not running, this has no effect. """
+        if self.__timer and self.__timer.isActive():
+            # No need for the timer anymore, stop it
+            self.__timer.stop()
+
+            # Verify that we're not already at the target brightness nor
+            # busy with dimming already
+            if self.__change_timer is None and self.__dimmer_brightness:
+                self.change_brightness()
+
+    def change_brightness(self):
         """ Move the brightness level down by one and schedule another dim event. """
         if self.__dimmer_brightness:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
             self.__change_timer = QTimer()
             self.__change_timer.setSingleShot(True)
-            self.__change_timer.timeout.connect(partial(self.dim))
+            self.__change_timer.timeout.connect(partial(self.change_brightness))
             self.__change_timer.start(10)
         else:
             self.__change_timer = None
@@ -537,6 +550,11 @@ def show_settings(window) -> None:
     dimmers[deck_id].reset()
 
 
+def dim_all_displays() -> None:
+    for _deck_id, dimmer in dimmers.items():
+        dimmer.dim()
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -558,6 +576,13 @@ def start(_exit: bool = False) -> None:
     tray.activated.connect(main_window.systray_clicked)
 
     menu = QMenu()
+    action_dim = QAction("Dim display")
+    action_dim.triggered.connect(dim_all_displays)
+    action_configure = QAction("Configure...")
+    action_configure.triggered.connect(main_window.show)
+    menu.addAction(action_dim)
+    menu.addAction(action_configure)
+    menu.addSeparator()
     action_exit = QAction("Exit")
     action_exit.triggered.connect(app.exit)
     menu.addAction(action_exit)

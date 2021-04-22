@@ -129,6 +129,7 @@ def close_decks() -> None:
     """Closes open decks for input/ouput."""
     for _deck_serial, deck in decks.items():
         if deck.connected():
+            deck.set_brightness(50)
             deck.reset()
             deck.close()
 
