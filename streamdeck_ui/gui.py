@@ -474,14 +474,17 @@ class MainWindow(QMainWindow):
         event.ignore()
 
     def systray_clicked(self, _status=None) -> None:
-        self.hide()
         if self.window_shown:
+            self.hide()
             self.window_shown = False
             return
 
+        self.bring_to_top()
+
+    def bring_to_top(self):
         self.show()
         self.activateWindow()
-        getattr(self, "raise")()  # noqa: B009 - Can't call as self.raise() due to syntax error.
+        self.raise_()
         self.window_shown = True
 
 
@@ -579,7 +582,7 @@ def start(_exit: bool = False) -> None:
     action_dim = QAction("Dim display")
     action_dim.triggered.connect(dim_all_displays)
     action_configure = QAction("Configure...")
-    action_configure.triggered.connect(main_window.show)
+    action_configure.triggered.connect(main_window.bring_to_top)
     menu.addAction(action_dim)
     menu.addAction(action_configure)
     menu.addSeparator()
