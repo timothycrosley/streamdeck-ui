@@ -59,6 +59,7 @@ dimmer_options = {
 class Dimmer:
     timeout = 0
     brightness = -1
+    __stopped = False
     __dimmer_brightness = -1
     __timer = None
     __change_timer = None
@@ -86,10 +87,13 @@ class Dimmer:
 
         self.__dimmer_brightness = self.brightness
         self.brightness_callback(self.brightness)
+        self.__stopped = True
 
     def reset(self) -> bool:
         """ Reset the dimmer and start counting down again. If it was busy dimming, it will
         immediately stop dimming. Callback fires to set brightness back to normal."""
+
+        self.__stopped = False
         if self.__timer:
             self.__timer.stop()
 
@@ -109,10 +113,16 @@ class Dimmer:
 
         return False
 
-    def dim(self):
-        """ Manually initiate a dim event, if the dimmer is currently active.
-            If the dimmer is not running, this has no effect. """
-        if self.__timer and self.__timer.isActive():
+    def dim(self, toggle: bool = False):
+        """ Manually initiate a dim event.
+            If the dimmer is stopped, this has no effect. """
+
+        if self.__stopped:
+            return
+
+        if toggle and self.__dimmer_brightness == 0:
+            self.reset()
+        elif self.__timer and self.__timer.isActive():
             # No need for the timer anymore, stop it
             self.__timer.stop()
 
@@ -122,7 +132,7 @@ class Dimmer:
                 self.change_brightness()
 
     def change_brightness(self):
-        """ Move the brightness level down by one and schedule another dim event. """
+        """ Move the brightness level down by one and schedule another change_brightness event. """
         if self.__dimmer_brightness:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
@@ -555,7 +565,7 @@ def show_settings(window) -> None:
 
 def dim_all_displays() -> None:
     for _deck_id, dimmer in dimmers.items():
-        dimmer.dim()
+        dimmer.dim(True)
 
 
 def start(_exit: bool = False) -> None:
@@ -579,7 +589,7 @@ def start(_exit: bool = False) -> None:
     tray.activated.connect(main_window.systray_clicked)
 
     menu = QMenu()
-    action_dim = QAction("Dim display")
+    action_dim = QAction("Dim display (toggle)")
     action_dim.triggered.connect(dim_all_displays)
     action_configure = QAction("Configure...")
     action_configure.triggered.connect(main_window.bring_to_top)
