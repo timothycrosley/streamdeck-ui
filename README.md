@@ -129,16 +129,20 @@ amixer -D pulse sset Master 20%+
 Simulates key press combinations (hot keys). The basic format is a group of keys, separated by a `+` sign to press simultaneously. Separate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
 > Use `comma` or `plus` if you want to actually *output* `,` or `+` respectively.
-> Use `delay` to add a short (0.5 seconds) delay. 
+> 
+> Use `delay <n>` to add a delay, where `<n>` is the number (float or integer) of seconds to delay. If `<n>` is not specified, 0.5 second default is used. If `<n>` fails to parse as a valid number, it will result in no delay.
+> 
 
 #### Examples
-- `F11` - Press F11. If you have focus on a browser this will toggle full screen.
+- `F11` - Press F11. If you have focus on a browser, this will toggle full screen.
 - `alt+F4` - Closes the current window.
 - `ctrl+w` - Closes the current browser tab.
 - `cmd+left` - View split on left. Note `cmd` is the **super** key (equivalent of the Windows key).
 - `alt+plus` - Presses the alt and the `+` key at the same time.
 - `alt+delay+F4` - Press alt, then wait 0.5 seconds, then press F4. Release both.
-- `1,delay,delay,2,delay,delay,3` - Type 123 with a second delay between key presses.
+- `1,delay,delay,2,delay,delay,3` - Type 123 with a 1-second delay between key presses (using default delay).
+- `1,delay 1,2,delay 1,3` - Type 123 with a 1-second delay between key presses (using custom delay).
+
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 
