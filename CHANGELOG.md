@@ -20,6 +20,7 @@ Change log
 ### Features
 - Open main window from tray with Configure... menu item.
 - Dim the display from tray.
+- Supports variable delay duration in Key press action.
 ### Fixes
 - On exit, reset the display to 50% brightness.
 - Documentation for Ubuntu 18.04 added.
