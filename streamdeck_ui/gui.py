@@ -223,9 +223,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                             try:
                                 sleep_time = float(sleep_time)
                             except Exception:
-                                print(
-                                    f"Not sleeping, could not convert sleep time to float '{sleep_time}'"
-                                )
+                                print(f"Could not convert sleep time to float '{sleep_time}'")
                                 sleep_time = None
                         else:
                             # default if not specified
@@ -235,9 +233,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                             try:
                                 time.sleep(sleep_time)
                             except Exception:
-                                print(
-                                    f"Not sleeping, could not sleep with provided sleep time '{sleep_time}'"
-                                )
+                                print(f"Could not sleep with provided sleep time '{sleep_time}'")
                     else:
                         try:
                             keyboard.press(key_name)
