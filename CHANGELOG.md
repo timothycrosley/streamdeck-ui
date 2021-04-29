@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 1.1.1 
+## 1.1.1 - April 29, 2021
 ### Features
 - Open main window from tray with Configure... menu item.
 - Dim the display from tray.
