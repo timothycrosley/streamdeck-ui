@@ -58,8 +58,9 @@ dimmer_options = {
 
 class Dimmer:
     timeout = 0
-    brightness = 0
-    __dimmer_brightness = 0
+    brightness = -1
+    __stopped = False
+    __dimmer_brightness = -1
     __timer = None
     __change_timer = None
 
@@ -84,11 +85,15 @@ class Dimmer:
         if self.__change_timer:
             self.__change_timer.stop()
 
+        self.__dimmer_brightness = self.brightness
         self.brightness_callback(self.brightness)
+        self.__stopped = True
 
     def reset(self) -> bool:
         """ Reset the dimmer and start counting down again. If it was busy dimming, it will
         immediately stop dimming. Callback fires to set brightness back to normal."""
+
+        self.__stopped = False
         if self.__timer:
             self.__timer.stop()
 
@@ -98,7 +103,7 @@ class Dimmer:
         if self.timeout:
             self.__timer = QTimer()
             self.__timer.setSingleShot(True)
-            self.__timer.timeout.connect(partial(self.dim))
+            self.__timer.timeout.connect(partial(self.change_brightness))
             self.__timer.start(self.timeout * 1000)
 
         if self.__dimmer_brightness != self.brightness:
@@ -108,14 +113,32 @@ class Dimmer:
 
         return False
 
-    def dim(self):
-        """ Move the brightness level down by one and schedule another dim event. """
+    def dim(self, toggle: bool = False):
+        """ Manually initiate a dim event.
+            If the dimmer is stopped, this has no effect. """
+
+        if self.__stopped:
+            return
+
+        if toggle and self.__dimmer_brightness == 0:
+            self.reset()
+        elif self.__timer and self.__timer.isActive():
+            # No need for the timer anymore, stop it
+            self.__timer.stop()
+
+            # Verify that we're not already at the target brightness nor
+            # busy with dimming already
+            if self.__change_timer is None and self.__dimmer_brightness:
+                self.change_brightness()
+
+    def change_brightness(self):
+        """ Move the brightness level down by one and schedule another change_brightness event. """
         if self.__dimmer_brightness:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
             self.__change_timer = QTimer()
             self.__change_timer.setSingleShot(True)
-            self.__change_timer.timeout.connect(partial(self.dim))
+            self.__change_timer.timeout.connect(partial(self.change_brightness))
             self.__change_timer.start(10)
         else:
             self.__change_timer = None
@@ -478,14 +501,17 @@ class MainWindow(QMainWindow):
         event.ignore()
 
     def systray_clicked(self, _status=None) -> None:
-        self.hide()
         if self.window_shown:
+            self.hide()
             self.window_shown = False
             return
 
+        self.bring_to_top()
+
+    def bring_to_top(self):
         self.show()
         self.activateWindow()
-        getattr(self, "raise")()  # noqa: B009 - Can't call as self.raise() due to syntax error.
+        self.raise_()
         self.window_shown = True
 
 
@@ -554,6 +580,11 @@ def show_settings(window) -> None:
     dimmers[deck_id].reset()
 
 
+def dim_all_displays() -> None:
+    for _deck_id, dimmer in dimmers.items():
+        dimmer.dim(True)
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -575,6 +606,13 @@ def start(_exit: bool = False) -> None:
     tray.activated.connect(main_window.systray_clicked)
 
     menu = QMenu()
+    action_dim = QAction("Dim display (toggle)")
+    action_dim.triggered.connect(dim_all_displays)
+    action_configure = QAction("Configure...")
+    action_configure.triggered.connect(main_window.bring_to_top)
+    menu.addAction(action_dim)
+    menu.addAction(action_configure)
+    menu.addSeparator()
     action_exit = QAction("Exit")
     action_exit.triggered.connect(app.exit)
     menu.addAction(action_exit)
