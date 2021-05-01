@@ -240,7 +240,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                 ]
 
                 for key_name in section_keys:
-                    if key_name.startswith("delay"):
+                    if isinstance(key_name, str) and key_name.startswith("delay"):
                         sleep_time = key_name.split("delay", 1)[1]
                         if sleep_time:
                             try:
@@ -264,7 +264,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                             print(f"Could not press key '{key_name}'")
 
                 for key_name in section_keys:
-                    if not key_name.startswith("delay"):
+                    if isinstance(key_name, str) and not key_name.startswith("delay"):
                         try:
                             keyboard.release(key_name)
                         except Exception:

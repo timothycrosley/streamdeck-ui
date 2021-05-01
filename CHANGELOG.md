@@ -16,6 +16,9 @@ OR
 
 Change log
 ==========
+## 1.1.2 - April 30, 2021
+### Fixes
+- Regression with multi-character keys
 ## 1.1.1 - April 29, 2021
 ### Features
 - Open main window from tray with Configure... menu item.
