@@ -241,13 +241,13 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
                 for key_name in section_keys:
                     if isinstance(key_name, str) and key_name.startswith("delay"):
-                        sleep_time = key_name.split("delay", 1)[1]
-                        if sleep_time:
+                        sleep_time_arg = key_name.split("delay", 1)[1]
+                        if sleep_time_arg:
                             try:
-                                sleep_time = float(sleep_time)
+                                sleep_time = float(sleep_time_arg)
                             except Exception:
-                                print(f"Could not convert sleep time to float '{sleep_time}'")
-                                sleep_time = None
+                                print(f"Could not convert sleep time to float '{sleep_time_arg}'")
+                                sleep_time = 0
                         else:
                             # default if not specified
                             sleep_time = 0.5
@@ -264,7 +264,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                             print(f"Could not press key '{key_name}'")
 
                 for key_name in section_keys:
-                    if isinstance(key_name, str) and not key_name.startswith("delay"):
+                    if not (isinstance(key_name, str) and key_name.startswith("delay")):
                         try:
                             keyboard.release(key_name)
                         except Exception:
