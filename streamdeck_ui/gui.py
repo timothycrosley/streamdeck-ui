@@ -287,8 +287,9 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                 print(f"Could not change brightness: {error}")
 
         switch_page = api.get_button_switch_page(deck_id, page, key)
+        target_device = api.get_target_device(deck_id, page, key)
         if switch_page:
-            api.set_page(deck_id, switch_page - 1)
+            api.set_page(target_device, switch_page - 1)
 
 
 def _deck_id(ui) -> str:
@@ -328,6 +329,11 @@ def update_change_brightness(ui, amount: int) -> None:
 def update_switch_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
     api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
+
+
+def update_target_device(ui, target_device_id: str) -> None:
+    deck_id = _deck_id(ui)
+    api.set_target_device(deck_id, _page(ui), selected_button.index, target_device_id)
 
 
 def _highlight_first_button(ui) -> None:
@@ -407,6 +413,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+    ui.target_device.setCurrentText(api.get_target_device(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
 
 
@@ -640,6 +647,7 @@ def start(_exit: bool = False) -> None:
 
     for deck_id, deck in items:
         ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+        ui.target_device.addItem(deck_id)
         dimmers[deck_id] = Dimmer(
             api.get_display_timeout(deck_id),
             api.get_brightness(deck_id),
@@ -649,6 +657,8 @@ def start(_exit: bool = False) -> None:
 
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
+
+    ui.target_device.currentTextChanged.connect(partial(update_target_device, ui))
 
     ui.pages.currentChanged.connect(partial(change_page, ui))
 

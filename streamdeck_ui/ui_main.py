@@ -8,11 +8,12 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
-from  . import resources_rc
+from . import resources_rc
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -64,7 +65,6 @@ class Ui_MainWindow(object):
         self.settingsButton.setIcon(icon)
 
         self.deviceSettings_horizontalLayout.addWidget(self.settingsButton)
-
 
         self.left_verticalLayout.addLayout(self.deviceSettings_horizontalLayout)
 
@@ -170,7 +170,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.removeButton)
 
-
         self.formLayout.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_2)
 
         self.label_2 = QLabel(self.groupBox)
@@ -203,6 +202,7 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
 
+        # switch page
         self.label_8 = QLabel(self.groupBox)
         self.label_8.setObjectName(u"label_8")
 
@@ -216,36 +216,45 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(4, QFormLayout.FieldRole, self.switch_page)
 
+        # target device
+        self.targetDevice = QLabel(self.groupBox)
+        self.targetDevice.setObjectName(u"label_9")
+
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.targetDevice)
+
+        self.target_device = QComboBox(self.groupBox)
+        self.target_device.setObjectName(u"target_device")
+
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.target_device)
+
+        # change brightness
         self.label_7 = QLabel(self.groupBox)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_7)
 
         self.change_brightness = QSpinBox(self.groupBox)
         self.change_brightness.setObjectName(u"change_brightness")
         self.change_brightness.setMinimum(-99)
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.change_brightness)
 
+        # write text
         self.label_6 = QLabel(self.groupBox)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(self.groupBox)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
-
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.write)
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
-
         self.right_horizontalLayout.addWidget(self.groupBox)
 
-
         self.main_horizontalLayout.addLayout(self.right_horizontalLayout)
-
 
         self.verticalLayout_2.addLayout(self.main_horizontalLayout)
 
@@ -270,8 +279,8 @@ class Ui_MainWindow(object):
 
         self.pages.setCurrentIndex(0)
 
-
         QMetaObject.connectSlotsByName(MainWindow)
+
     # setupUi
 
     def retranslateUi(self, MainWindow):
@@ -280,29 +289,55 @@ class Ui_MainWindow(object):
         self.actionExport.setText(QCoreApplication.translate("MainWindow", u"Export", None))
         self.actionExit.setText(QCoreApplication.translate("MainWindow", u"Exit", None))
         self.settingsButton.setText("")
-        self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"Page 1", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_2), QCoreApplication.translate("MainWindow", u"2", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_3), QCoreApplication.translate("MainWindow", u"3", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_4), QCoreApplication.translate("MainWindow", u"4", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_5), QCoreApplication.translate("MainWindow", u"5", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_6), QCoreApplication.translate("MainWindow", u"6", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_7), QCoreApplication.translate("MainWindow", u"7", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_8), QCoreApplication.translate("MainWindow", u"8", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_9), QCoreApplication.translate("MainWindow", u"9", None))
-        self.pages.setTabText(self.pages.indexOf(self.tab_10), QCoreApplication.translate("MainWindow", u"10", None))
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_1),
+            QCoreApplication.translate("MainWindow", u"Page 1", None),
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_2), QCoreApplication.translate("MainWindow", u"2", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_3), QCoreApplication.translate("MainWindow", u"3", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_4), QCoreApplication.translate("MainWindow", u"4", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_5), QCoreApplication.translate("MainWindow", u"5", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_6), QCoreApplication.translate("MainWindow", u"6", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_7), QCoreApplication.translate("MainWindow", u"7", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_8), QCoreApplication.translate("MainWindow", u"8", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.page_9), QCoreApplication.translate("MainWindow", u"9", None)
+        )
+        self.pages.setTabText(
+            self.pages.indexOf(self.tab_10), QCoreApplication.translate("MainWindow", u"10", None)
+        )
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Configure Button", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Image:", None))
         self.imageButton.setText(QCoreApplication.translate("MainWindow", u"Image...", None))
-#if QT_CONFIG(tooltip)
-        self.removeButton.setToolTip(QCoreApplication.translate("MainWindow", u"Remove the image from the button", None))
-#endif // QT_CONFIG(tooltip)
+        # if QT_CONFIG(tooltip)
+        self.removeButton.setToolTip(
+            QCoreApplication.translate("MainWindow", u"Remove the image from the button", None)
+        )
+        # endif // QT_CONFIG(tooltip)
         self.removeButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
+
+        self.targetDevice.setText(QCoreApplication.translate("MainWindow", u"Target Device:", None))
+
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
-    # retranslateUi
 
+    # retranslateUi

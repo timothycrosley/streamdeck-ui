@@ -8,11 +8,12 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *  # type: ignore
+from PySide2.QtGui import *  # type: ignore
+from PySide2.QtWidgets import *  # type: ignore
 
-from  . import resources_rc
+from . import resources_rc
+
 
 class Ui_SettingsDialog(object):
     def setupUi(self, SettingsDialog):
@@ -68,34 +69,38 @@ class Ui_SettingsDialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dim)
 
-
         self.verticalLayout_2.addLayout(self.formLayout)
-
 
         self.verticalLayout.addLayout(self.verticalLayout_2)
 
         self.buttonBox = QDialogButtonBox(SettingsDialog)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(False)
 
         self.verticalLayout.addWidget(self.buttonBox)
-
 
         self.retranslateUi(SettingsDialog)
         self.buttonBox.accepted.connect(SettingsDialog.accept)
         self.buttonBox.rejected.connect(SettingsDialog.reject)
 
         QMetaObject.connectSlotsByName(SettingsDialog)
+
     # setupUi
 
     def retranslateUi(self, SettingsDialog):
-        SettingsDialog.setWindowTitle(QCoreApplication.translate("SettingsDialog", u"Stream Deck Settings", None))
+        SettingsDialog.setWindowTitle(
+            QCoreApplication.translate("SettingsDialog", u"Stream Deck Settings", None)
+        )
         self.label.setText(QCoreApplication.translate("SettingsDialog", u"Stream Deck:", None))
         self.label_streamdeck.setText("")
-        self.label_brightness.setText(QCoreApplication.translate("SettingsDialog", u"Brightness:", None))
-        self.label_dim.setText(QCoreApplication.translate("SettingsDialog", u"Auto dim after:", None))
+        self.label_brightness.setText(
+            QCoreApplication.translate("SettingsDialog", u"Brightness:", None)
+        )
+        self.label_dim.setText(
+            QCoreApplication.translate("SettingsDialog", u"Auto dim after:", None)
+        )
         self.dim.setCurrentText("")
-    # retranslateUi
 
+    # retranslateUi
