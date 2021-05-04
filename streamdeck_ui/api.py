@@ -192,6 +192,19 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _save_state()
 
 
+def get_target_device(deck_id: str, page: int, button: int) -> str:
+    """Gets the target device for the page change"""
+    return _button_state(deck_id, page, button).get("target_device", deck_id)
+
+
+def set_target_device(deck_id: str, page: int, button: int, target_device_id: str) -> None:
+    """Sets the target device for the page change"""
+    if get_target_device(deck_id, page, button) != target_device_id:
+        _button_state(deck_id, page, button)["target_device"] = target_device_id
+        render()
+        _save_state()
+
+
 def get_button_icon(deck_id: str, page: int, button: int) -> str:
     """Returns the icon set for a particular button"""
     return _button_state(deck_id, page, button).get("icon", "")
