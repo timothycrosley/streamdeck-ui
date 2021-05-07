@@ -23,6 +23,7 @@ state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = 
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
 
+
 class DataModel:
     image = ""
     text = ""
@@ -33,13 +34,8 @@ class DataModel:
     brightness = ""
     writeText = ""
 
+
 paste_cache: Dict[str, str] = {}
-
-class KeySignalEmitter(QObject):
-    key_pressed = Signal(str, int, bool)
-
-
-streamdesk_keys = KeySignalEmitter()
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
