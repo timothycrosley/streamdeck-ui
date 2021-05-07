@@ -24,6 +24,13 @@ streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
 
 
+class KeySignalEmitter(QObject):
+    key_pressed = Signal(str, int, bool)
+
+
+streamdesk_keys = KeySignalEmitter()
+
+
 class DataModel:
     image = ""
     text = ""
