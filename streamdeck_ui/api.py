@@ -315,6 +315,15 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     _save_state()
 
 
+def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
+    render()
+    _save_state()
+
+
+def edit_menu_paste_button(deck_id: str, page: int, button: int) -> None:
+    render()
+    _save_state()
+
 
 def render() -> None:
     """renders all decks"""
