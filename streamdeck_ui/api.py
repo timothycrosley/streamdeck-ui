@@ -302,6 +302,20 @@ def set_page(deck_id: str, page: int) -> None:
         _save_state()
 
 
+def edit_delete_button(deck_id: str, page: int, button: int) -> None:
+    set_button_text(deck_id, page, button, "")
+    set_button_command(deck_id, page, button, "")
+    set_button_keys(deck_id, page, button, "")
+    set_button_write(deck_id, page, button, "")
+    set_button_switch_page(deck_id, page, button, 0)
+    set_button_change_brightness(deck_id, page, button, 0)
+    set_button_icon(deck_id, page, button, "")
+    set_target_device(deck_id, page, button, "")
+    render()
+    _save_state()
+
+
+
 def render() -> None:
     """renders all decks"""
     for deck_id, deck_state in state.items():

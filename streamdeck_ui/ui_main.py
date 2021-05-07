@@ -20,7 +20,15 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(901, 489)
+
+        self.actionDelete = QAction(MainWindow)
+        self.actionDelete.setObjectName(u"actionDelete")
+        self.actionCopy = QAction(MainWindow)
+        self.actionCopy.setObjectName(u"actionCopy")
+        self.actionPaste = QAction(MainWindow)
+        self.actionPaste.setObjectName(u"actionPaste")
         self.actionImport = QAction(MainWindow)
+
         self.actionImport.setObjectName(u"actionImport")
         self.actionExport = QAction(MainWindow)
         self.actionExport.setObjectName(u"actionExport")
@@ -275,6 +283,14 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
 
+        self.menuEdit = QMenu(self.menubar)
+        self.menuEdit.setObjectName(u"menuEdit")
+        self.menubar.addAction(self.menuEdit.menuAction())
+        self.menuEdit.addAction(self.actionCopy)
+        self.menuEdit.addAction(self.actionPaste)
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionDelete)
+
         self.retranslateUi(MainWindow)
 
         self.pages.setCurrentIndex(0)
@@ -339,5 +355,10 @@ class Ui_MainWindow(object):
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
+
+        self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
+        self.actionDelete.setText(QCoreApplication.translate("MainWindow", u"Delete Button", None))
+        self.actionCopy.setText(QCoreApplication.translate("MainWindow", u"Copy Button", None))
+        self.actionPaste.setText(QCoreApplication.translate("MainWindow", u"Paste Button", None))
 
     # retranslateUi
