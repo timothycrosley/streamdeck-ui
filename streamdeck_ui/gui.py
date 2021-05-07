@@ -481,6 +481,21 @@ def import_config(window) -> None:
     redraw_buttons(window.ui)
 
 
+def copy_button(window) -> None:
+    redraw_buttons(window.ui)
+
+
+def paste_button(window) -> None:
+    redraw_buttons(window.ui)
+
+
+def delete_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_delete_button(deck_id, _page(window.ui), selected_button.index)
+    redraw_buttons(window.ui)
+    _highlight_first_button(window.ui)
+
+
 def sync(ui) -> None:
     api.ensure_decks_connected()
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
@@ -670,6 +685,11 @@ def start(_exit: bool = False) -> None:
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
+
+    ui.actionCopy.triggered.connect(partial(copy_button, main_window))
+    ui.actionPaste.triggered.connect(partial(paste_button, main_window))
+    ui.actionDelete.triggered.connect(partial(delete_button, main_window))
+
     ui.actionExit.triggered.connect(app.exit)
 
     timer = QTimer()
