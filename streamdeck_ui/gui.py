@@ -485,7 +485,7 @@ def paste_button(window) -> None:
 
 def delete_button(window) -> None:
     deck_id = _deck_id(window.ui)
-    api.edit_delete_button(deck_id, _page(window.ui), selected_button.index)
+    api.edit_menu_delete_button(deck_id, _page(window.ui), selected_button.index)
     redraw_buttons(window.ui)
     _highlight_first_button(window.ui)
 
