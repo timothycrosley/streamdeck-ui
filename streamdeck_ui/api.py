@@ -302,7 +302,7 @@ def set_page(deck_id: str, page: int) -> None:
         _save_state()
 
 
-def edit_delete_button(deck_id: str, page: int, button: int) -> None:
+def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     set_button_text(deck_id, page, button, "")
     set_button_command(deck_id, page, button, "")
     set_button_keys(deck_id, page, button, "")
