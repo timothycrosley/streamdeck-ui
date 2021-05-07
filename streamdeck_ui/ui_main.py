@@ -23,12 +23,16 @@ class Ui_MainWindow(object):
 
         self.actionDelete = QAction(MainWindow)
         self.actionDelete.setObjectName(u"actionDelete")
+        self.actionCut = QAction(MainWindow)
+        self.actionCut.setObjectName(u"actionCut")
         self.actionCopy = QAction(MainWindow)
         self.actionCopy.setObjectName(u"actionCopy")
         self.actionPaste = QAction(MainWindow)
         self.actionPaste.setObjectName(u"actionPaste")
-        self.actionImport = QAction(MainWindow)
+        self.actionMultiPaste = QAction(MainWindow)
+        self.actionMultiPaste.setObjectName(u"actionMultiPaste")
 
+        self.actionImport = QAction(MainWindow)
         self.actionImport.setObjectName(u"actionImport")
         self.actionExport = QAction(MainWindow)
         self.actionExport.setObjectName(u"actionExport")
@@ -286,10 +290,12 @@ class Ui_MainWindow(object):
         self.menuEdit = QMenu(self.menubar)
         self.menuEdit.setObjectName(u"menuEdit")
         self.menubar.addAction(self.menuEdit.menuAction())
+        self.menuEdit.addAction(self.actionCut)
         self.menuEdit.addAction(self.actionCopy)
         self.menuEdit.addAction(self.actionPaste)
-        self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionDelete)
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionMultiPaste)
 
         self.retranslateUi(MainWindow)
 
@@ -358,7 +364,9 @@ class Ui_MainWindow(object):
 
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
         self.actionDelete.setText(QCoreApplication.translate("MainWindow", u"Delete Button", None))
+        self.actionCut.setText(QCoreApplication.translate("MainWindow", u"Cut Button", None))
         self.actionCopy.setText(QCoreApplication.translate("MainWindow", u"Copy Button", None))
         self.actionPaste.setText(QCoreApplication.translate("MainWindow", u"Paste Button", None))
+        self.actionMultiPaste.setText(QCoreApplication.translate("MainWindow", u"Multi Paste Disabled", None))
 
     # retranslateUi
