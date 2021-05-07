@@ -482,10 +482,14 @@ def import_config(window) -> None:
 
 
 def copy_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_copy_button(deck_id, _page(window.ui), selected_button.index)
     redraw_buttons(window.ui)
 
 
 def paste_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_paste_button(deck_id, _page(window.ui), selected_button.index)
     redraw_buttons(window.ui)
 
 
