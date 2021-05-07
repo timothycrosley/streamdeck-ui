@@ -7,7 +7,7 @@ from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Callable, Dict
 
-from pynput.keyboard import Controller, Key, Listener
+from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
 from PySide2.QtGui import QDrag, QIcon
@@ -681,6 +681,8 @@ def start(_exit: bool = False) -> None:
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+
+    api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
     items = api.open_decks().items()
     if len(items) == 0:
