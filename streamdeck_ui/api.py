@@ -3,9 +3,9 @@ import json
 import os
 import threading
 import tkinter
+from functools import partial
 from tkinter import filedialog
 from tkinter import messagebox as mb
-from functools import partial
 from typing import Dict, Tuple, Union, cast
 from warnings import warn
 
@@ -380,7 +380,7 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
         if mb.showerror("Paste Error", "There is nothing to paste."):
             return
 
-    if mb.askyesno('Paste Here ?', 'Do you want to replace this current button ?'):
+    if mb.askyesno("Paste Here ?", "Do you want to replace this current button ?"):
         set_button_text(deck_id, page, button, paste_cache.text)
         set_button_icon(deck_id, page, button, paste_cache.image)
         set_button_command(deck_id, page, button, paste_cache.command)
