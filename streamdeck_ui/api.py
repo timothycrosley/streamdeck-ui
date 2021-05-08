@@ -2,6 +2,9 @@
 import json
 import os
 import threading
+import tkinter
+from tkinter import filedialog
+from tkinter import messagebox as mb
 from functools import partial
 from typing import Dict, Tuple, Union, cast
 from warnings import warn
@@ -26,6 +29,20 @@ class KeySignalEmitter(QObject):
 
 
 streamdesk_keys = KeySignalEmitter()
+
+
+class DataModel:
+    image = ""
+    text = ""
+    command = ""
+    pressKey = ""
+    switchKeys = ""
+    targetDevice = ""
+    brightness = ""
+    writeText = ""
+
+
+paste_cache: Dict[str, str] = {}
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
@@ -300,6 +317,93 @@ def set_page(deck_id: str, page: int) -> None:
         state.setdefault(deck_id, {})["page"] = page
         render()
         _save_state()
+
+
+def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
+    set_button_text(deck_id, page, button, "")
+    set_button_command(deck_id, page, button, "")
+    set_button_keys(deck_id, page, button, "")
+    set_button_write(deck_id, page, button, "")
+    set_button_switch_page(deck_id, page, button, 0)
+    set_button_change_brightness(deck_id, page, button, 0)
+    set_button_icon(deck_id, page, button, "")
+    set_target_device(deck_id, page, button, "")
+    render()
+    _save_state()
+
+
+def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
+    global paste_cache
+
+    paste_cache = DataModel
+    paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.image = get_button_icon(deck_id, page, button)
+    paste_cache.command = get_button_command(deck_id, page, button)
+    paste_cache.pressKey = get_button_keys(deck_id, page, button)
+    paste_cache.switchKeys = get_button_switch_page(deck_id, page, button)
+    paste_cache.targetDevice = get_target_device(deck_id, page, button)
+    paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
+    paste_cache.writeText = get_button_write(deck_id, page, button)
+
+    render()
+    _save_state()
+
+
+def edit_menu_cut_button(deck_id: str, page: int, button: int) -> None:
+    global paste_cache
+
+    paste_cache = DataModel
+    paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.image = get_button_icon(deck_id, page, button)
+    paste_cache.command = get_button_command(deck_id, page, button)
+    paste_cache.pressKey = get_button_keys(deck_id, page, button)
+    paste_cache.switchKeys = get_button_switch_page(deck_id, page, button)
+    paste_cache.targetDevice = get_target_device(deck_id, page, button)
+    paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
+    paste_cache.writeText = get_button_write(deck_id, page, button)
+
+    edit_menu_delete_button(deck_id, page, button)
+
+    render()
+    _save_state()
+
+
+def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: bool) -> None:
+    global paste_cache
+
+    dialog_root = tkinter.Tk()
+    dialog_root.withdraw()
+
+    print(type(paste_cache))
+
+    if type(paste_cache) is dict:
+        if mb.showerror("Paste Error", "There is nothing to paste."):
+            return
+
+    if mb.askyesno('Paste Here ?', 'Do you want to replace this current button ?'):
+        set_button_text(deck_id, page, button, paste_cache.text)
+        set_button_icon(deck_id, page, button, paste_cache.image)
+        set_button_command(deck_id, page, button, paste_cache.command)
+        set_button_keys(deck_id, page, button, paste_cache.pressKey)
+        set_button_switch_page(deck_id, page, button, paste_cache.switchKeys)
+        set_target_device(deck_id, page, button, paste_cache.targetDevice)
+        set_button_change_brightness(deck_id, page, button, paste_cache.brightness)
+        set_button_write(deck_id, page, button, paste_cache.writeText)
+
+        if not multiPaste:
+            paste_cache = {}
+
+    else:
+        print("No Selected in Paste")
+
+    dialog_root.destroy()
+    render()
+    _save_state()
+
+
+def edit_menu_multi_paste_button() -> None:
+    render()
+    _save_state()
 
 
 def render() -> None:

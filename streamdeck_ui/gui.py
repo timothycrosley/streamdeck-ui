@@ -55,6 +55,8 @@ dimmer_options = {
     "10 Hours": 36000,
 }
 
+multiPasteEnabled = False
+
 
 class Dimmer:
     timeout = 0
@@ -357,7 +359,7 @@ def select_image(window) -> None:
         image = os.path.expanduser("~")
 
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp)"
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
     )[0]
     if file_name:
         deck_id = _deck_id(window.ui)
@@ -473,6 +475,50 @@ def import_config(window) -> None:
 
     api.import_config(file_name)
     redraw_buttons(window.ui)
+
+
+def cut_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_cut_button(deck_id, _page(window.ui), selected_button.index)
+    redraw_buttons(window.ui)
+    _highlight_first_button(window.ui)
+
+
+def copy_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_copy_button(deck_id, _page(window.ui), selected_button.index)
+    redraw_buttons(window.ui)
+
+
+def paste_button(window) -> None:
+    global multiPasteEnabled
+
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_paste_button(deck_id, _page(window.ui), selected_button.index, multiPasteEnabled)
+    redraw_buttons(window.ui)
+    _highlight_first_button(window.ui)
+
+
+def delete_button(window) -> None:
+    deck_id = _deck_id(window.ui)
+    api.edit_menu_delete_button(deck_id, _page(window.ui), selected_button.index)
+    redraw_buttons(window.ui)
+    _highlight_first_button(window.ui)
+
+
+def multi_paste_Button(window) -> None:
+    global multiPasteEnabled
+
+    multiPasteEnabled = not multiPasteEnabled
+
+    if multiPasteEnabled:
+        window.ui.actionMultiPaste.setText("Multi Paste Enabled")
+    else:
+        window.ui.actionMultiPaste.setText("Multi Paste Disabled")
+
+    api.edit_menu_multi_paste_button()
+    redraw_buttons(window.ui)
+    _highlight_first_button(window.ui)
 
 
 def sync(ui) -> None:
@@ -664,6 +710,13 @@ def start(_exit: bool = False) -> None:
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
+
+    ui.actionCut.triggered.connect(partial(cut_button, main_window))
+    ui.actionCopy.triggered.connect(partial(copy_button, main_window))
+    ui.actionPaste.triggered.connect(partial(paste_button, main_window))
+    ui.actionDelete.triggered.connect(partial(delete_button, main_window))
+    ui.actionMultiPaste.triggered.connect(partial(multi_paste_Button, main_window))
+
     ui.actionExit.triggered.connect(app.exit)
 
     timer = QTimer()
