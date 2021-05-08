@@ -367,6 +367,8 @@ class Ui_MainWindow(object):
         self.actionCut.setText(QCoreApplication.translate("MainWindow", u"Cut Button", None))
         self.actionCopy.setText(QCoreApplication.translate("MainWindow", u"Copy Button", None))
         self.actionPaste.setText(QCoreApplication.translate("MainWindow", u"Paste Button", None))
-        self.actionMultiPaste.setText(QCoreApplication.translate("MainWindow", u"Multi Paste Disabled", None))
+        self.actionMultiPaste.setText(
+            QCoreApplication.translate("MainWindow", u"Multi Paste Disabled", None)
+        )
 
     # retranslateUi
