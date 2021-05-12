@@ -439,14 +439,20 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key]
             else:
-                image = _render_key_image(deck, streamdeck_ui.api.get_font_size(deck_id, page, button_id), **button_settings)
+                image = _render_key_image(
+                    deck,
+                    streamdeck_ui.api.get_font_size(deck_id, page, button_id),
+                    **button_settings,
+                )
                 image_cache[key] = image
 
             with streamdecks_lock:
                 deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, fontSize: int, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(
+    deck, fontSize: int, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs
+):
     """Renders an individual key image"""
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
