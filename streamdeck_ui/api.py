@@ -40,6 +40,7 @@ class DataModel:
     targetDevice = ""
     brightness = ""
     writeText = ""
+    fontSize = ""
 
 
 paste_cache: Dict[str, str] = {}
@@ -200,6 +201,17 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
     return _button_state(deck_id, page, button).get("text", "")
 
 
+def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
+    if get_font_size(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["font_size"] = value
+        _save_state()
+
+
+def get_font_size(deck_id: str, page: int, button: int) -> int:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("font_size", 12)
+
+
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     if get_button_icon(deck_id, page, button) != icon:
@@ -337,6 +349,7 @@ def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
 
     paste_cache = DataModel
     paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.fontSize = get_font_size(deck_id, page, button)
     paste_cache.image = get_button_icon(deck_id, page, button)
     paste_cache.command = get_button_command(deck_id, page, button)
     paste_cache.pressKey = get_button_keys(deck_id, page, button)
@@ -354,6 +367,7 @@ def edit_menu_cut_button(deck_id: str, page: int, button: int) -> None:
 
     paste_cache = DataModel
     paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.fontSize = get_font_size(deck_id, page, button)
     paste_cache.image = get_button_icon(deck_id, page, button)
     paste_cache.command = get_button_command(deck_id, page, button)
     paste_cache.pressKey = get_button_keys(deck_id, page, button)

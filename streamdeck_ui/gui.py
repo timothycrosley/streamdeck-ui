@@ -314,6 +314,12 @@ def update_button_text(ui, text: str) -> None:
     redraw_buttons(ui)
 
 
+def update_font_size(ui, value: int) -> None:
+    deck_id = _deck_id(ui)
+    api.set_font_size(deck_id, _page(ui), selected_button.index, value)
+    redraw_buttons(ui)
+
+
 def update_button_command(ui, command: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_command(deck_id, _page(ui), selected_button.index, command)
@@ -416,6 +422,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+    ui.font_Size.setValue(api.get_font_size(deck_id, _page(ui), button_id))
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
     ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
@@ -679,6 +686,7 @@ def start(_exit: bool = False) -> None:
     tray.setContextMenu(menu)
 
     ui.text.textChanged.connect(partial(queue_text_change, ui))
+    ui.font_Size.valueChanged.connect(partial(update_font_size, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
     ui.keys.textChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
