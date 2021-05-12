@@ -205,6 +205,7 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
     if get_font_size(deck_id, page, button) != value:
         _button_state(deck_id, page, button)["font_size"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
         _save_state()
 
