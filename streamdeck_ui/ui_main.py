@@ -194,31 +194,45 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.text)
 
+        # font size
+        self.fontSize = QLabel(self.groupBox)
+        self.fontSize.setObjectName(u"font_size_label")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.fontSize)
+
+        self.font_Size = QSpinBox(self.groupBox)
+        self.font_Size.setObjectName(u"target_font_size")
+        self.font_Size.setMinimum(1)
+        self.font_Size.setMaximum(20)
+        self.font_Size.setValue(0)
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.font_Size)
+
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_3)
 
         self.command = QLineEdit(self.groupBox)
         self.command.setObjectName(u"command")
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.command)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.command)
 
         self.label_5 = QLabel(self.groupBox)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_5)
 
         self.keys = QLineEdit(self.groupBox)
         self.keys.setObjectName(u"keys")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.keys)
 
         # switch page
         self.label_8 = QLabel(self.groupBox)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_8)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_8)
 
         self.switch_page = QSpinBox(self.groupBox)
         self.switch_page.setObjectName(u"switch_page")
@@ -226,41 +240,41 @@ class Ui_MainWindow(object):
         self.switch_page.setMaximum(10)
         self.switch_page.setValue(0)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.switch_page)
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.switch_page)
 
         # target device
         self.targetDevice = QLabel(self.groupBox)
         self.targetDevice.setObjectName(u"label_9")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.targetDevice)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.targetDevice)
 
         self.target_device = QComboBox(self.groupBox)
         self.target_device.setObjectName(u"target_device")
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.target_device)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.target_device)
 
         # change brightness
         self.label_7 = QLabel(self.groupBox)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_7)
 
         self.change_brightness = QSpinBox(self.groupBox)
         self.change_brightness.setObjectName(u"change_brightness")
         self.change_brightness.setMinimum(-99)
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.change_brightness)
 
         # write text
         self.label_6 = QLabel(self.groupBox)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(self.groupBox)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.write)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.write)
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
@@ -356,6 +370,7 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
 
+        self.fontSize.setText(QCoreApplication.translate("MainWindow", u"Font Size:", None))
         self.targetDevice.setText(QCoreApplication.translate("MainWindow", u"Target Device:", None))
 
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
