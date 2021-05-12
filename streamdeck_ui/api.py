@@ -40,7 +40,7 @@ class DataModel:
     targetDevice = ""
     brightness = ""
     writeText = ""
-    fontSize = ""
+    fontSize = 14
 
 
 paste_cache: Dict[str, str] = {}
@@ -209,7 +209,7 @@ def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
 
 def get_font_size(deck_id: str, page: int, button: int) -> int:
     """Returns the font size set for the specified button"""
-    return _button_state(deck_id, page, button).get("font_size", 12)
+    return _button_state(deck_id, page, button).get("font_size", 14)
 
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
