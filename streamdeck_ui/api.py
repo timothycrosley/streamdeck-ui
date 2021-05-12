@@ -15,6 +15,7 @@ from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
+import streamdeck_ui.api
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
 image_cache: Dict[str, memoryview] = {}
@@ -204,6 +205,7 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
     if get_font_size(deck_id, page, button) != value:
         _button_state(deck_id, page, button)["font_size"] = value
+        render()
         _save_state()
 
 
@@ -436,14 +438,14 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key]
             else:
-                image = _render_key_image(deck, **button_settings)
+                image = _render_key_image(deck, streamdeck_ui.api.get_font_size(deck_id, page, button_id), **button_settings)
                 image_cache[key] = image
 
             with streamdecks_lock:
                 deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(deck, fontSize: int, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
     """Renders an individual key image"""
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
@@ -466,7 +468,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), fontSize)
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
             label_pos = ((image.width - label_w) // 2, image.height - 20)
