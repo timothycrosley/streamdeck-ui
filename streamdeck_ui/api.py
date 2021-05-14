@@ -43,6 +43,7 @@ class DataModel:
     writeText = ""
     fontSize = 14
     fontColor = "white"
+    textAlign = "center"
 
 
 paste_cache: Dict[str, str] = {}
@@ -214,6 +215,19 @@ def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
 def get_font_size(deck_id: str, page: int, button: int) -> int:
     """Returns the font size set for the specified button"""
     return _button_state(deck_id, page, button).get("font_size", 14)
+
+
+def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
+    if get_font_size(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["text_align"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
+
+
+def get_text_align(deck_id: str, page: int, button: int) -> int:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("text_align", "center")
 
 
 def set_font_color(deck_id: str, page: int, button: int, value: str) -> None:
@@ -447,6 +461,7 @@ def render() -> None:
             else:
                 image = _render_key_image(
                     deck,
+                    streamdeck_ui.api.get_text_align(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_size(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_color(deck_id, page, button_id),
                     **button_settings,
@@ -459,6 +474,7 @@ def render() -> None:
 
 def _render_key_image(
     deck,
+    textAlign: str,
     fontSize: int,
     fontColor: str,
     icon: str = "",
@@ -495,7 +511,7 @@ def _render_key_image(
             label_pos = ((image.width - label_w) // 2, image.height - 20)
         else:
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
-        draw.text(label_pos, text=text, font=true_font, fill=fontColor)
+        draw.text(label_pos, align=textAlign, text=text, font=true_font, fill=fontColor)
 
     return PILHelper.to_native_format(deck, image)
 

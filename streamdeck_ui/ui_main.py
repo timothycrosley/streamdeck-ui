@@ -194,6 +194,17 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.text)
 
+        # Text Align
+        self.textAlign = QLabel(self.groupBox)
+        self.textAlign.setObjectName(u"text_align_label")
+
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.textAlign)
+
+        self.text_Align = QComboBox(self.groupBox)
+        self.text_Align.setObjectName(u"target_text_align")
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.text_Align)
+
         # font size
         self.fontSize = QLabel(self.groupBox)
         self.fontSize.setObjectName(u"font_size_label")
