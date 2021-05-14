@@ -373,6 +373,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     set_button_change_brightness(deck_id, page, button, 0)
     set_button_icon(deck_id, page, button, "")
     set_target_device(deck_id, page, button, "")
+    set_text_align(deck_id,page,button, "center")
     render()
     _save_state()
 
@@ -390,6 +391,7 @@ def createCopyOrPasteItem(deck_id: str, page: int, button: int):
     paste_cache.targetDevice = get_target_device(deck_id, page, button)
     paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
     paste_cache.writeText = get_button_write(deck_id, page, button)
+    paste_cache.textAlign = get_text_align(deck_id, page, button)
 
 
 def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
@@ -426,6 +428,9 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
         set_target_device(deck_id, page, button, paste_cache.targetDevice)
         set_button_change_brightness(deck_id, page, button, paste_cache.brightness)
         set_button_write(deck_id, page, button, paste_cache.writeText)
+        set_text_align(deck_id, page,button, paste_cache.textAlign)
+        set_font_size(deck_id,page, button, paste_cache.fontSize)
+        set_font_color(deck_id, page, button, paste_cache.fontColor)
 
         if not multiPaste:
             paste_cache = {}
