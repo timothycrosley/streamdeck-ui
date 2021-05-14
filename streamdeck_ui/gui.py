@@ -326,6 +326,12 @@ def update_font_color(ui, value: str) -> None:
     redraw_buttons(ui)
 
 
+def update_text_align(ui, value: str) -> None:
+    deck_id = _deck_id(ui)
+    api.set_text_align(deck_id, _page(ui), selected_button.index, value)
+    redraw_buttons(ui)
+
+
 def update_button_command(ui, command: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_command(deck_id, _page(ui), selected_button.index, command)
@@ -715,6 +721,11 @@ def start(_exit: bool = False) -> None:
     ui.font_Color.addItem("cyan")
     ui.font_Color.addItem("magenta")
     ui.font_Color.currentTextChanged.connect(partial(update_font_color, ui))
+
+    ui.text_Align.addItem("left")
+    ui.text_Align.addItem("center")
+    ui.text_Align.addItem("right")
+    ui.text_Align.currentTextChanged.connect(partial(update_text_align, ui))
 
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
