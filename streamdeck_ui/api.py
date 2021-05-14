@@ -458,7 +458,13 @@ def render() -> None:
 
 
 def _render_key_image(
-    deck, fontSize: int, fontColor: str, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs
+    deck,
+    fontSize: int,
+    fontColor: str,
+    icon: str = "",
+    text: str = "",
+    font: str = DEFAULT_FONT,
+    **kwargs,
 ):
     """Renders an individual key image"""
     image = PILHelper.create_image(deck)

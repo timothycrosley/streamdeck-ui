@@ -219,7 +219,6 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.font_Color)
 
-
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
 
