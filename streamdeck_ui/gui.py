@@ -437,6 +437,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+    ui.text_Align.setCurrentText(api.get_text_align(deck_id, _page(ui), button_id))
     ui.font_Size.setValue(api.get_font_size(deck_id, _page(ui), button_id))
     ui.font_Color.setCurrentText(api.get_font_color(deck_id, _page(ui), button_id))
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
