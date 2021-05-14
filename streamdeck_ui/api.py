@@ -488,6 +488,7 @@ def _render_key_image(
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
+        text = text.replace('\\n', '\n')
         true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), fontSize)
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
