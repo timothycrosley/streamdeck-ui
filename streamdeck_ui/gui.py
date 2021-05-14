@@ -320,6 +320,12 @@ def update_font_size(ui, value: int) -> None:
     redraw_buttons(ui)
 
 
+def update_font_color(ui, value: str) -> None:
+    deck_id = _deck_id(ui)
+    api.set_font_color(deck_id, _page(ui), selected_button.index, value)
+    redraw_buttons(ui)
+
+
 def update_button_command(ui, command: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_command(deck_id, _page(ui), selected_button.index, command)
@@ -423,6 +429,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     button_id = selected_button.index
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
     ui.font_Size.setValue(api.get_font_size(deck_id, _page(ui), button_id))
+    ui.font_Color.setCurrentText(api.get_font_color(deck_id, _page(ui), button_id))
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
     ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
@@ -695,6 +702,16 @@ def start(_exit: bool = False) -> None:
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+
+    ui.font_Color.addItem("white")
+    ui.font_Color.addItem("black")
+    ui.font_Color.addItem("blue")
+    ui.font_Color.addItem("red")
+    ui.font_Color.addItem("green")
+    ui.font_Color.addItem("purple")
+    ui.font_Color.addItem("cyan")
+    ui.font_Color.addItem("magenta")
+    ui.font_Color.currentTextChanged.connect(partial(update_font_color, ui))
 
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 

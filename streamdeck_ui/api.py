@@ -37,11 +37,12 @@ class DataModel:
     text = ""
     command = ""
     pressKey = ""
-    switchKeys = ""
+    switchKeys = 0
     targetDevice = ""
-    brightness = ""
+    brightness = 0
     writeText = ""
     fontSize = 14
+    fontColor = "white"
 
 
 paste_cache: Dict[str, str] = {}
@@ -215,6 +216,19 @@ def get_font_size(deck_id: str, page: int, button: int) -> int:
     return _button_state(deck_id, page, button).get("font_size", 14)
 
 
+def set_font_color(deck_id: str, page: int, button: int, value: str) -> None:
+    if get_font_color(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["font_color"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
+
+
+def get_font_color(deck_id: str, page: int, button: int) -> str:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("font_color", "white")
+
+
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     if get_button_icon(deck_id, page, button) != icon:
@@ -336,6 +350,8 @@ def set_page(deck_id: str, page: int) -> None:
 
 def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     set_button_text(deck_id, page, button, "")
+    set_font_size(deck_id, page, button, 14)
+    set_font_color(deck_id, page, button, "white")
     set_button_command(deck_id, page, button, "")
     set_button_keys(deck_id, page, button, "")
     set_button_write(deck_id, page, button, "")
@@ -347,12 +363,12 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     _save_state()
 
 
-def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
+def createCopyOrPasteItem(deck_id: str, page: int, button: int):
     global paste_cache
-
     paste_cache = DataModel
     paste_cache.text = get_button_text(deck_id, page, button)
     paste_cache.fontSize = get_font_size(deck_id, page, button)
+    paste_cache.fontColor = get_font_color(deck_id, page, button)
     paste_cache.image = get_button_icon(deck_id, page, button)
     paste_cache.command = get_button_command(deck_id, page, button)
     paste_cache.pressKey = get_button_keys(deck_id, page, button)
@@ -361,26 +377,16 @@ def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
     paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
     paste_cache.writeText = get_button_write(deck_id, page, button)
 
+
+def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
+    createCopyOrPasteItem(deck_id, page, button)
     render()
     _save_state()
 
 
 def edit_menu_cut_button(deck_id: str, page: int, button: int) -> None:
-    global paste_cache
-
-    paste_cache = DataModel
-    paste_cache.text = get_button_text(deck_id, page, button)
-    paste_cache.fontSize = get_font_size(deck_id, page, button)
-    paste_cache.image = get_button_icon(deck_id, page, button)
-    paste_cache.command = get_button_command(deck_id, page, button)
-    paste_cache.pressKey = get_button_keys(deck_id, page, button)
-    paste_cache.switchKeys = get_button_switch_page(deck_id, page, button)
-    paste_cache.targetDevice = get_target_device(deck_id, page, button)
-    paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
-    paste_cache.writeText = get_button_write(deck_id, page, button)
-
+    createCopyOrPasteItem(deck_id, page, button)
     edit_menu_delete_button(deck_id, page, button)
-
     render()
     _save_state()
 
@@ -442,6 +448,7 @@ def render() -> None:
                 image = _render_key_image(
                     deck,
                     streamdeck_ui.api.get_font_size(deck_id, page, button_id),
+                    streamdeck_ui.api.get_font_color(deck_id, page, button_id),
                     **button_settings,
                 )
                 image_cache[key] = image
@@ -451,7 +458,7 @@ def render() -> None:
 
 
 def _render_key_image(
-    deck, fontSize: int, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs
+    deck, fontSize: int, fontColor: str, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs
 ):
     """Renders an individual key image"""
     image = PILHelper.create_image(deck)
@@ -481,7 +488,7 @@ def _render_key_image(
             label_pos = ((image.width - label_w) // 2, image.height - 20)
         else:
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
-        draw.text(label_pos, text=text, font=true_font, fill="white")
+        draw.text(label_pos, text=text, font=true_font, fill=fontColor)
 
     return PILHelper.to_native_format(deck, image)
 
