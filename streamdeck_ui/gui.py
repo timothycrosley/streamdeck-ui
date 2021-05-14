@@ -401,11 +401,14 @@ def remove_image(window) -> None:
 
 
 def redraw_buttons(ui) -> None:
+    print("redraw_buttons")
     deck_id = _deck_id(ui)
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
-        button.setText(api.get_button_text(deck_id, _page(ui), button.index))
+        button.setText(
+            api.get_button_text(deck_id, _page(ui), button.index).replace("\\n", os.linesep)
+        )
         button.setIcon(QIcon(api.get_button_icon(deck_id, _page(ui), button.index)))
 
 
