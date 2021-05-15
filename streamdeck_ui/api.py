@@ -2,8 +2,8 @@
 import json
 import os
 import threading
-import tkinter
 import time
+import tkinter
 from functools import partial
 from tkinter import filedialog
 from tkinter import messagebox as mb
@@ -60,7 +60,12 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     # shared state with a lock
     with key_event_lock:
         holder = get_button_icon(deck_id, get_page(deck_id), key)
-        set_button_icon(deck_id, get_page(deck_id), key, os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"))
+        set_button_icon(
+            deck_id,
+            get_page(deck_id),
+            key,
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"),
+        )
         render()
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
         set_button_icon(deck_id, get_page(deck_id), key, holder)
