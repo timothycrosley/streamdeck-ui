@@ -69,6 +69,16 @@ class Ui_SettingsDialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dim)
 
+        self.button_feedback = QLabel(SettingsDialog)
+        self.button_feedback.setObjectName(u"label_button_feedback")
+
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.button_feedback)
+
+        self.buttonfeedback = QComboBox(SettingsDialog)
+        self.buttonfeedback.setObjectName(u"button_feedback")
+
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.buttonfeedback)
+
         self.verticalLayout_2.addLayout(self.formLayout)
 
         self.verticalLayout.addLayout(self.verticalLayout_2)
@@ -100,6 +110,9 @@ class Ui_SettingsDialog(object):
         )
         self.label_dim.setText(
             QCoreApplication.translate("SettingsDialog", u"Auto dim after:", None)
+        )
+        self.button_feedback.setText(
+            QCoreApplication.translate("SettingsDialog", u"Button Feedback Enabled:", None)
         )
         self.dim.setCurrentText("")
 

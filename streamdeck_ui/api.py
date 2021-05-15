@@ -59,16 +59,19 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     # Since multiple keys could fire simultaniously, we need to protect
     # shared state with a lock
     with key_event_lock:
-        holder = get_button_icon(deck_id, get_page(deck_id), key)
-        set_button_icon(
-            deck_id,
-            get_page(deck_id),
-            key,
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"),
-        )
-        render()
+        if get_feedback_enabled(deck_id) == "Enabled":
+            holder = get_button_icon(deck_id, get_page(deck_id), key)
+            set_button_icon(
+                deck_id,
+                get_page(deck_id),
+                key,
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"),
+            )
+            render()
+            set_button_icon(deck_id, get_page(deck_id), key, holder)
+            render()
+
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
-        set_button_icon(deck_id, get_page(deck_id), key, holder)
 
 
 def get_display_timeout(deck_id: str) -> int:
@@ -366,6 +369,15 @@ def set_brightness(deck_id: str, brightness: int) -> None:
 def get_brightness(deck_id: str) -> int:
     """Gets the brightness that is set for the specified stream deck"""
     return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
+
+
+def set_feedback_enabled(deck_id: str, value: str) -> None:
+        state.setdefault(deck_id, {})["feedback_enabled"] = value
+        _save_state()
+
+
+def get_feedback_enabled(deck_id: str) -> str:
+    return cast(bool, state.get(deck_id, {}).get("feedback_enabled", "Disabled"))
 
 
 def change_brightness(deck_id: str, amount: int = 1) -> None:
