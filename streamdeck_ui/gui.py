@@ -10,7 +10,7 @@ from typing import Callable, Dict
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
-from PySide2.QtGui import QDrag, QIcon
+from PySide2.QtGui import QDrag, QIcon, QKeySequence, QMouseEvent
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
@@ -19,6 +19,7 @@ from PySide2.QtWidgets import (
     QMainWindow,
     QMenu,
     QMessageBox,
+    QShortcut,
     QSizePolicy,
     QSystemTrayIcon,
 )
@@ -158,6 +159,19 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setAcceptDrops(True)
         self.ui = ui
 
+    # def keyPressEvent(self, event):
+    #     print('key press')
+    #     clipboard = QApplication.clipboard()
+    #
+    #     if (event.matches(QKeySequence.Copy)):
+    #         print("copy")
+    #         clipboard.setText('some text')
+    #     if (event.matches(QKeySequence.Paste)):
+    #         print("print")
+    #         print(clipboard.text())
+    #
+    #     DraggableButton.keyPressEvent(self, event)
+
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
 
         if e.buttons() != Qt.LeftButton:
@@ -218,7 +232,6 @@ def _replace_special_keys(key):
 
 
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
-
     if state:
 
         if dimmers[deck_id].reset():
@@ -430,14 +443,21 @@ def set_brightness(ui, value: int) -> None:
     dimmers[deck_id].reset()
 
 
+def button_triggerd(self, event):
+    print(event)
+
+
 def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
+
     for button in buttons:
         if button == clicked_button:
             continue
 
         button.setChecked(False)
+
+    selected_button.setFocus()
 
     deck_id = _deck_id(ui)
     button_id = selected_button.index
@@ -453,6 +473,13 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.target_device.setCurrentText(api.get_target_device(deck_id, _page(ui), button_id))
     ui.selected_font.setCurrentText(api.get_selected_font(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
+
+
+def button_shortcuts(ui, button):
+    if button == selected_button:
+        return
+
+    print("hello")
 
 
 def build_buttons(ui, tab) -> None:
@@ -773,6 +800,11 @@ def start(_exit: bool = False) -> None:
 
     ui.actionCut.triggered.connect(partial(cut_button, main_window))
     ui.actionCopy.triggered.connect(partial(copy_button, main_window))
+
+    ui.actionCopy.setShortcuts([QKeySequence.Copy, QKeySequence("Ctrl+Insert")])
+    ui.actionPaste.setShortcuts([QKeySequence.Paste, QKeySequence("Shift+Insert")])
+    ui.actionDelete.setShortcuts([QKeySequence("Del")])
+
     ui.actionPaste.triggered.connect(partial(paste_button, main_window))
     ui.actionDelete.triggered.connect(partial(delete_button, main_window))
     ui.actionMultiPaste.triggered.connect(partial(multi_paste_Button, main_window))
