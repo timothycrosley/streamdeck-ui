@@ -61,12 +61,7 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     with key_event_lock:
         if get_feedback_enabled(deck_id) == "Enabled":
             holder = get_button_icon(deck_id, get_page(deck_id), key)
-            set_button_icon(
-                deck_id,
-                get_page(deck_id),
-                key,
-                get_custom_image_for_feedback(deck_id),
-            )
+            set_button_icon(deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id))
             render()
             set_button_icon(deck_id, get_page(deck_id), key, holder)
             render()
@@ -372,7 +367,7 @@ def get_brightness(deck_id: str) -> int:
 
 
 def set_feedback_enabled(deck_id: str, value: str) -> None:
-    state.setdefault(deck_id, {})["feedback_enabled"] = value # type: ignore
+    state.setdefault(deck_id, {})["feedback_enabled"] = value  # type: ignore
     _save_state()
 
 
@@ -381,17 +376,25 @@ def get_feedback_enabled(deck_id: str) -> str:
 
 
 def set_default_custom_image_for_feedback(deck_id: str) -> None:
-    state.setdefault(deck_id, {})["feedback_custom_image"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png") # type: ignore
+    state.setdefault(deck_id, {})["feedback_custom_image"] = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "ok.png"
+    )  # type: ignore
     _save_state()
 
 
 def set_custom_image_for_feedback(deck_id: str, value: str) -> None:
-    state.setdefault(deck_id, {})["feedback_custom_image"] = value # type: ignore
+    state.setdefault(deck_id, {})["feedback_custom_image"] = value  # type: ignore
     _save_state()
 
 
 def get_custom_image_for_feedback(deck_id: str) -> str:
-    return cast(str, state.get(deck_id, {}).get("feedback_custom_image", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"))) # type: ignore
+    return cast(
+        str,
+        state.get(deck_id, {}).get(
+            "feedback_custom_image",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"),
+        ),
+    )  # type: ignore
 
 
 def change_brightness(deck_id: str, amount: int = 1) -> None:
@@ -487,18 +490,18 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
             return
 
     if mb.askyesno("Paste Here ?", "Do you want to replace this current button ?"):
-        set_button_text(deck_id, page, button, paste_cache.text) # type: ignore
-        set_button_icon(deck_id, page, button, paste_cache.image) # type: ignore
-        set_button_command(deck_id, page, button, paste_cache.command) # type: ignore
-        set_button_keys(deck_id, page, button, paste_cache.pressKey) # type: ignore
-        set_button_switch_page(deck_id, page, button, paste_cache.switchKeys) # type: ignore
-        set_target_device(deck_id, page, button, paste_cache.targetDevice) # type: ignore
-        set_button_change_brightness(deck_id, page, button, paste_cache.brightness) # type: ignore
-        set_button_write(deck_id, page, button, paste_cache.writeText) # type: ignore
-        set_text_align(deck_id, page, button, paste_cache.textAlign) # type: ignore
-        set_font_size(deck_id, page, button, paste_cache.fontSize) # type: ignore
-        set_font_color(deck_id, page, button, paste_cache.fontColor) # type: ignore
-        set_selected_font(deck_id, page, button, paste_cache.selectedFont) # type: ignore
+        set_button_text(deck_id, page, button, paste_cache.text)  # type: ignore
+        set_button_icon(deck_id, page, button, paste_cache.image)  # type: ignore
+        set_button_command(deck_id, page, button, paste_cache.command)  # type: ignore
+        set_button_keys(deck_id, page, button, paste_cache.pressKey)  # type: ignore
+        set_button_switch_page(deck_id, page, button, paste_cache.switchKeys)  # type: ignore
+        set_target_device(deck_id, page, button, paste_cache.targetDevice)  # type: ignore
+        set_button_change_brightness(deck_id, page, button, paste_cache.brightness)  # type: ignore
+        set_button_write(deck_id, page, button, paste_cache.writeText)  # type: ignore
+        set_text_align(deck_id, page, button, paste_cache.textAlign)  # type: ignore
+        set_font_size(deck_id, page, button, paste_cache.fontSize)  # type: ignore
+        set_font_color(deck_id, page, button, paste_cache.fontColor)  # type: ignore
+        set_selected_font(deck_id, page, button, paste_cache.selectedFont)  # type: ignore
 
         if not multiPaste:
             paste_cache = {}

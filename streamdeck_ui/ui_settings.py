@@ -103,7 +103,6 @@ class Ui_SettingsDialog(object):
         self.horizontalLayout_2.addWidget(self.removeButton)
         self.formLayout.setLayout(5, QFormLayout.FieldRole, self.horizontalLayout_2)
 
-
         self.verticalLayout_2.addLayout(self.formLayout)
 
         self.verticalLayout.addLayout(self.verticalLayout_2)
