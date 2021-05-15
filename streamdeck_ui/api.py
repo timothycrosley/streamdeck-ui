@@ -372,8 +372,8 @@ def get_brightness(deck_id: str) -> int:
 
 
 def set_feedback_enabled(deck_id: str, value: str) -> None:
-        state.setdefault(deck_id, {})["feedback_enabled"] = value
-        _save_state()
+    state.setdefault(deck_id, {})["feedback_enabled"] = value
+    _save_state()
 
 
 def get_feedback_enabled(deck_id: str) -> str:

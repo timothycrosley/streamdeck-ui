@@ -331,6 +331,7 @@ def update_selected_font(ui, value: str) -> None:
     api.set_selected_font(deck_id, _page(ui), selected_button.index, value)
     redraw_buttons(ui)
 
+
 def update_feedback_enabled(ui, value: bool) -> None:
     deck_id = _deck_id(ui)
     api.set_feedback_enabled(deck_id, value)
@@ -759,8 +760,6 @@ def start(_exit: bool = False) -> None:
     ui.text_Align.addItem("center")
     ui.text_Align.addItem("right")
     ui.text_Align.currentTextChanged.connect(partial(update_text_align, ui))
-
-
 
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
