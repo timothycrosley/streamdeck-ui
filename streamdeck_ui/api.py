@@ -377,20 +377,24 @@ def set_page(deck_id: str, page: int) -> None:
 
 
 def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
-    set_button_text(deck_id, page, button, "")
-    set_font_size(deck_id, page, button, 14)
-    set_font_color(deck_id, page, button, "white")
-    set_button_command(deck_id, page, button, "")
-    set_button_keys(deck_id, page, button, "")
-    set_button_write(deck_id, page, button, "")
-    set_button_switch_page(deck_id, page, button, 0)
-    set_button_change_brightness(deck_id, page, button, 0)
-    set_button_icon(deck_id, page, button, "")
-    set_target_device(deck_id, page, button, "")
-    set_text_align(deck_id,page,button, "center")
-    set_selected_font(deck_id, page, button, "Roboto")
-    render()
-    _save_state()
+    dialog_root = tkinter.Tk()
+    dialog_root.withdraw()
+
+    if mb.askyesno("Delete this button ?", "Are you sure you want to delete this button"):
+        set_button_text(deck_id, page, button, "")
+        set_font_size(deck_id, page, button, 14)
+        set_font_color(deck_id, page, button, "white")
+        set_button_command(deck_id, page, button, "")
+        set_button_keys(deck_id, page, button, "")
+        set_button_write(deck_id, page, button, "")
+        set_button_switch_page(deck_id, page, button, 0)
+        set_button_change_brightness(deck_id, page, button, 0)
+        set_button_icon(deck_id, page, button, "")
+        set_target_device(deck_id, page, button, "")
+        set_text_align(deck_id,page,button, "center")
+        set_selected_font(deck_id, page, button, "Roboto")
+        render()
+        _save_state()
 
 
 def createCopyOrPasteItem(deck_id: str, page: int, button: int):
