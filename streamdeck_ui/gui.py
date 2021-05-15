@@ -159,19 +159,6 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setAcceptDrops(True)
         self.ui = ui
 
-    # def keyPressEvent(self, event):
-    #     print('key press')
-    #     clipboard = QApplication.clipboard()
-    #
-    #     if (event.matches(QKeySequence.Copy)):
-    #         print("copy")
-    #         clipboard.setText('some text')
-    #     if (event.matches(QKeySequence.Paste)):
-    #         print("print")
-    #         print(clipboard.text())
-    #
-    #     DraggableButton.keyPressEvent(self, event)
-
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
 
         if e.buttons() != Qt.LeftButton:
@@ -443,10 +430,6 @@ def set_brightness(ui, value: int) -> None:
     dimmers[deck_id].reset()
 
 
-def button_triggerd(self, event):
-    print(event)
-
-
 def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
@@ -473,13 +456,6 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.target_device.setCurrentText(api.get_target_device(deck_id, _page(ui), button_id))
     ui.selected_font.setCurrentText(api.get_selected_font(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
-
-
-def button_shortcuts(ui, button):
-    if button == selected_button:
-        return
-
-    print("hello")
 
 
 def build_buttons(ui, tab) -> None:
