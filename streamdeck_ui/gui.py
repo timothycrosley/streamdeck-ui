@@ -779,7 +779,7 @@ def start(_exit: bool = False) -> None:
 
     ui.actionCopy.setShortcuts([QKeySequence.Copy, QKeySequence("Ctrl+Insert")])
     ui.actionPaste.setShortcuts([QKeySequence.Paste, QKeySequence("Shift+Insert")])
-    ui.actionDelete.setShortcuts([QKeySequence("Del")])
+    ui.actionDelete.setShortcuts([QKeySequence.Delete])
 
     ui.actionPaste.triggered.connect(partial(paste_button, main_window))
     ui.actionDelete.triggered.connect(partial(delete_button, main_window))
