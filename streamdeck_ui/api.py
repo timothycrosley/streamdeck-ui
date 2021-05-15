@@ -391,7 +391,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
         set_button_change_brightness(deck_id, page, button, 0)
         set_button_icon(deck_id, page, button, "")
         set_target_device(deck_id, page, button, "")
-        set_text_align(deck_id,page,button, "center")
+        set_text_align(deck_id, page, button, "center")
         set_selected_font(deck_id, page, button, "Roboto")
         render()
         _save_state()
@@ -448,8 +448,8 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
         set_target_device(deck_id, page, button, paste_cache.targetDevice)
         set_button_change_brightness(deck_id, page, button, paste_cache.brightness)
         set_button_write(deck_id, page, button, paste_cache.writeText)
-        set_text_align(deck_id, page,button, paste_cache.textAlign)
-        set_font_size(deck_id,page, button, paste_cache.fontSize)
+        set_text_align(deck_id, page, button, paste_cache.textAlign)
+        set_font_size(deck_id, page, button, paste_cache.fontSize)
         set_font_color(deck_id, page, button, paste_cache.fontColor)
         set_selected_font(deck_id, page, button, paste_cache.selectedFont)
 
@@ -535,17 +535,31 @@ def _render_key_image(
         text = text.replace("\\n", "\n")
 
         if selectedFont == "Roboto":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Goblin_One", "GoblinOne-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("Goblin_One", "GoblinOne-Regular.ttf")),
+                fontSize,
+            )
         elif selectedFont == "Open_Sans":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Open_Sans", "OpenSans-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("Open_Sans", "OpenSans-Regular.ttf")),
+                fontSize,
+            )
         elif selectedFont == "Roboto":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("roboto", "Roboto-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("roboto", "Roboto-Regular.ttf")), fontSize
+            )
         elif selectedFont == "Lobster":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Lobster", "Lobster-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("Lobster", "Lobster-Regular.ttf")), fontSize
+            )
         elif selectedFont == "Anton":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Anton", "Anton-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("Anton", "Anton-Regular.ttf")), fontSize
+            )
         elif selectedFont == "Pacifico":
-            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Pacifico", "Pacifico-Regular.ttf")), fontSize)
+            true_font = ImageFont.truetype(
+                os.path.join(FONTS_PATH, os.path.join("Pacifico", "Pacifico-Regular.ttf")), fontSize
+            )
 
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
