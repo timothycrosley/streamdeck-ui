@@ -732,7 +732,7 @@ def start(_exit: bool = False) -> None:
     ui.font_Color.addItem("magenta")
     ui.font_Color.currentTextChanged.connect(partial(update_font_color, ui))
 
-    ui.selected_font.addItem("Goblin")
+    ui.selected_font.addItem("Goblin_One")
     ui.selected_font.addItem("Open_Sans")
     ui.selected_font.addItem("Roboto")
     ui.selected_font.addItem("Lobster")

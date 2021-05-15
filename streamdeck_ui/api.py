@@ -3,6 +3,7 @@ import json
 import os
 import threading
 import tkinter
+import time
 from functools import partial
 from tkinter import filedialog
 from tkinter import messagebox as mb
@@ -44,7 +45,7 @@ class DataModel:
     fontSize = 14
     fontColor = "white"
     textAlign = "center"
-    selectedFont = "Roboto"
+    selectedFont = "Open_Sans"
 
 
 paste_cache: Dict[str, str] = {}
@@ -58,7 +59,11 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     # Since multiple keys could fire simultaniously, we need to protect
     # shared state with a lock
     with key_event_lock:
+        holder = get_button_icon(deck_id, get_page(deck_id), key)
+        set_button_icon(deck_id, get_page(deck_id), key, os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"))
+        render()
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
+        set_button_icon(deck_id, get_page(deck_id), key, holder)
 
 
 def get_display_timeout(deck_id: str) -> int:
@@ -241,7 +246,7 @@ def set_selected_font(deck_id: str, page: int, button: int, value: str) -> None:
 
 def get_selected_font(deck_id: str, page: int, button: int) -> str:
     """Returns the font size set for the specified button"""
-    return _button_state(deck_id, page, button).get("selected_font", "Roboto")
+    return _button_state(deck_id, page, button).get("selected_font", "Open_Sans")
 
 
 def set_font_color(deck_id: str, page: int, button: int, value: str) -> None:
@@ -392,7 +397,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
         set_button_icon(deck_id, page, button, "")
         set_target_device(deck_id, page, button, "")
         set_text_align(deck_id, page, button, "center")
-        set_selected_font(deck_id, page, button, "Roboto")
+        set_selected_font(deck_id, page, button, "Open_Sans")
         render()
         _save_state()
 
@@ -433,7 +438,7 @@ def edit_menu_cut_button(deck_id: str, page: int, button: int) -> None:
     set_button_icon(deck_id, page, button, "")
     set_target_device(deck_id, page, button, "")
     set_text_align(deck_id, page, button, "center")
-    set_selected_font(deck_id, page, button, "Roboto")
+    set_selected_font(deck_id, page, button, "Open_Sans")
     render()
     _save_state()
 
@@ -512,10 +517,10 @@ def render() -> None:
 
 def _render_key_image(
     deck,
-    selectedFont: str,
-    textAlign: str,
-    fontSize: int,
-    fontColor: str,
+    selectedFont: str = "Open_Sans",
+    textAlign: str = "Cetner",
+    fontSize: int = 14,
+    fontColor: str = "white",
     icon: str = "",
     text: str = "",
     font: str = DEFAULT_FONT,
@@ -545,7 +550,7 @@ def _render_key_image(
     if text:
         text = text.replace("\\n", "\n")
 
-        if selectedFont == "Roboto":
+        if selectedFont == "Goblin_One":
             true_font = ImageFont.truetype(
                 os.path.join(FONTS_PATH, os.path.join("Goblin_One", "GoblinOne-Regular.ttf")),
                 fontSize,
