@@ -366,6 +366,36 @@ def get_brightness(deck_id: str) -> int:
     return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
 
 
+def set_last_known_folder(deck_id: str, value: str) -> None:
+    if get_last_known_folder(deck_id) != value:
+        state.setdefault(deck_id, {})["last_known_folder"] = value
+        _save_state()
+
+
+def get_last_known_folder(deck_id: str) -> str:
+    return state.get(deck_id, {}).get("last_known_folder", os.path.expanduser("~"))  # type: ignore
+
+
+def set_last_known_export_folder(deck_id: str, value: str) -> None:
+    if get_last_known_folder(deck_id) != value:
+        state.setdefault(deck_id, {})["last_known_export_folder"] = value
+        _save_state()
+
+
+def get_last_known_export_folder(deck_id: str) -> str:
+    return state.get(deck_id, {}).get("last_known_export_folder", "/home")  # type: ignore
+
+
+def set_last_known_import_folder(deck_id: str, value: str) -> None:
+    if get_last_known_folder(deck_id) != value:
+        state.setdefault(deck_id, {})["last_known_import_folder"] = value
+        _save_state()
+
+
+def get_last_known_import_folder(deck_id: str) -> str:
+    return state.get(deck_id, {}).get("last_known_import_folder", "/home")  # type: ignore
+
+
 def set_feedback_enabled(deck_id: str, value: str) -> None:
     state.setdefault(deck_id, {})["feedback_enabled"] = value  # type: ignore
     _save_state()

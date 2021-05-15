@@ -3,6 +3,8 @@ import os
 import shlex
 import sys
 import time
+import tkinter as tk
+from tkinter import filedialog
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Callable, Dict
@@ -394,9 +396,14 @@ def select_image(window) -> None:
     if not image:
         image = os.path.expanduser("~")
 
-    file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
-    )[0]
+    root = tk.Tk()
+    root.withdraw()
+
+    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_folder(deck_id)))
+
+    # file_name = QFileDialog.getOpenFileName(
+    #     window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
+    # )[0]
     if file_name:
         deck_id = _deck_id(window.ui)
         api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
@@ -409,12 +416,18 @@ def select_image_for_custom_feedback(window) -> None:
     if not image:
         image = os.path.expanduser("~")
 
-    file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
-    )[0]
+    root = tk.Tk()
+    root.withdraw()
+
+    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_folder(deck_id)))
+
+    # file_name = QFileDialog.getOpenFileName(
+    #     window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
+    # )[0]
     if file_name:
         deck_id = _deck_id(window.ui)
         api.set_custom_image_for_feedback(deck_id, file_name)
+        api.set_last_known_folder(deck_id, file_name)
 
 
 def remove_image(window) -> None:
@@ -516,23 +529,34 @@ def build_buttons(ui, tab) -> None:
 
 
 def export_config(window) -> None:
+    deck_id = _deck_id(window.ui)
+    valueLocation = api.get_last_known_export_folder(deck_id)
     file_name = QFileDialog.getSaveFileName(
-        window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)"
+        window, "Export Config", valueLocation, "JSON (*.json)"
     )[0]
     if not file_name:
         return
 
+    api.set_last_known_export_folder(deck_id, file_name)
     api.export_config(file_name)
 
 
 def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(
-        window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)"
-    )[0]
+    deck_id = _deck_id(window.ui)
+    valueLocation = api.get_last_known_import_folder(deck_id)
+    root = tk.Tk()
+    root.withdraw()
+
+    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_import_folder(deck_id)))
+
+    # file_name = QFileDialog.getOpenFileName(
+    #     window, "Import Config", valueLocation, "Config Files (*.json)"
+    # )[0]
     if not file_name:
         return
 
     api.import_config(file_name)
+    api.set_last_known_import_folder(deck_id, file_name)
     redraw_buttons(window.ui)
 
 
