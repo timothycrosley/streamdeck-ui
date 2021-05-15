@@ -65,7 +65,7 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
                 deck_id,
                 get_page(deck_id),
                 key,
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"),
+                get_custom_image_for_feedback(deck_id),
             )
             render()
             set_button_icon(deck_id, get_page(deck_id), key, holder)
@@ -231,7 +231,7 @@ def get_font_size(deck_id: str, page: int, button: int) -> int:
     return _button_state(deck_id, page, button).get("font_size", 14)
 
 
-def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
+def set_text_align(deck_id: str, page: int, button: int, value: str) -> None:
     if get_text_align(deck_id, page, button) != value:
         _button_state(deck_id, page, button)["text_align"] = value
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
@@ -239,7 +239,7 @@ def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
         _save_state()
 
 
-def get_text_align(deck_id: str, page: int, button: int) -> int:
+def get_text_align(deck_id: str, page: int, button: int) -> str:
     """Returns the font size set for the specified button"""
     return _button_state(deck_id, page, button).get("text_align", "center")
 
@@ -372,12 +372,26 @@ def get_brightness(deck_id: str) -> int:
 
 
 def set_feedback_enabled(deck_id: str, value: str) -> None:
-    state.setdefault(deck_id, {})["feedback_enabled"] = value
+    state.setdefault(deck_id, {})["feedback_enabled"] = value # type: ignore
     _save_state()
 
 
 def get_feedback_enabled(deck_id: str) -> str:
-    return cast(bool, state.get(deck_id, {}).get("feedback_enabled", "Disabled"))
+    return cast(str, state.get(deck_id, {}).get("feedback_enabled", "Disabled"))
+
+
+def set_default_custom_image_for_feedback(deck_id: str) -> None:
+    state.setdefault(deck_id, {})["feedback_custom_image"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png") # type: ignore
+    _save_state()
+
+
+def set_custom_image_for_feedback(deck_id: str, value: str) -> None:
+    state.setdefault(deck_id, {})["feedback_custom_image"] = value # type: ignore
+    _save_state()
+
+
+def get_custom_image_for_feedback(deck_id: str) -> str:
+    return cast(str, state.get(deck_id, {}).get("feedback_custom_image", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png"))) # type: ignore
 
 
 def change_brightness(deck_id: str, amount: int = 1) -> None:
@@ -473,18 +487,18 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
             return
 
     if mb.askyesno("Paste Here ?", "Do you want to replace this current button ?"):
-        set_button_text(deck_id, page, button, paste_cache.text)
-        set_button_icon(deck_id, page, button, paste_cache.image)
-        set_button_command(deck_id, page, button, paste_cache.command)
-        set_button_keys(deck_id, page, button, paste_cache.pressKey)
-        set_button_switch_page(deck_id, page, button, paste_cache.switchKeys)
-        set_target_device(deck_id, page, button, paste_cache.targetDevice)
-        set_button_change_brightness(deck_id, page, button, paste_cache.brightness)
-        set_button_write(deck_id, page, button, paste_cache.writeText)
-        set_text_align(deck_id, page, button, paste_cache.textAlign)
-        set_font_size(deck_id, page, button, paste_cache.fontSize)
-        set_font_color(deck_id, page, button, paste_cache.fontColor)
-        set_selected_font(deck_id, page, button, paste_cache.selectedFont)
+        set_button_text(deck_id, page, button, paste_cache.text) # type: ignore
+        set_button_icon(deck_id, page, button, paste_cache.image) # type: ignore
+        set_button_command(deck_id, page, button, paste_cache.command) # type: ignore
+        set_button_keys(deck_id, page, button, paste_cache.pressKey) # type: ignore
+        set_button_switch_page(deck_id, page, button, paste_cache.switchKeys) # type: ignore
+        set_target_device(deck_id, page, button, paste_cache.targetDevice) # type: ignore
+        set_button_change_brightness(deck_id, page, button, paste_cache.brightness) # type: ignore
+        set_button_write(deck_id, page, button, paste_cache.writeText) # type: ignore
+        set_text_align(deck_id, page, button, paste_cache.textAlign) # type: ignore
+        set_font_size(deck_id, page, button, paste_cache.fontSize) # type: ignore
+        set_font_color(deck_id, page, button, paste_cache.fontColor) # type: ignore
+        set_selected_font(deck_id, page, button, paste_cache.selectedFont) # type: ignore
 
         if not multiPaste:
             paste_cache = {}

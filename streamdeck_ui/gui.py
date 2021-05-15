@@ -403,6 +403,20 @@ def select_image(window) -> None:
         redraw_buttons(window.ui)
 
 
+def select_image_for_custom_feedback(window) -> None:
+    deck_id = _deck_id(window.ui)
+    image = api.get_custom_image_for_feedback(deck_id)
+    if not image:
+        image = os.path.expanduser("~")
+
+    file_name = QFileDialog.getOpenFileName(
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
+    )[0]
+    if file_name:
+        deck_id = _deck_id(window.ui)
+        api.set_custom_image_for_feedback(deck_id, file_name)
+
+
 def remove_image(window) -> None:
     deck_id = _deck_id(window.ui)
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
@@ -643,6 +657,7 @@ def show_settings(window) -> None:
     """Shows the settings dialog and allows the user the change deck specific
     settings. Settings are not saved until OK is clicked."""
     ui = window.ui
+    main_window = window
     deck_id = _deck_id(ui)
     settings = SettingsDialog(window)
     dimmers[deck_id].stop()
@@ -656,6 +671,11 @@ def show_settings(window) -> None:
         settings.ui.buttonfeedback.setCurrentIndex(0)
 
     settings.ui.buttonfeedback.currentTextChanged.connect(partial(update_feedback_enabled, ui))
+
+    location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ok.png")
+    settings.ui.removeButton.clicked.connect(api.set_default_custom_image_for_feedback(deck_id))
+
+    settings.ui.imageButton.clicked.connect(partial(select_image_for_custom_feedback, main_window))
 
     for label, value in dimmer_options.items():
         settings.ui.dim.addItem(f"{label}", userData=value)

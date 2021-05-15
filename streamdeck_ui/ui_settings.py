@@ -69,15 +69,40 @@ class Ui_SettingsDialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dim)
 
+        # Feedback Enable Disable
+
         self.button_feedback = QLabel(SettingsDialog)
         self.button_feedback.setObjectName(u"label_button_feedback")
-
         self.formLayout.setWidget(4, QFormLayout.LabelRole, self.button_feedback)
-
         self.buttonfeedback = QComboBox(SettingsDialog)
         self.buttonfeedback.setObjectName(u"button_feedback")
-
         self.formLayout.setWidget(4, QFormLayout.FieldRole, self.buttonfeedback)
+
+        # Custom Image For Feedback Section
+
+        self.imagelabel = QLabel(SettingsDialog)
+        self.imagelabel.setObjectName(u"label")
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.imagelabel)
+        self.horizontalLayout_2 = QHBoxLayout(SettingsDialog)
+        self.horizontalLayout_2.setSpacing(6)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.imageButton = QPushButton(SettingsDialog)
+        self.imageButton.setObjectName(u"imageButton")
+        self.horizontalLayout_2.addWidget(self.imageButton)
+        self.removeButton = QPushButton(SettingsDialog)
+        self.removeButton.setObjectName(u"removeButton")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
+        self.removeButton.setSizePolicy(sizePolicy2)
+        self.removeButton.setMaximumSize(QSize(30, 16777215))
+        icon1 = QIcon()
+        icon1.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.removeButton.setIcon(icon1)
+        self.horizontalLayout_2.addWidget(self.removeButton)
+        self.formLayout.setLayout(5, QFormLayout.FieldRole, self.horizontalLayout_2)
+
 
         self.verticalLayout_2.addLayout(self.formLayout)
 
@@ -113,6 +138,12 @@ class Ui_SettingsDialog(object):
         )
         self.button_feedback.setText(
             QCoreApplication.translate("SettingsDialog", u"Button Feedback Enabled:", None)
+        )
+        self.imagelabel.setText(
+            QCoreApplication.translate("SettingsDialog", u"Feedback Custom Image:", None)
+        )
+        self.imageButton.setText(
+            QCoreApplication.translate("SettingsDialog", u"Select Image:", None)
         )
         self.dim.setCurrentText("")
 

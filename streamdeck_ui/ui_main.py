@@ -155,6 +155,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
+
+        # Image Button Section
+
         self.label = QLabel(self.groupBox)
         self.label.setObjectName(u"label")
 
@@ -183,6 +186,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.removeButton)
 
         self.formLayout.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_2)
+
+        # Text Entry Section
 
         self.label_2 = QLabel(self.groupBox)
         self.label_2.setObjectName(u"label_2")
