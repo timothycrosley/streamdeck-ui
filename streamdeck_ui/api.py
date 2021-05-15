@@ -44,6 +44,7 @@ class DataModel:
     fontSize = 14
     fontColor = "white"
     textAlign = "center"
+    selectedFont = "Roboto"
 
 
 paste_cache: Dict[str, str] = {}
@@ -218,7 +219,7 @@ def get_font_size(deck_id: str, page: int, button: int) -> int:
 
 
 def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
-    if get_font_size(deck_id, page, button) != value:
+    if get_text_align(deck_id, page, button) != value:
         _button_state(deck_id, page, button)["text_align"] = value
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
@@ -228,6 +229,19 @@ def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
 def get_text_align(deck_id: str, page: int, button: int) -> int:
     """Returns the font size set for the specified button"""
     return _button_state(deck_id, page, button).get("text_align", "center")
+
+
+def set_selected_font(deck_id: str, page: int, button: int, value: str) -> None:
+    if get_selected_font(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["selected_font"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
+
+
+def get_selected_font(deck_id: str, page: int, button: int) -> str:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("selected_font", "Roboto")
 
 
 def set_font_color(deck_id: str, page: int, button: int, value: str) -> None:
@@ -374,6 +388,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     set_button_icon(deck_id, page, button, "")
     set_target_device(deck_id, page, button, "")
     set_text_align(deck_id,page,button, "center")
+    set_selected_font(deck_id, page, button, "Roboto")
     render()
     _save_state()
 
@@ -392,6 +407,7 @@ def createCopyOrPasteItem(deck_id: str, page: int, button: int):
     paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
     paste_cache.writeText = get_button_write(deck_id, page, button)
     paste_cache.textAlign = get_text_align(deck_id, page, button)
+    paste_cache.selectedFont = get_selected_font(deck_id, page, button)
 
 
 def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
@@ -431,6 +447,7 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
         set_text_align(deck_id, page,button, paste_cache.textAlign)
         set_font_size(deck_id,page, button, paste_cache.fontSize)
         set_font_color(deck_id, page, button, paste_cache.fontColor)
+        set_selected_font(deck_id, page, button, paste_cache.selectedFont)
 
         if not multiPaste:
             paste_cache = {}
@@ -466,6 +483,7 @@ def render() -> None:
             else:
                 image = _render_key_image(
                     deck,
+                    streamdeck_ui.api.get_selected_font(deck_id, page, button_id),
                     streamdeck_ui.api.get_text_align(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_size(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_color(deck_id, page, button_id),
@@ -479,6 +497,7 @@ def render() -> None:
 
 def _render_key_image(
     deck,
+    selectedFont: str,
     textAlign: str,
     fontSize: int,
     fontColor: str,
@@ -510,7 +529,20 @@ def _render_key_image(
 
     if text:
         text = text.replace("\\n", "\n")
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), fontSize)
+
+        if selectedFont == "Roboto":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Goblin_One", "GoblinOne-Regular.ttf")), fontSize)
+        elif selectedFont == "Open_Sans":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Open_Sans", "OpenSans-Regular.ttf")), fontSize)
+        elif selectedFont == "Roboto":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("roboto", "Roboto-Regular.ttf")), fontSize)
+        elif selectedFont == "Lobster":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Lobster", "Lobster-Regular.ttf")), fontSize)
+        elif selectedFont == "Anton":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Anton", "Anton-Regular.ttf")), fontSize)
+        elif selectedFont == "Pacifico":
+            true_font = ImageFont.truetype(os.path.join(FONTS_PATH, os.path.join("Pacifico", "Pacifico-Regular.ttf")), fontSize)
+
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
             label_pos = ((image.width - label_w) // 2, image.height - 20)

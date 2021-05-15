@@ -326,6 +326,12 @@ def update_font_color(ui, value: str) -> None:
     redraw_buttons(ui)
 
 
+def update_selected_font(ui, value: str) -> None:
+    deck_id = _deck_id(ui)
+    api.set_selected_font(deck_id, _page(ui), selected_button.index, value)
+    redraw_buttons(ui)
+
+
 def update_text_align(ui, value: str) -> None:
     deck_id = _deck_id(ui)
     api.set_text_align(deck_id, _page(ui), selected_button.index, value)
@@ -445,6 +451,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
     ui.target_device.setCurrentText(api.get_target_device(deck_id, _page(ui), button_id))
+    ui.selected_font.setCurrentText(api.get_selected_font(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
 
 
@@ -721,6 +728,14 @@ def start(_exit: bool = False) -> None:
     ui.font_Color.addItem("cyan")
     ui.font_Color.addItem("magenta")
     ui.font_Color.currentTextChanged.connect(partial(update_font_color, ui))
+
+    ui.selected_font.addItem("Goblin")
+    ui.selected_font.addItem("Open_Sans")
+    ui.selected_font.addItem("Roboto")
+    ui.selected_font.addItem("Lobster")
+    ui.selected_font.addItem("Anton")
+    ui.selected_font.addItem("Pacifico")
+    ui.selected_font.currentTextChanged.connect(partial(update_selected_font, ui))
 
     ui.text_Align.addItem("left")
     ui.text_Align.addItem("center")
