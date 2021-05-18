@@ -173,17 +173,23 @@ class DraggableButton(QtWidgets.QToolButton):
 
         self.setStyleSheet(BUTTON_STYLE)
 
-        # Ignore drag and drop on yourself
-        if e.source().index == self.index:
-            return
+        if e.source():
+            # Ignore drag and drop on yourself
+            if e.source().index == self.index:
+                return
 
-        api.swap_buttons(_deck_id(self.ui), _page(self.ui), e.source().index, self.index)
-        # In the case that we've dragged the currently selected button, we have to
-        # check the target button instead so it appears that it followed the drag/drop
-        if e.source().isChecked():
-            e.source().setChecked(False)
-            self.setChecked(True)
-            selected_button = self
+            api.swap_buttons(_deck_id(self.ui), _page(self.ui), e.source().index, self.index)
+            # In the case that we've dragged the currently selected button, we have to
+            # check the target button instead so it appears that it followed the drag/drop
+            if e.source().isChecked():
+                e.source().setChecked(False)
+                self.setChecked(True)
+                selected_button = self
+        else:
+            # Handle drag and drop from outside the application
+            if e.mimeData().hasUrls:
+                file_name = e.mimeData().urls()[0].toLocalFile()
+                api.set_button_icon(_deck_id(self.ui), _page(self.ui), self.index, file_name)
 
         redraw_buttons(self.ui)
 
