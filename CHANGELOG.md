@@ -16,6 +16,11 @@ OR
 
 Change log
 ==========
+## 1.1.3 - TBD
+
+### Features
+- Drag and drop icons onto buttons from file browser.
+- Follow the settings file location if symbolic link.
 ## 1.1.2 - April 30, 2021
 ### Fixes
 - Regression with multi-character keys
