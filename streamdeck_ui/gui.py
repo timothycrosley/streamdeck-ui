@@ -54,6 +54,7 @@ dimmer_options = {
     "5 Hours": 7200,
     "10 Hours": 36000,
 }
+last_image_dir = ""
 
 
 class Dimmer:
@@ -351,15 +352,19 @@ def change_page(ui, page: int) -> None:
 
 
 def select_image(window) -> None:
+    global last_image_dir
     deck_id = _deck_id(window.ui)
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
     if not image:
-        image = os.path.expanduser("~")
-
+        if not last_image_dir:
+            image = os.path.expanduser("~")
+        else:
+            image = last_image_dir
     file_name = QFileDialog.getOpenFileName(
         window, "Open Image", image, "Image Files (*.png *.jpg *.bmp)"
     )[0]
     if file_name:
+        last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
         api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
         redraw_buttons(window.ui)
