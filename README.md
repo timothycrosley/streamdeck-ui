@@ -125,6 +125,12 @@ Change the system volume up (or down) by a certain percentage. Assumes you're us
 ``` console
 amixer -D pulse sset Master 20%+
 ```
+If you want you invoke a command that uses shell-script specific things like `&&` or `|`, run it via bash. This command will shift focus to firefox using the `wmctrl`, and then shifts focus to the first tab: 
+
+``` console
+bash -c "wmctrl -a firefox  && xdotool key alt+1"
+```
+
 ### Press Keys
 Simulates key press combinations (hot keys). The basic format is a group of keys, separated by a `+` sign to press simultaneously. Separate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
