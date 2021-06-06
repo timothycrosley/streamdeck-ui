@@ -272,7 +272,7 @@ def get_brightness(deck_id: str) -> int:
 
 
 def get_brightness_dimmed(deck_id: str) -> int:
-    """Gets the percentage value of the full brightness that is used when dimming the specified 
+    """Gets the percentage value of the full brightness that is used when dimming the specified
     stream deck"""
     return state.get(deck_id, {}).get("brightness_dimmed", 0)
 

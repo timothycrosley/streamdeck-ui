@@ -65,8 +65,13 @@ class Dimmer:
     __timer = None
     __change_timer = None
 
-    def __init__(self, timeout: int, brightness: int, brightness_dimmed: int,
-                 brightness_callback: Callable[[int], None]):
+    def __init__(
+        self,
+        timeout: int,
+        brightness: int,
+        brightness_dimmed: int,
+        brightness_callback: Callable[[int], None],
+    ):
         """ Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.
@@ -402,7 +407,7 @@ def set_brightness(ui, value: int) -> None:
 def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness_dimmed(deck_id, value)
-    dimmers[deck_id].brightness_dimmed = int(full_brightness  * (value / 100))
+    dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
     dimmers[deck_id].reset()
 
 
