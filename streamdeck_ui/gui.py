@@ -593,6 +593,7 @@ def show_settings(window) -> None:
     settings.ui.label_streamdeck.setText(deck_id)
     settings.ui.brightness.setValue(api.get_brightness(deck_id))
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
+    settings.ui.dim.currentIndexChanged.connect(partial(disable_dim_settings, settings))
     if settings.exec_():
         # Commit changes
         if existing_index != settings.ui.dim.currentIndex():
@@ -607,6 +608,12 @@ def show_settings(window) -> None:
         change_brightness(deck_id, api.get_brightness(deck_id))
 
     dimmers[deck_id].reset()
+
+
+def disable_dim_settings(settings: SettingsDialog, _index: int) -> None:
+    disable = dimmer_options.get(settings.ui.dim.currentText()) == 0
+    settings.ui.brightness_dimmed.setDisabled(disable)
+    settings.ui.label_brightness_dimmed.setDisabled(disable)
 
 
 def dim_all_displays() -> None:
