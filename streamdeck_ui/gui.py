@@ -115,9 +115,11 @@ class Dimmer:
             self.__timer.start(self.timeout * 1000)
 
         if self.__dimmer_brightness != self.brightness:
+            previous_dimmer_brightness = self.__dimmer_brightness
             self.brightness_callback(self.brightness)
             self.__dimmer_brightness = self.brightness
-            return True
+            if previous_dimmer_brightness < 10:
+                return True
 
         return False
 
