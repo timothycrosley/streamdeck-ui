@@ -357,7 +357,7 @@ def select_image(window) -> None:
         image = os.path.expanduser("~")
 
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp)"
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *gif)"
     )[0]
     if file_name:
         deck_id = _deck_id(window.ui)
@@ -667,6 +667,7 @@ def start(_exit: bool = False) -> None:
     timer.start(1000)
 
     api.render()
+    api.start_animation()
     tray.show()
 
     if show_ui:
