@@ -16,7 +16,7 @@ from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE, ICON_DIR
 
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
@@ -104,6 +104,29 @@ def export_config(output_file: str) -> None:
         os.replace(output_file + ".tmp", os.path.realpath(output_file))
 
 
+def export_icon(deck_id: str, page: int, button_id: int, icon_frames_to_save: list) -> None:
+    """export rendered icon"""
+    if not os.path.isdir(ICON_DIR):
+        os.mkdir(ICON_DIR)
+    key = f"{deck_id}.{page}.{button_id}"
+    try:
+        gif = icon_frames_to_save
+        if gif.__len__() > 1:
+            gif[0].save(
+                ICON_DIR + key + ".gif",
+                save_all=True,
+                append_images=gif[1:],
+                optimize=False,
+                loop=0,
+                duration=40  # 40ms (25 fps)
+            )
+        else:
+            gif[0].save(ICON_DIR + key + ".gif")
+    except Exception as error:
+        print(f"The icon file '{key}'.gif was not updated. Error: {error}")
+        raise
+
+
 def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     """Opens and then returns all known stream deck devices"""
     for deck in DeviceManager.DeviceManager().enumerate():
@@ -169,6 +192,8 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
     # Clear the cache so images will be recreated on render
     image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
     image_cache.pop(f"{deck_id}.{page}.{target_button}", None)
+    os.remove(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".gif")
+    os.remove(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".gif")
 
     _save_state()
     render()
@@ -179,6 +204,7 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".gif")
         render()
         _save_state()
 
@@ -193,6 +219,7 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".gif")
         render()
         _save_state()
 
@@ -309,10 +336,17 @@ def render() -> None:
             deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
         ):
             key = f"{deck_id}.{page}.{button_id}"
+            key_image = False
             if key in image_cache:
                 image = image_cache[key]
+            elif os.path.isfile(ICON_DIR + key + ".gif"):
+                image = _load_key_image(deck, key)
+                key_image = True
             else:
-                image = _render_key_image(deck, **button_settings)
+                image = _render_key_image(deck, key, **button_settings)
+                key_image = True
+
+            if key_image:
                 image_cache[key] = image[0]
 
                 global animation_buttons
@@ -326,14 +360,13 @@ def render() -> None:
                 deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
-    """Renders an individual key image"""
-
-    if icon:
+def _load_key_image(deck, key: str):
+    """load an individual rendered key image"""
+    if os.path.isfile(ICON_DIR + key + ".gif"):
         try:
-            rgba_icon = Image.open(icon)
+            rgba_icon = Image.open(ICON_DIR + key + ".gif")
         except (OSError, IOError) as icon_error:
-            print(f"Unable to load icon {icon} with error {icon_error}")
+            print(f"Unable to load icon {key}.gif with error {icon_error}")
             rgba_icon = Image.new("RGBA", (300, 300))
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
@@ -351,7 +384,62 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
             rgba_icon.seek(rgba_icon.tell() + 1)
             frames_n += 1
         except EOFError:  # end of gif
-            # frames_n -= 1
+            break
+        except KeyError:  # no gif
+            break
+    frames = ImageSequence.Iterator(rgba_icon)
+    del frame_timestamp[0]
+
+    frame_ms = 0
+    for frame_index in range(frames_n):
+        if bool(frame_timestamp) and frame_ms > frame_timestamp[frame_index]:
+            continue
+        frame = frames[frame_index].convert("RGBA")
+        frame_image = PILHelper.create_image(deck)
+        icon_width, icon_height = frame_image.width, frame_image.height
+
+        frame.thumbnail((icon_width, icon_height), Image.LANCZOS)
+        icon_pos = ((frame_image.width - frame.width) // 2, 0)
+        frame_image.paste(frame, icon_pos, frame)
+
+        native_frame_image = PILHelper.to_native_format(deck, frame_image)
+
+        if bool(frame_timestamp):
+            while frame_ms < frame_timestamp[frame_index]:
+                frame_ms += 40  # 40ms/frame (25 fps)
+                icon_frames.append(native_frame_image)
+        else:
+            icon_frames.append(native_frame_image)
+
+    return icon_frames
+
+
+def _render_key_image(deck, key: str, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+    """Renders an individual key image"""
+
+    if icon:
+        try:
+            rgba_icon = Image.open(icon)
+        except (OSError, IOError) as icon_error:
+            print(f"Unable to load icon {icon} with error {icon_error}")
+            rgba_icon = Image.new("RGBA", (300, 300))
+    else:
+        rgba_icon = Image.new("RGBA", (300, 300))
+
+    icon_frames = list()
+    icon_frames_to_save = list()
+    frame_durations = list()
+    frame_timestamp = [0]
+
+    rgba_icon.seek(0)
+    frames_n = 1
+    while True:
+        try:
+            frame_durations.append(rgba_icon.info['duration'])
+            frame_timestamp.append(frame_timestamp[-1]+rgba_icon.info['duration'])
+            rgba_icon.seek(rgba_icon.tell() + 1)
+            frames_n += 1
+        except EOFError:  # end of gif
             break
         except KeyError:  # no gif
             break
@@ -388,8 +476,13 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
             while frame_ms < frame_timestamp[frame_index]:
                 frame_ms += 40  # 40ms/frame (25 fps)
                 icon_frames.append(native_frame_image)
+                icon_frames_to_save.append(frame_image)
         else:
             icon_frames.append(native_frame_image)
+            icon_frames_to_save.append(frame_image)
+
+    deck_id, page, button_id = key.split(".")
+    export_icon(deck_id, page, button_id, icon_frames_to_save)
 
     return icon_frames
 
