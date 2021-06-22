@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>901</width>
-    <height>489</height>
+    <width>940</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -282,7 +282,91 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="keys"/>
+              <widget class="QComboBox" name="keys">
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+             <item>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">F11</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">alt+F4</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">ctrl+w</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">cmd+left</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">alt+plus</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">alt+delay+F3</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">backspace</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">right</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">page_up</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_volume_up</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_volume_down</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_volume_mute</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_previous</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_next</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">media_play_pause</string>
+              </property>
+             </item>
+              </widget>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_8">
@@ -344,8 +428,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>901</width>
-     <height>22</height>
+     <width>940</width>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -357,7 +441,17 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionDocs"/>
+    <addaction name="actionGithub"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionImport">
@@ -373,6 +467,21 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionDocs">
+   <property name="text">
+    <string>Documentation</string>
+   </property>
+  </action>
+  <action name="actionGithub">
+   <property name="text">
+    <string>Github</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
    </property>
   </action>
  </widget>

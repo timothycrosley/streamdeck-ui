@@ -1,5 +1,6 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
+import pkg_resources
 import shlex
 import sys
 import time
@@ -9,8 +10,8 @@ from typing import Callable, Dict
 
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSize, Qt, QTimer
-from PySide2.QtGui import QDrag, QIcon
+from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl, QCoreApplication
+from PySide2.QtGui import QDrag, QIcon, QDesktopServices
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
@@ -409,11 +410,21 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     button_id = selected_button.index
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
     ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
-    ui.keys.setText(api.get_button_keys(deck_id, _page(ui), button_id))
+    ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
+
+
+def browse_documentation():
+    url = QUrl("https://timothycrosley.github.io/streamdeck-ui")
+    QDesktopServices.openUrl(url)
+
+
+def browse_github():
+    url = QUrl("https://github.com/timothycrosley/streamdeck-ui")
+    QDesktopServices.openUrl(url)
 
 
 def build_buttons(ui, tab) -> None:
@@ -506,7 +517,9 @@ class MainWindow(QMainWindow):
         self.hide()
         event.ignore()
 
-    def systray_clicked(self, _status=None) -> None:
+    def systray_clicked(self, status=None) -> None:
+        if status is QtWidgets.QSystemTrayIcon.ActivationReason.Context:
+            return
         if self.window_shown:
             self.hide()
             self.window_shown = False
@@ -519,6 +532,20 @@ class MainWindow(QMainWindow):
         self.activateWindow()
         self.raise_()
         self.window_shown = True
+
+    def about_dialog(self):
+        title = "About StreamDeck UI"
+        description = "A Linux compatible UI for the Elgato Stream Deck."
+        app = QApplication.instance()
+        body = [description, "Version {}\n".format(app.applicationVersion())]
+        dependencies = ("streamdeck", "pyside2", "pillow", "pynput")
+        for dep in dependencies:
+            try:
+                dist = pkg_resources.get_distribution(dep)
+                body.append(u"{} {}".format(dep, dist.version))
+            except pkg_resources.DistributionNotFound:
+                pass
+        QtWidgets.QMessageBox.about(self, title, u"\n".join(body))
 
 
 def queue_text_change(ui, text: str) -> None:
@@ -602,12 +629,19 @@ def start(_exit: bool = False) -> None:
     elif "-n" in sys.argv or "--no-ui" in sys.argv:
         show_ui = False
 
-    app = QApplication(sys.argv)
+    try:
+        version = pkg_resources.get_distribution("streamdeck_ui").version
+    except pkg_resources.DistributionNotFound:
+        version = "devel"
 
+    app = QApplication(sys.argv)
+    app.setApplicationName("Streamdeck UI")
+    app.setApplicationVersion(version)
     logo = QIcon(LOGO)
+    app.setWindowIcon(logo)
+
     main_window = MainWindow()
     ui = main_window.ui
-    main_window.setWindowIcon(logo)
     tray = QSystemTrayIcon(logo, app)
     tray.activated.connect(main_window.systray_clicked)
 
@@ -627,7 +661,7 @@ def start(_exit: bool = False) -> None:
 
     ui.text.textChanged.connect(partial(queue_text_change, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
-    ui.keys.textChanged.connect(partial(update_button_keys, ui))
+    ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
@@ -661,6 +695,9 @@ def start(_exit: bool = False) -> None:
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
     ui.actionExit.triggered.connect(app.exit)
+    ui.actionAbout.triggered.connect(main_window.about_dialog)
+    ui.actionDocs.triggered.connect(browse_documentation)
+    ui.actionGithub.triggered.connect(browse_github)
 
     timer = QTimer()
     timer.timeout.connect(partial(sync, ui))
