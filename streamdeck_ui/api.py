@@ -113,7 +113,7 @@ def export_icon(deck_id: str, page: int, button_id: int, icon_frames_to_save: li
         gif = icon_frames_to_save
         if gif.__len__() > 1:
             gif[0].save(
-                ICON_DIR + key + ".gif",
+                ICON_DIR + key + ".png",
                 save_all=True,
                 append_images=gif[1:],
                 optimize=False,
@@ -121,9 +121,9 @@ def export_icon(deck_id: str, page: int, button_id: int, icon_frames_to_save: li
                 duration=40  # 40ms (25 fps)
             )
         else:
-            gif[0].save(ICON_DIR + key + ".gif")
+            gif[0].save(ICON_DIR + key + ".png")
     except Exception as error:
-        print(f"The icon file '{key}'.gif was not updated. Error: {error}")
+        print(f"The icon file '{key}'.png was not updated. Error: {error}")
         raise
 
 
@@ -192,8 +192,8 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
     # Clear the cache so images will be recreated on render
     image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
     image_cache.pop(f"{deck_id}.{page}.{target_button}", None)
-    os.remove(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".gif")
-    os.remove(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".gif")
+    os.remove(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".png")
+    os.remove(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".png")
 
     _save_state()
     render()
@@ -204,7 +204,7 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".gif")
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
         render()
         _save_state()
 
@@ -219,7 +219,7 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".gif")
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
         render()
         _save_state()
 
@@ -339,7 +339,7 @@ def render() -> None:
             key_image = False
             if key in image_cache:
                 image = image_cache[key]
-            elif os.path.isfile(ICON_DIR + key + ".gif"):
+            elif os.path.isfile(ICON_DIR + key + ".png"):
                 image = _load_key_image(deck, key)
                 key_image = True
             else:
@@ -362,11 +362,11 @@ def render() -> None:
 
 def _load_key_image(deck, key: str):
     """load an individual rendered key image"""
-    if os.path.isfile(ICON_DIR + key + ".gif"):
+    if os.path.isfile(ICON_DIR + key + ".png"):
         try:
-            rgba_icon = Image.open(ICON_DIR + key + ".gif")
+            rgba_icon = Image.open(ICON_DIR + key + ".png")
         except (OSError, IOError) as icon_error:
-            print(f"Unable to load icon {key}.gif with error {icon_error}")
+            print(f"Unable to load icon {key}.png with error {icon_error}")
             rgba_icon = Image.new("RGBA", (300, 300))
     else:
         rgba_icon = Image.new("RGBA", (300, 300))
