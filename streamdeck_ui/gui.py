@@ -357,6 +357,8 @@ def _update_page_names_items(ui):
 
 
 def update_page_names(ui, index: int) -> None:
+    if index == -1 or ui.page_names.count() == 1:
+        return
     ui.switch_page.setValue(index)
 
 
