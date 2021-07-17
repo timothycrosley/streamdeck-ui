@@ -343,7 +343,6 @@ def set_page(deck_id: str, page: int, old_page: int) -> None:
     if get_page(deck_id) != page:
         state.setdefault(deck_id, {})["page"] = page
         render()
-        _save_state()
 
         # delete the state pages who is not bool
         to_delete = []
@@ -354,6 +353,8 @@ def set_page(deck_id: str, page: int, old_page: int) -> None:
             del _page_state(deck_id, old_page)[button]
         if not bool(_page_state(deck_id, old_page)):
             del _deck_state(deck_id)["buttons"][old_page]
+
+        _save_state()
 
 
 def render() -> None:
