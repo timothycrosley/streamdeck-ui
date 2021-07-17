@@ -181,12 +181,11 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     if get_button_text(deck_id, page, button) != text:
-        if bool(text):
-            _button_state(deck_id, page, button)["text"] = text
-        else:
-            del_none_page(deck_id, page, button, "text")
+        _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
+        if not bool(text):
+            del_none_page(deck_id, page, button, "text")
         _save_state()
 
 
@@ -198,12 +197,11 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     if get_button_icon(deck_id, page, button) != icon:
-        if bool(icon):
-            _button_state(deck_id, page, button)["icon"] = icon
-        else:
-            del_none_page(deck_id, page, button, "icon")
+        _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
+        if not bool(icon):
+            del_none_page(deck_id, page, button, "icon")
         _save_state()
 
 
@@ -215,11 +213,10 @@ def get_button_icon(deck_id: str, page: int, button: int) -> str:
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
     """Sets the brightness changing associated with a button"""
     if get_button_change_brightness(deck_id, page, button) != amount:
-        if amount != 0:
-            _button_state(deck_id, page, button)["brightness_change"] = amount
-        else:
-            del_none_page(deck_id, page, button, "brightness_change")
+        _button_state(deck_id, page, button)["brightness_change"] = amount
         render()
+        if amount == 0:
+            del_none_page(deck_id, page, button, "brightness_change")
         _save_state()
 
 
