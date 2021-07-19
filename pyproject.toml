@@ -13,6 +13,7 @@ pillow = "^8.2"
 pynput = "^1.7"
 pyside2 = "^5.13"
 python3-xlib = "^0.15"
+CairoSVG = "^2.5.2"
 
 [tool.poetry.dev-dependencies]
 vulture = "^1.0"
