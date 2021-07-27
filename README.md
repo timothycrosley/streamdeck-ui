@@ -41,7 +41,7 @@ To use streamdeck_ui on Linux, you will need first to install some prerequisite 
 The name of those libraries will differ depending on your Operating System.  
 Debian / Ubuntu:
 ``` console
-sudo apt install python3-pip libhidapi-libusb0 libxcb-xinerama0
+sudo apt install python3-pip libhidapi-libusb0 libxcb-xinerama0 libusb-1.0-0-dev libxcb-util1
 ```
 Fedora:
 ``` console
