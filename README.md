@@ -68,7 +68,7 @@ Reload the rules:
 ``` console
 sudo udevadm control --reload-rules
 ```
-Make sure you unplug and replug your device before continuing.
+Make sure you unplug and replug your device before continuing.  For input to work, you'll need to log out and back in again so logind can assign you permission to read the Stream Deck's input device.
 Once complete, you should be able to install streamdeck_ui.
 Installing the application itself is done via pip:
 ``` console
