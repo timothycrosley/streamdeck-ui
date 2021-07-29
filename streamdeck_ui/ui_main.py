@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         self.current_page = QSpinBox(self.centralwidget)
         self.current_page.setObjectName(u"current_page")
         self.current_page.setMinimum(1)
-        self.current_page.setMaximum(99)
+        self.current_page.setMaximum(999999)
 
         self.gridLayout.addWidget(self.current_page, 0, 1, 1, 1)
 
@@ -201,7 +201,7 @@ class Ui_MainWindow(object):
         self.switch_page = QSpinBox(self.groupBox)
         self.switch_page.setObjectName(u"switch_page")
         self.switch_page.setMinimum(0)
-        self.switch_page.setMaximum(99)
+        self.switch_page.setMaximum(999999)
         self.switch_page.setValue(0)
 
         self.formLayout.setWidget(4, QFormLayout.FieldRole, self.switch_page)
