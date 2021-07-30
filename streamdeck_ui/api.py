@@ -192,8 +192,10 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
     # Clear the cache so images will be recreated on render
     image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
     image_cache.pop(f"{deck_id}.{page}.{target_button}", None)
-    os.remove(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".png")
-    os.remove(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".png")
+    if os.path.isfile(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".png"):
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{source_button}" + ".png")
+    if os.path.isfile(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".png"):
+        os.remove(ICON_DIR + f"{deck_id}.{page}.{target_button}" + ".png")
 
     _save_state()
     render()
@@ -204,7 +206,8 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
+        if os.path.isfile(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png"):
+            os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
         render()
         _save_state()
 
@@ -219,7 +222,8 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
+        if os.path.isfile(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png"):
+            os.remove(ICON_DIR + f"{deck_id}.{page}.{button}" + ".png")
         render()
         _save_state()
 
