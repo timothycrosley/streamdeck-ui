@@ -54,6 +54,7 @@ dimmer_options = {
     "15 Minutes": 900,
     "30 Minutes": 1800,
     "1 Hour": 3600,
+    "2 Hour": 7200,
     "5 Hours": 7200,
     "10 Hours": 36000,
 }
