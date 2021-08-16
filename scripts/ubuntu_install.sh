@@ -9,7 +9,9 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", TAG+="uacce
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
 EOF
-sudo udevadm control --reload-rules
+
+# If below does not work, try: # sudo udevadm control --reload-rules
+sudo udevadm control -R
 
 echo "Unplug and replug in device for the new udev rules to take effect"
 echo "Installing streamdeck_ui"
