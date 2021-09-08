@@ -8,8 +8,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
-streamdeck = "^0.8.4"
-pillow = "^8.2"
+streamdeck = "^0.8.5"
+pillow = "^8.3.2"
 pynput = "^1.7"
 pyside2 = "^5.13"
 python3-xlib = "^0.15"
