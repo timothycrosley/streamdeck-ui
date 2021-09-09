@@ -20,6 +20,7 @@ Change log
 
 ### Features
 - Support for Stream Deck MK.2 added.
+- Remember previous image selection directory.
 
 ### Fixes
 
