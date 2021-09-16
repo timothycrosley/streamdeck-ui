@@ -88,7 +88,7 @@ You can then launch `streamdeck` to start configuring your device.
 streamdeck
 ```
 
-It's recommended that you include `streamdeck` in your windowing environment's list of applications to auto-start.
+It's recommended that you include `streamdeck` in your windowing environment's list of applications to auto-start. If you would like to start it without the user interface shown, use `streamdeck -n`.
 
 ## Generic Quick Start
 
