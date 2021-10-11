@@ -271,6 +271,18 @@ def get_brightness(deck_id: str) -> int:
     return state.get(deck_id, {}).get("brightness", 100)  # type: ignore
 
 
+def get_brightness_dimmed(deck_id: str) -> int:
+    """Gets the percentage value of the full brightness that is used when dimming the specified
+    stream deck"""
+    return state.get(deck_id, {}).get("brightness_dimmed", 0)
+
+
+def set_brightness_dimmed(deck_id: str, brightness_dimmed: int) -> None:
+    """Sets the percentage value that will be used for dimming the full brightness"""
+    state.setdefault(deck_id, {})["brightness_dimmed"] = brightness_dimmed
+    _save_state()
+
+
 def change_brightness(deck_id: str, amount: int = 1) -> None:
     """Change the brightness of the deck by the specified amount"""
     set_brightness(deck_id, max(min(get_brightness(deck_id) + amount, 100), 0))

@@ -60,12 +60,19 @@ last_image_dir = ""
 class Dimmer:
     timeout = 0
     brightness = -1
+    brightness_dimmed = -1
     __stopped = False
     __dimmer_brightness = -1
     __timer = None
     __change_timer = None
 
-    def __init__(self, timeout: int, brightness: int, brightness_callback: Callable[[int], None]):
+    def __init__(
+        self,
+        timeout: int,
+        brightness: int,
+        brightness_dimmed: int,
+        brightness_callback: Callable[[int], None],
+    ):
         """ Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.
@@ -75,6 +82,7 @@ class Dimmer:
          """
         self.timeout = timeout
         self.brightness = brightness
+        self.brightness_dimmed = brightness_dimmed
         self.brightness_callback = brightness_callback
 
     def stop(self) -> None:
@@ -108,9 +116,11 @@ class Dimmer:
             self.__timer.start(self.timeout * 1000)
 
         if self.__dimmer_brightness != self.brightness:
+            previous_dimmer_brightness = self.__dimmer_brightness
             self.brightness_callback(self.brightness)
             self.__dimmer_brightness = self.brightness
-            return True
+            if previous_dimmer_brightness < 10:
+                return True
 
         return False
 
@@ -134,7 +144,7 @@ class Dimmer:
 
     def change_brightness(self):
         """ Move the brightness level down by one and schedule another change_brightness event. """
-        if self.__dimmer_brightness:
+        if self.__dimmer_brightness and self.__dimmer_brightness >= self.brightness_dimmed:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
             self.__change_timer = QTimer()
@@ -401,6 +411,13 @@ def set_brightness(ui, value: int) -> None:
     dimmers[deck_id].reset()
 
 
+def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
+    deck_id = _deck_id(ui)
+    api.set_brightness_dimmed(deck_id, value)
+    dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
+    dimmers[deck_id].reset()
+
+
 def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
@@ -575,20 +592,33 @@ def show_settings(window) -> None:
     else:
         settings.ui.dim.setCurrentIndex(existing_index)
 
+    existing_brightness_dimmed = api.get_brightness_dimmed(deck_id)
+    settings.ui.brightness_dimmed.setValue(existing_brightness_dimmed)
+
     settings.ui.label_streamdeck.setText(deck_id)
     settings.ui.brightness.setValue(api.get_brightness(deck_id))
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
+    settings.ui.dim.currentIndexChanged.connect(partial(disable_dim_settings, settings))
     if settings.exec_():
         # Commit changes
         if existing_index != settings.ui.dim.currentIndex():
             dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
+        set_brightness_dimmed(
+            window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value()
+        )
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
 
     dimmers[deck_id].reset()
+
+
+def disable_dim_settings(settings: SettingsDialog, _index: int) -> None:
+    disable = dimmer_options.get(settings.ui.dim.currentText()) == 0
+    settings.ui.brightness_dimmed.setDisabled(disable)
+    settings.ui.label_brightness_dimmed.setDisabled(disable)
 
 
 def dim_all_displays() -> None:
@@ -654,6 +684,7 @@ def start(_exit: bool = False) -> None:
         dimmers[deck_id] = Dimmer(
             api.get_display_timeout(deck_id),
             api.get_brightness(deck_id),
+            api.get_brightness_dimmed(deck_id),
             partial(change_brightness, deck_id),
         )
         dimmers[deck_id].reset()
