@@ -147,6 +147,15 @@ def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
 
+def _deck_state(deck_id: str) -> dict:
+    return state.setdefault(deck_id, {})  # type: ignore
+
+
+def _page_state(deck_id: str, page: int) -> dict:
+    buttons = state.setdefault(deck_id, {}).setdefault("buttons", {})
+    return buttons.setdefault(page, {})  # type: ignore
+
+
 def _button_state(deck_id: str, page: int, button: int) -> dict:
     buttons = state.setdefault(deck_id, {}).setdefault("buttons", {})
     buttons_state = buttons.setdefault(page, {})  # type: ignore
@@ -175,6 +184,8 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
+        if not bool(text):
+            del_none_key(deck_id, page, button, "text")
         _save_state()
 
 
@@ -189,6 +200,8 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
+        if not bool(icon):
+            del_none_key(deck_id, page, button, "icon")
         _save_state()
 
 
@@ -202,6 +215,8 @@ def set_button_change_brightness(deck_id: str, page: int, button: int, amount: i
     if get_button_change_brightness(deck_id, page, button) != amount:
         _button_state(deck_id, page, button)["brightness_change"] = amount
         render()
+        if amount == 0:
+            del_none_key(deck_id, page, button, "brightness_change")
         _save_state()
 
 
@@ -213,7 +228,10 @@ def get_button_change_brightness(deck_id: str, page: int, button: int) -> int:
 def set_button_command(deck_id: str, page: int, button: int, command: str) -> None:
     """Sets the command associated with the button"""
     if get_button_command(deck_id, page, button) != command:
-        _button_state(deck_id, page, button)["command"] = command
+        if bool(command):
+            _button_state(deck_id, page, button)["command"] = command
+        else:
+            del_none_key(deck_id, page, button, "command")
         _save_state()
 
 
@@ -225,7 +243,10 @@ def get_button_command(deck_id: str, page: int, button: int) -> str:
 def set_button_switch_page(deck_id: str, page: int, button: int, switch_page: int) -> None:
     """Sets the page switch associated with the button"""
     if get_button_switch_page(deck_id, page, button) != switch_page:
-        _button_state(deck_id, page, button)["switch_page"] = switch_page
+        if switch_page != 0:
+            _button_state(deck_id, page, button)["switch_page"] = switch_page
+        else:
+            del_none_key(deck_id, page, button, "switch_page")
         _save_state()
 
 
@@ -234,10 +255,41 @@ def get_button_switch_page(deck_id: str, page: int, button: int) -> int:
     return _button_state(deck_id, page, button).get("switch_page", 0)
 
 
+def set_pages_name(deck_id: str, page: int, page_name: str) -> None:
+    """Sets the page name for this page"""
+    if get_pages_name(deck_id, page) != page_name:
+        if "page_names" in _deck_state(deck_id):
+            if bool(page_name):
+                _deck_state(deck_id)["page_names"][str(page)] = page_name
+            else:
+                del _deck_state(deck_id)["page_names"][str(page)]
+        else:
+            _deck_state(deck_id)["page_names"] = {str(page): page_name}
+        _save_state()
+
+
+def get_pages_name(deck_id: str, page: int) -> str:
+    """Returns the page name set for the specified page. {} implies no page name."""
+    return _deck_state(deck_id).get("page_names", {str(page): f"Page {page+1}"}).get(str(page), f"Page {page+1}")
+
+
+def get_page_length(deck_id: str) -> int:
+    """return the number of page count"""
+    return _deck_state(deck_id).get("buttons", {}).__len__()
+
+
+def del_none_key(deck_id: str, page: int, button: int, key: str) -> None:
+    """Delete the state if it's not bool"""
+    del _button_state(deck_id, page, button)[key]
+
+
 def set_button_keys(deck_id: str, page: int, button: int, keys: str) -> None:
     """Sets the keys associated with the button"""
     if get_button_keys(deck_id, page, button) != keys:
-        _button_state(deck_id, page, button)["keys"] = keys
+        if bool(keys):
+            _button_state(deck_id, page, button)["keys"] = keys
+        else:
+            del_none_key(deck_id, page, button, "keys")
         _save_state()
 
 
@@ -249,7 +301,10 @@ def get_button_keys(deck_id: str, page: int, button: int) -> str:
 def set_button_write(deck_id: str, page: int, button: int, write: str) -> None:
     """Sets the text meant to be written when button is pressed"""
     if get_button_write(deck_id, page, button) != write:
-        _button_state(deck_id, page, button)["write"] = write
+        if bool(write):
+            _button_state(deck_id, page, button)["write"] = write
+        else:
+            del_none_key(deck_id, page, button, "write")
         _save_state()
 
 
@@ -293,11 +348,20 @@ def get_page(deck_id: str) -> int:
     return state.get(deck_id, {}).get("page", 0)  # type: ignore
 
 
-def set_page(deck_id: str, page: int) -> None:
+def set_page(deck_id: str, page: int, old_page: int) -> None:
     """Sets the current page shown on the stream deck"""
     if get_page(deck_id) != page:
         state.setdefault(deck_id, {})["page"] = page
         render()
+
+        # delete the state pages who is not bool
+        to_delete = []
+        for button in _page_state(deck_id, old_page).items():
+            if not bool(button[1]):
+                to_delete.append(button[0])
+        if _page_state(deck_id, old_page).__len__() == to_delete.__len__():
+            del _deck_state(deck_id)["buttons"][old_page]
+
         _save_state()
 
 

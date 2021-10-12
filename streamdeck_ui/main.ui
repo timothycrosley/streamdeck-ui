@@ -45,7 +45,7 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QVBoxLayout" name="left_verticalLayout" stretch="0,1">
+       <layout class="QVBoxLayout" name="left_verticalLayout" stretch="0,0,0,1">
         <property name="spacing">
          <number>6</number>
         </property>
@@ -111,6 +111,40 @@
          </layout>
         </item>
         <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="current_page">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Page Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Current Page</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="page_name"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="formLayout_2"/>
+        </item>
+        <item>
          <widget class="QTabWidget" name="pages">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -127,65 +161,14 @@
           <property name="currentIndex">
            <number>0</number>
           </property>
+          <property name="tabsClosable">
+           <bool>false</bool>
+          </property>
           <widget class="QWidget" name="page_1">
            <attribute name="title">
-            <string>Page 1</string>
+            <string/>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2"/>
-          </widget>
-          <widget class="QWidget" name="page_2">
-           <attribute name="title">
-            <string>2</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_3"/>
-          </widget>
-          <widget class="QWidget" name="page_3">
-           <attribute name="title">
-            <string>3</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_11"/>
-          </widget>
-          <widget class="QWidget" name="page_4">
-           <attribute name="title">
-            <string>4</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_10"/>
-          </widget>
-          <widget class="QWidget" name="page_5">
-           <attribute name="title">
-            <string>5</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_9"/>
-          </widget>
-          <widget class="QWidget" name="page_6">
-           <attribute name="title">
-            <string>6</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_8"/>
-          </widget>
-          <widget class="QWidget" name="page_7">
-           <attribute name="title">
-            <string>7</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_7"/>
-          </widget>
-          <widget class="QWidget" name="page_8">
-           <attribute name="title">
-            <string>8</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_6"/>
-          </widget>
-          <widget class="QWidget" name="page_9">
-           <attribute name="title">
-            <string>9</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_5"/>
-          </widget>
-          <widget class="QWidget" name="tab_10">
-           <attribute name="title">
-            <string>10</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_4"/>
           </widget>
          </widget>
         </item>
@@ -297,36 +280,39 @@
                 <number>0</number>
                </property>
                <property name="maximum">
-                <number>10</number>
+                <number>999999</number>
                </property>
                <property name="value">
                 <number>0</number>
                </property>
               </widget>
              </item>
-             <item row="5" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="label_7">
                <property name="text">
                 <string>Brightness +/-:</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="6" column="1">
               <widget class="QSpinBox" name="change_brightness">
                <property name="minimum">
                 <number>-99</number>
                </property>
               </widget>
              </item>
-             <item row="6" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="label_6">
                <property name="text">
                 <string>Write Text:</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="7" column="1">
               <widget class="QPlainTextEdit" name="write"/>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="page_names"/>
              </item>
             </layout>
            </item>
@@ -373,6 +359,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionTest2">
+   <property name="text">
+    <string>Test2</string>
    </property>
   </action>
  </widget>

@@ -305,7 +305,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
         switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
-            api.set_page(deck_id, switch_page - 1)
+            api.set_page(deck_id, switch_page - 1, page)
 
 
 def _deck_id(ui) -> str:
@@ -313,7 +313,7 @@ def _deck_id(ui) -> str:
 
 
 def _page(ui) -> int:
-    return ui.pages.currentIndex()
+    return ui.current_page.value()-1
 
 
 def update_button_text(ui, text: str) -> None:
@@ -344,7 +344,33 @@ def update_change_brightness(ui, amount: int) -> None:
 
 def update_switch_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
+    ui.page_names.setCurrentIndex(page)
     api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
+
+
+def update_page_name(ui, name: str) -> None:
+    deck_id = _deck_id(ui)
+    api.set_pages_name(deck_id, _page(ui), name)
+    _update_page_names_items(ui)
+
+
+def _update_page_names_items(ui):
+    deck_id = _deck_id(ui)
+    ui.page_names.clear()
+    ui.page_names.addItem("")
+    for page_number in range(api.get_page_length(deck_id)):
+        page_name = api.get_pages_name(deck_id, page_number)
+        if bool(page_name):
+            ui.page_names.addItem(page_name)
+        else:
+            ui.page_names.addItem(f"Page {page_number+1}")
+    ui.switch_page.setMaximum(ui.page_names.count()-1)
+
+
+def update_page_names(ui, index: int) -> None:
+    if index == -1 or ui.page_names.count() == 1:
+        return
+    ui.switch_page.setValue(index)
 
 
 def _highlight_first_button(ui) -> None:
@@ -355,7 +381,9 @@ def _highlight_first_button(ui) -> None:
 
 def change_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
-    api.set_page(deck_id, page)
+    old_page = api.get_page(deck_id)
+    api.set_page(deck_id, page-1, old_page)
+    ui.page_name.setText(api.get_pages_name(deck_id, _page(ui)))
     redraw_buttons(ui)
     _highlight_first_button(ui)
     dimmers[deck_id].reset()
@@ -498,17 +526,22 @@ def import_config(window) -> None:
 
 def sync(ui) -> None:
     api.ensure_decks_connected()
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    ui.pages.setCurrentIndex(0)
+    ui.current_page.setValue(api.get_page(_deck_id(ui))+1)
 
 
 def build_device(ui, _device_index=None) -> None:
-    for page_id in range(ui.pages.count()):
-        page = ui.pages.widget(page_id)
-        page.setStyleSheet("background-color: black")
-        build_buttons(ui, page)
+    page = ui.pages.widget(0)
+    page.setStyleSheet("background-color: black")
+    build_buttons(ui, page)
 
     # Set the active page for this device
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    ui.current_page.setValue(api.get_page(_deck_id(ui))+1)
+
+    # Set the number of the active page
+    deck_id = _deck_id(ui)
+    ui.page_name.setText(api.get_pages_name(deck_id, _page(ui)))
+    update_page_name(ui, api.get_pages_name(deck_id, _page(ui)))
 
     # Draw the buttons for the active page
     redraw_buttons(ui)
@@ -666,6 +699,7 @@ def start(_exit: bool = False) -> None:
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
+    ui.page_names.currentIndexChanged.connect(partial(update_page_names, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
@@ -692,7 +726,8 @@ def start(_exit: bool = False) -> None:
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
 
-    ui.pages.currentChanged.connect(partial(change_page, ui))
+    ui.current_page.valueChanged.connect(partial(change_page, ui))
+    ui.page_name.textChanged.connect(partial(update_page_name, ui))
 
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
