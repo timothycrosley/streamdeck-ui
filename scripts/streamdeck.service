@@ -1,6 +1,5 @@
 [Unit]
 Description=A Linux compatible UI for the Elgato Stream Deck.
-After=network.target
 
 [Service]
 Type=forking
