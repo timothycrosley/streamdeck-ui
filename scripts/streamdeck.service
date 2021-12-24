@@ -2,7 +2,7 @@
 Description=A Linux compatible UI for the Elgato Stream Deck.
 
 [Service]
-Type=forking
+Type=simple
 ExecStart=<path to streamdeck> -n
 Restart=on-failure
 
