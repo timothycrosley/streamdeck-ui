@@ -229,7 +229,6 @@ def _replace_special_keys(key):
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
     if state:
-
         if dimmers[deck_id].reset():
             return
 
@@ -291,6 +290,9 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
         if write:
             try:
                 keyboard.type(write)
+                if api.get_button_enter_after_write(deck_id, page, key) == 2:
+                    keyboard.press(Key.enter)
+                    keyboard.release(Key.enter)
             except Exception as error:
                 print(f"Could not complete the write command: {error}")
 
@@ -320,6 +322,11 @@ def update_button_text(ui, text: str) -> None:
     deck_id = _deck_id(ui)
     api.set_button_text(deck_id, _page(ui), selected_button.index, text)
     redraw_buttons(ui)
+
+
+def update_enter_after_write(ui, state) -> None:
+    deck_id = _deck_id(ui)
+    api.set_button_enter_after_write(deck_id, _page(ui), selected_button.index, state)
 
 
 def update_button_command(ui, command: str) -> None:
@@ -435,6 +442,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
     ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
     ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+    ui.enter_after_write.setChecked(api.get_button_enter_after_write(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
 
 
@@ -669,7 +677,7 @@ def start(_exit: bool = False) -> None:
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
-
+    ui.enter_after_write.stateChanged.connect(partial(update_enter_after_write, ui))
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
     items = api.open_decks().items()

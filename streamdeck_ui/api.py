@@ -29,11 +29,11 @@ streamdesk_keys = KeySignalEmitter()
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
-    """ Callback whenever a key is pressed. This is method runs the various actions defined
+    """ Callback whenever a key is pressed. This method runs the various actions defined
         for the key being pressed, sequentially. """
     # Stream Desk key events fire on a background thread. Emit a signal
     # to bring it back to UI thread, so we can use Qt objects for timers etc.
-    # Since multiple keys could fire simultaniously, we need to protect
+    # Since multiple keys could fire simultaneously, we need to protect
     # shared state with a lock
     with key_event_lock:
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
@@ -208,6 +208,17 @@ def set_button_change_brightness(deck_id: str, page: int, button: int, amount: i
 def get_button_change_brightness(deck_id: str, page: int, button: int) -> int:
     """Returns the brightness change set for a particular button"""
     return _button_state(deck_id, page, button).get("brightness_change", 0)
+
+
+def get_button_enter_after_write(deck_id: str, page: int, button: int) -> int:
+    """Returns the brightness change set for a particular button"""
+    return _button_state(deck_id, page, button).get("enter_flag", 0)
+
+
+def set_button_enter_after_write(deck_id: str, page: int, button: int, flag: bool) -> None:
+    """Sets the after write do enter flag"""
+    _button_state(deck_id, page, button)["enter_flag"] = flag
+    _save_state()
 
 
 def set_button_command(deck_id: str, page: int, button: int, command: str) -> None:

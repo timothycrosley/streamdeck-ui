@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from  . import resources_rc
 
@@ -149,7 +149,7 @@ class Ui_MainWindow(object):
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
 
         self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setSpacing(6)
+        self.horizontalLayout_2.setSpacing(7)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.imageButton = QPushButton(self.groupBox)
         self.imageButton.setObjectName(u"imageButton")
@@ -237,6 +237,16 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
 
+        self.label_enter = QLabel(self.groupBox)
+        self.label_enter.setObjectName(u"label_enter")
+
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_enter)
+
+        self.enter_after_write = QCheckBox(self.groupBox)
+        self.enter_after_write.setObjectName(u"enter_after_write")
+
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.enter_after_write)
+
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
@@ -303,6 +313,7 @@ class Ui_MainWindow(object):
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
+        self.label_enter.setText(QCoreApplication.translate("MainWindow", u"Press Enter after Write:", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 
