@@ -14,6 +14,8 @@ from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
+from signal import signal, SIGUSR1
+
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
@@ -26,6 +28,14 @@ class KeySignalEmitter(QObject):
 
 
 streamdesk_keys = KeySignalEmitter()
+
+
+def reload_on_SIGUSR1(signal_received, frame):
+    print('Received USR1: Reloading configuration')
+    import_config(STATE_FILE)
+
+
+signal(SIGUSR1, reload_on_SIGUSR1)
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
