@@ -13,13 +13,14 @@ from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.ui_main import Ui_MainWindow
 
 image_cache: Dict[str, memoryview] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
-
+ui: Ui_MainWindow
 
 class KeySignalEmitter(QObject):
     key_pressed = Signal(str, int, bool)

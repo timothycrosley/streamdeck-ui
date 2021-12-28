@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from  . import resources_rc
 
@@ -68,17 +68,6 @@ class Ui_SettingsDialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dim)
 
-        self.label_brightness_dimmed = QLabel(SettingsDialog)
-        self.label_brightness_dimmed.setObjectName(u"label_brightness_dimmed")
-
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_brightness_dimmed)
-
-        self.brightness_dimmed = QSlider(SettingsDialog)
-        self.brightness_dimmed.setObjectName(u"brightness_dimmed")
-        self.brightness_dimmed.setOrientation(Qt.Horizontal)
-
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.brightness_dimmed)
-
 
         self.verticalLayout_2.addLayout(self.formLayout)
 
@@ -107,7 +96,6 @@ class Ui_SettingsDialog(object):
         self.label_streamdeck.setText("")
         self.label_brightness.setText(QCoreApplication.translate("SettingsDialog", u"Brightness:", None))
         self.label_dim.setText(QCoreApplication.translate("SettingsDialog", u"Auto dim after:", None))
-        self.label_brightness_dimmed.setText(QCoreApplication.translate("SettingsDialog", u"Dim to %:", None))
         self.dim.setCurrentText("")
     # retranslateUi
 

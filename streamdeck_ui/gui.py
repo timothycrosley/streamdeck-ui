@@ -3,8 +3,10 @@ import os
 import shlex
 import sys
 import time
+import json
+
 from functools import partial
-from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from subprocess import Popen, PIPE  # nosec - Need to allow users to specify arbitrary commands
 from typing import Callable, Dict
 
 from pynput.keyboard import Controller, Key
@@ -226,6 +228,25 @@ def _replace_special_keys(key):
     return key
 
 
+def process_input(line: str) -> None:
+    if "streamdeck_config_change" in line:
+        result = json.loads(line)["streamdeck_config_change"]
+        if "text" in result:
+            api.ui.text.setText(result["text"])
+        if "command" in result:
+            api.ui.command.setText(result["command"])
+        if "write" in result:
+            api.ui.write.setPlainText(result["write"])
+        if "image" in result:
+            set_button_image(api.ui, result["image"])
+        if "keys" in result:
+            api.ui.keys.setText(int(result["keys"]))
+        # this needs to be last
+        if "page" in result:
+            api.ui.pages.setCurrentIndex(int(result["page"]))
+        print("applied new configs")
+
+
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
     if state:
@@ -239,7 +260,9 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
         command = api.get_button_command(deck_id, page, key)
         if command:
             try:
-                Popen(shlex.split(command))
+                with Popen(shlex.split(command), stderr=PIPE, bufsize=1, universal_newlines=True) as p:
+                    for line in p.stderr:
+                        process_input(line) # dynamically process each line
             except Exception as error:
                 print(f"The command '{command}' failed: {error}")
 
@@ -375,9 +398,13 @@ def select_image(window) -> None:
     )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
-        deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
-        redraw_buttons(window.ui)
+        set_button_image(window.ui, file_name)
+
+
+def set_button_image(ui, file_name) -> None:
+    deck_id = _deck_id(ui)
+    api.set_button_icon(deck_id, _page(ui), selected_button.index, file_name)
+    redraw_buttons(ui)
 
 
 def remove_image(window) -> None:
@@ -641,7 +668,9 @@ def start(_exit: bool = False) -> None:
 
     logo = QIcon(LOGO)
     main_window = MainWindow()
+
     ui = main_window.ui
+    api.ui = ui
     main_window.setWindowIcon(logo)
     tray = QSystemTrayIcon(logo, app)
     tray.activated.connect(main_window.systray_clicked)
