@@ -178,9 +178,19 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
         _save_state()
 
 
-def get_button_text(deck_id: str, page: int, button: int) -> str:
+def get_button_text(deck_id: str, page: int, button: int, transform_text: bool = False) -> str:
     """Returns the text set for the specified button"""
-    return _button_state(deck_id, page, button).get("text", "")
+    state = _button_state(deck_id, page, button)
+    if transform_text:
+        return transform_button_text(state)
+    return state.get("text", "")
+
+
+def transform_button_text(button_state: dict) -> str:
+    """Returns final text for the button"""
+    text = button_state.get("text", "")
+    text = text.replace("\\n", "\n")
+    return text
 
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
@@ -317,7 +327,10 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key]
             else:
-                image = _render_key_image(deck, **button_settings)
+                button_settings_c = button_settings.copy()
+                if "text" in button_settings_c:
+                    button_settings_c["text"] = transform_button_text(button_settings_c)
+                image = _render_key_image(deck, **button_settings_c)
                 image_cache[key] = image
 
             with streamdecks_lock:
@@ -340,20 +353,20 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
 
     icon_width, icon_height = image.width, image.height
     if text:
-        icon_height -= 20
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        label_w, label_h = draw.textsize(text, font=true_font)
+        icon_height -= label_h + 7
 
     rgba_icon.thumbnail((icon_width, icon_height), Image.LANCZOS)
     icon_pos = ((image.width - rgba_icon.width) // 2, 0)
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
-        label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
-            label_pos = ((image.width - label_w) // 2, image.height - 20)
+            label_pos = ((image.width - label_w) // 2, image.height - (label_h + 7))
         else:
-            label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
-        draw.text(label_pos, text=text, font=true_font, fill="white")
+            label_pos = ((image.width - label_w) // 2, (image.height - label_h) // 2)
+        draw.text(label_pos, text=text, font=true_font, fill="white", align="center")
 
     return PILHelper.to_native_format(deck, image)
 
