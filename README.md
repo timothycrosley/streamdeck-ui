@@ -153,6 +153,12 @@ Simulates key press combinations (hot keys). The basic format is a group of keys
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 
+The `super` key (Windows key) can be problematic on some versions of Linux. Instead of using the Key Press feature, you could use the Command feature as follows. In this example, it will press `Super` and `4`, which launches application number 4 in your favorites (Ubuntu).
+```
+xdotool key "Super_L+4"
+```
+
+
 ## Known issues
 Confirm you are running the latest release with `pip3 show streamdeck-ui`. Compare it to: [![PyPI version](https://badge.fury.io/py/streamdeck-ui.svg)](http://badge.fury.io/py/streamdeck-ui)
 
