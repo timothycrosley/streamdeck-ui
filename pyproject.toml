@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 streamdeck = "^0.9.0"
-pillow = "^8.3.2"
+pillow = "^9.0.0"
 pynput = "^1.7"
 pyside2 = "^5.15"
 python3-xlib = "^0.15"
@@ -33,7 +33,7 @@ ipdb = "^0.12.2"
 hypothesis-auto = "^1.1"
 cruft = "^2.2"
 pydantic = "^1.6"
-numpy = "^1.16.2"
+numpy = "^1.22.1"
 
 [tool.poetry.scripts]
 streamdeck = "streamdeck_ui.gui:start"
