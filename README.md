@@ -12,7 +12,8 @@ _________________
  
 _________________
 
-[Read Latest Documentation](https://timothycrosley.github.io/streamdeck-ui/) - [Browse GitHub Code Repository](https://github.com/timothycrosley/streamdeck-ui/)
+[Read Latest Documentation](https://timothycrosley.github.io/streamdeck-ui/) 
+[Release notes](CHANGELOG.md) 
 _________________
 
 **streamdeck_ui** A Linux compatible UI for the Elgato Stream Deck.

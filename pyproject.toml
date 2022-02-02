@@ -7,11 +7,11 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-streamdeck = "^0.8.5"
+python = ">=3.8,<3.11"
+streamdeck = "^0.9.0"
 pillow = "^8.3.2"
 pynput = "^1.7"
-pyside2 = "^5.13"
+pyside2 = "^5.15"
 python3-xlib = "^0.15"
 
 [tool.poetry.dev-dependencies]

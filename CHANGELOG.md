@@ -16,18 +16,17 @@ OR
 
 Change log
 ==========
-## 1.1.3 - TBD
+## 1.1.3 - 2 Feb 2022
 
 ### Features
 - Support for Stream Deck MK.2 added.
 - Remember previous image selection directory.
 - Auto dim to a configurable percentage.
-
-### Fixes
-
-### Features
 - Drag and drop icons onto buttons from file browser.
 - Follow the settings file location if symbolic link.
+
+### Fixes
+- Works with Python 3.10 (resolves Fedora 35 install).
 ## 1.1.2 - April 30, 2021
 ### Fixes
 - Regression with multi-character keys.
