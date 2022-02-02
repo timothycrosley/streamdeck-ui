@@ -65,12 +65,11 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uacce
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0080", TAG+="uaccess"
 ```
-Reload the rules:
+Make the new rule take effect:
 ``` console
-sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
-Make sure you unplug and replug your device before continuing.
-Once complete, you should be able to install streamdeck_ui.
+
 Installing the application itself is done via pip:
 ``` console
 pip3 install streamdeck-ui --user
@@ -80,7 +79,7 @@ If you haven't already, add
 ``` console
 PATH=$PATH:$HOME/.local/bin
 ```
-to the bottom your shell config file (most likely .bashrc in your home directory)
+to the bottom your shell config file (most likely .bashrc in your home directory).
 
 You can then launch `streamdeck` to start configuring your device.
 
