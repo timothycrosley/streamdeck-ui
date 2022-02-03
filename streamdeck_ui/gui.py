@@ -371,7 +371,7 @@ def select_image(window) -> None:
         else:
             image = last_image_dir
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp)"
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *gif)"
     )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
@@ -703,6 +703,7 @@ def start(_exit: bool = False) -> None:
     timer.start(1000)
 
     api.render()
+    api.start_animation()
     tray.show()
 
     if show_ui:
