@@ -16,6 +16,10 @@ OR
 
 Change log
 ==========
+## 1.1.4 - TBD
+
+### Features
+- SVG file type support
 ## 1.1.3 - 2 Feb 2022
 
 ### Features
