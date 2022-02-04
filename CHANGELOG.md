@@ -19,7 +19,13 @@ Change log
 ## 1.1.4 - TBD
 
 ### Features
-- SVG file type support
+- SVG file type support.
+- Keys widget now has examples built in.
+- Help menu with links to websites.
+- About dialog shows application version and primary dependency versions.
+
+### Fixes
+- Tray context menu not interrupted by window activation.
 ## 1.1.3 - 2 Feb 2022
 
 ### Features
