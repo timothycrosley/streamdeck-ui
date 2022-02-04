@@ -43,7 +43,9 @@ jobs:
       # install your root project, if required 
       #----------------------------------------------      
       - name: Install library
-        run: poetry install --no-interaction
+        run: |
+          python -m pip install --upgrade pip
+          poetry install --no-interaction
       #----------------------------------------------
       #              run Lint tests   
       #----------------------------------------------
