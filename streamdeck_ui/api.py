@@ -8,6 +8,7 @@ from typing import Dict, Tuple, Union, cast
 from warnings import warn
 
 import cairosvg
+import filetype
 from PIL import Image, ImageDraw, ImageFont
 from PySide2.QtCore import QObject, Signal
 from StreamDeck import DeviceManager
@@ -333,13 +334,14 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
 
     if icon:
         try:
-            rgba_icon = Image.open(icon).convert("RGBA")
-        except (OSError, IOError) as icon_error:
-            print(f"Unable to load icon {icon} with error {icon_error}")
-            svg_code = open(icon).read()
-            png = cairosvg.svg2png(svg_code, output_height=72, output_width=72)
-            image_file = BytesIO(png)
-            rgba_icon = Image.open(image_file)
+            kind = filetype.guess(icon)
+            if kind is None:
+                svg_code = open(icon).read()
+                png = cairosvg.svg2png(svg_code, output_height=72, output_width=72)
+                image_file = BytesIO(png)
+                rgba_icon = Image.open(image_file)
+            else:
+                rgba_icon = Image.open(icon).convert("RGBA")
         except (OSError, IOError) as icon_error:
             print(f"Unable to load icon {icon} with error {icon_error}")
             rgba_icon = Image.new("RGBA", (300, 300))
