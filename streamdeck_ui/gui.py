@@ -10,7 +10,7 @@ from typing import Callable, Dict
 import pkg_resources
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
-from PySide2.QtCore import QCoreApplication, QMimeData, QSize, Qt, QTimer, QUrl
+from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
