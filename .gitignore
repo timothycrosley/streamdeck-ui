@@ -1,4 +1,5 @@
 *.py[cod]
+__pycache__
 .DS_Store
 # C extensions
 *.so
@@ -85,4 +86,3 @@ docs/preconvert
 site/
 out
 .hypothesis
-

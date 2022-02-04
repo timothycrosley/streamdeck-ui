@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from  . import resources_rc
 
@@ -18,13 +18,19 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(901, 489)
+        MainWindow.resize(940, 490)
         self.actionImport = QAction(MainWindow)
         self.actionImport.setObjectName(u"actionImport")
         self.actionExport = QAction(MainWindow)
         self.actionExport.setObjectName(u"actionExport")
         self.actionExit = QAction(MainWindow)
         self.actionExit.setObjectName(u"actionExit")
+        self.actionDocs = QAction(MainWindow)
+        self.actionDocs.setObjectName(u"actionDocs")
+        self.actionGithub = QAction(MainWindow)
+        self.actionGithub.setObjectName(u"actionGithub")
+        self.actionAbout = QAction(MainWindow)
+        self.actionAbout.setObjectName(u"actionAbout")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.centralwidget.setAutoFillBackground(False)
@@ -198,8 +204,25 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_5)
 
-        self.keys = QLineEdit(self.groupBox)
+        self.keys = QComboBox(self.groupBox)
+        self.keys.addItem(u"")
+        self.keys.addItem(u"F11")
+        self.keys.addItem(u"alt+F4")
+        self.keys.addItem(u"ctrl+w")
+        self.keys.addItem(u"cmd+left")
+        self.keys.addItem(u"alt+plus")
+        self.keys.addItem(u"alt+delay+F3")
+        self.keys.addItem(u"backspace")
+        self.keys.addItem(u"right")
+        self.keys.addItem(u"page_up")
+        self.keys.addItem(u"media_volume_up")
+        self.keys.addItem(u"media_volume_down")
+        self.keys.addItem(u"media_volume_mute")
+        self.keys.addItem(u"media_previous")
+        self.keys.addItem(u"media_next")
+        self.keys.addItem(u"media_play_pause")
         self.keys.setObjectName(u"keys")
+        self.keys.setEditable(True)
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
 
@@ -252,19 +275,26 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 901, 22))
+        self.menubar.setGeometry(QRect(0, 0, 940, 29))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
+        self.menuHelp = QMenu(self.menubar)
+        self.menuHelp.setObjectName(u"menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
         self.menuFile.addAction(self.actionImport)
         self.menuFile.addAction(self.actionExport)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
+        self.menuHelp.addAction(self.actionDocs)
+        self.menuHelp.addAction(self.actionGithub)
+        self.menuHelp.addSeparator()
+        self.menuHelp.addAction(self.actionAbout)
 
         self.retranslateUi(MainWindow)
 
@@ -279,6 +309,9 @@ class Ui_MainWindow(object):
         self.actionImport.setText(QCoreApplication.translate("MainWindow", u"Import", None))
         self.actionExport.setText(QCoreApplication.translate("MainWindow", u"Export", None))
         self.actionExit.setText(QCoreApplication.translate("MainWindow", u"Exit", None))
+        self.actionDocs.setText(QCoreApplication.translate("MainWindow", u"Documentation", None))
+        self.actionGithub.setText(QCoreApplication.translate("MainWindow", u"Github", None))
+        self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About...", None))
         self.settingsButton.setText("")
         self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"Page 1", None))
         self.pages.setTabText(self.pages.indexOf(self.page_2), QCoreApplication.translate("MainWindow", u"2", None))
@@ -300,9 +333,11 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
+
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
+        self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
 
