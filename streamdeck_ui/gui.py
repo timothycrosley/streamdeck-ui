@@ -74,21 +74,21 @@ class Dimmer:
         brightness_dimmed: int,
         brightness_callback: Callable[[int], None],
     ):
-        """ Constructs a new Dimmer instance
+        """Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.
         :param int brightness: The normal brightness level.
         :param Callable[[int], None] brightness_callback: Callback that receives the current
                                                           brightness level.
-         """
+        """
         self.timeout = timeout
         self.brightness = brightness
         self.brightness_dimmed = brightness_dimmed
         self.brightness_callback = brightness_callback
 
     def stop(self) -> None:
-        """ Stops the dimmer and sets the brightness back to normal. Call
-        reset to start normal dimming operation. """
+        """Stops the dimmer and sets the brightness back to normal. Call
+        reset to start normal dimming operation."""
         if self.__timer:
             self.__timer.stop()
 
@@ -100,7 +100,7 @@ class Dimmer:
         self.__stopped = True
 
     def reset(self) -> bool:
-        """ Reset the dimmer and start counting down again. If it was busy dimming, it will
+        """Reset the dimmer and start counting down again. If it was busy dimming, it will
         immediately stop dimming. Callback fires to set brightness back to normal."""
 
         self.__stopped = False
@@ -126,8 +126,8 @@ class Dimmer:
         return False
 
     def dim(self, toggle: bool = False):
-        """ Manually initiate a dim event.
-            If the dimmer is stopped, this has no effect. """
+        """Manually initiate a dim event.
+        If the dimmer is stopped, this has no effect."""
 
         if self.__stopped:
             return
@@ -144,7 +144,7 @@ class Dimmer:
                 self.change_brightness()
 
     def change_brightness(self):
-        """ Move the brightness level down by one and schedule another change_brightness event. """
+        """Move the brightness level down by one and schedule another change_brightness event."""
         if self.__dimmer_brightness and self.__dimmer_brightness >= self.brightness_dimmed:
             self.__dimmer_brightness = self.__dimmer_brightness - 1
             self.brightness_callback(self.__dimmer_brightness)
@@ -160,7 +160,7 @@ dimmers: Dict[str, Dimmer] = {}
 
 
 class DraggableButton(QtWidgets.QToolButton):
-    """A QToolButton that supports drag and drop and swaps the button properties on drop """
+    """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
     def __init__(self, parent, ui):
         super(DraggableButton, self).__init__(parent)
@@ -564,10 +564,10 @@ class MainWindow(QMainWindow):
         for dep in dependencies:
             try:
                 dist = pkg_resources.get_distribution(dep)
-                body.append(u"{} {}".format(dep, dist.version))
+                body.append("{} {}".format(dep, dist.version))
             except pkg_resources.DistributionNotFound:
                 pass
-        QtWidgets.QMessageBox.about(self, title, u"\n".join(body))
+        QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
 
 def queue_text_change(ui, text: str) -> None:

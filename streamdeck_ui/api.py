@@ -32,8 +32,8 @@ streamdesk_keys = KeySignalEmitter()
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
-    """ Callback whenever a key is pressed. This is method runs the various actions defined
-        for the key being pressed, sequentially. """
+    """Callback whenever a key is pressed. This is method runs the various actions defined
+    for the key being pressed, sequentially."""
     # Stream Desk key events fire on a background thread. Emit a signal
     # to bring it back to UI thread, so we can use Qt objects for timers etc.
     # Since multiple keys could fire simultaniously, we need to protect
@@ -43,12 +43,12 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
 
 
 def get_display_timeout(deck_id: str) -> int:
-    """ Returns the amount of time in seconds before the display gets dimmed."""
+    """Returns the amount of time in seconds before the display gets dimmed."""
     return cast(int, state.get(deck_id, {}).get("display_timeout", 0))
 
 
 def set_display_timeout(deck_id: str, timeout: int) -> None:
-    """ Sets the amount of time in seconds before the display gets dimmed."""
+    """Sets the amount of time in seconds before the display gets dimmed."""
     state.setdefault(deck_id, {})["display_timeout"] = timeout
     _save_state()
 
