@@ -149,7 +149,7 @@ Simulates key press combinations (hot keys). The basic format is a group of keys
 - `alt+delay+F4` - Press alt, then wait 0.5 seconds, then press F4. Release both.
 - `1,delay,delay,2,delay,delay,3` - Type 123 with a 1-second delay between key presses (using default delay).
 - `1,delay 1,2,delay 1,3` - Type 123 with a 1-second delay between key presses (using custom delay).
-
+- `e,c,h,o,space,",t,e,s,t,",enter` - Type `echo "test"` and press enter.
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 
@@ -158,6 +158,19 @@ The `super` key (Windows key) can be problematic on some versions of Linux. Inst
 xdotool key "Super_L+4"
 ```
 
+### Write Text:
+A quick way of typing longer pieces of text (verbatim). Note that unlike the *Press Keys* action,
+write text does not accept special (modifier) keys. However, if you type Enter (causing a new line) it will
+press enter during the output.
+
+#### Examples
+
+```
+Unfortunately that's a hard no.
+Kind regards,
+Joe
+```
+![nope](art/nope.gif)
 
 ## Known issues
 Confirm you are running the latest release with `pip3 show streamdeck-ui`. Compare it to: [![PyPI version](https://badge.fury.io/py/streamdeck-ui.svg)](http://badge.fury.io/py/streamdeck-ui)
