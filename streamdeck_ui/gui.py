@@ -372,7 +372,7 @@ def select_image(window) -> None:
         else:
             image = last_image_dir
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *svg)"
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.svg)"
     )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
