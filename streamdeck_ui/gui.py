@@ -1,6 +1,5 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
-import pkg_resources
 import shlex
 import sys
 import time
@@ -8,10 +7,11 @@ from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Callable, Dict
 
+import pkg_resources
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl, QCoreApplication
-from PySide2.QtGui import QDrag, QIcon, QDesktopServices
+from PySide2.QtCore import QCoreApplication, QMimeData, QSize, Qt, QTimer, QUrl
+from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
     QApplication,
