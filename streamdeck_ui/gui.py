@@ -30,15 +30,27 @@ from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 BUTTON_STYLE = """
-    QToolButton{background-color:black; color:white;}
-    QToolButton:checked{background-color:darkGray; color:black;}
-    QToolButton:focus{border:none; }
+    QToolButton {
+    margin: 2px;
+    border: 2px solid #444444;
+    border-radius: 8px;
+    background-color: #000000;
+    border-style: outset;}
+    QToolButton:checked {
+    margin: 2px;
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    background-color: #000000;
+    border-style: outset;}
 """
 
 BUTTON_DRAG_STYLE = """
-    QToolButton{background-color:white; color:black;}
-    QToolButton:checked{background-color:darkGray; color:black;}
-    QToolButton:focus{border:none; }
+    QToolButton {
+    margin: 2px;
+    border: 2px solid #999999;
+    border-radius: 8px;
+    background-color: #000000;
+    border-style: outset;}
 """
 
 selected_button: QtWidgets.QToolButton
@@ -368,11 +380,11 @@ def select_image(window) -> None:
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
     if not image:
         if not last_image_dir:
-            image = os.path.expanduser("~")
+            image_file = os.path.expanduser("~")
         else:
-            image = last_image_dir
+            image_file = last_image_dir
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.svg)"
+        window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg)"
     )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
@@ -402,7 +414,7 @@ def redraw_buttons(ui) -> None:
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
         button.setText(api.get_button_text(deck_id, _page(ui), button.index))
-        button.setIcon(QIcon(api.get_button_icon(deck_id, _page(ui), button.index)))
+        button.setIcon(api.get_button_icon(deck_id, _page(ui), button.index))
 
 
 def set_brightness(ui, value: int) -> None:
@@ -473,13 +485,18 @@ def build_buttons(ui, tab) -> None:
             button.setCheckable(True)
             button.index = index
             button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-            button.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-            button.setIconSize(QSize(100, 100))
+            button.setToolButtonStyle(Qt.ToolButtonIconOnly)
+            button.setIconSize(QSize(80, 80))
             button.setStyleSheet(BUTTON_STYLE)
             buttons.append(button)
             column_layout.addWidget(button)
             index += 1
 
+        column_layout.addStretch(1)
+    row_layout.addStretch(1)
+
+    # Note that the button click event captures the ui variable, the current button
+    #  and all the other buttons
     for button in buttons:
         button.clicked.connect(
             lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)

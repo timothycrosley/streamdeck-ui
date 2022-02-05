@@ -10,14 +10,16 @@ from warnings import warn
 import cairosvg
 import filetype
 from PIL import Image, ImageDraw, ImageFont
+from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
-from StreamDeck import DeviceManager
+from PySide2.QtGui import QImage, QPixmap
+from StreamDeck import DeviceManager, ImageHelpers
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
-image_cache: Dict[str, memoryview] = {}
+image_cache: Dict[str, Tuple[object, QPixmap]] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 streamdecks_lock = threading.Lock()
@@ -195,9 +197,12 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _save_state()
 
 
-def get_button_icon(deck_id: str, page: int, button: int) -> str:
+def get_button_icon(deck_id: str, page: int, button: int) -> QPixmap:
     """Returns the icon set for a particular button"""
-    return _button_state(deck_id, page, button).get("icon", "")
+    key = f"{deck_id}.{page}.{button}"
+    if key not in image_cache:
+        render()
+    return image_cache[key][1]
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
@@ -318,17 +323,23 @@ def render() -> None:
         ):
             key = f"{deck_id}.{page}.{button_id}"
             if key in image_cache:
-                image = image_cache[key]
+                image = image_cache[key][0]
             else:
-                image = _render_key_image(deck, **button_settings)
-                image_cache[key] = image
+                pil_image = _render_key_image(deck, **button_settings)
+                image = ImageHelpers.PILHelper.to_native_format(deck, pil_image)
+
+                qt_image = ImageQt(pil_image)
+                qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
+                pixmap = QPixmap(qt_image)
+                image_cache[key] = (image, pixmap)
 
             with streamdecks_lock:
                 deck.set_key_image(button_id, image)
 
 
 def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
-    """Renders an individual key image"""
+    """Renders an individual key image and returns
+    it as a PIL image"""
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
 
@@ -365,7 +376,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
         draw.text(label_pos, text=text, font=true_font, fill="white")
 
-    return PILHelper.to_native_format(deck, image)
+    return image
 
 
 if os.path.isfile(STATE_FILE):
