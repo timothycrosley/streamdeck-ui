@@ -86,3 +86,6 @@ docs/preconvert
 site/
 out
 .hypothesis
+
+# QT
+.qt_for_python
