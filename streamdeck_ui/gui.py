@@ -740,6 +740,8 @@ def start(_exit: bool = False) -> None:
         )
         dimmers[deck_id].reset()
 
+    api.load_display_pipelines()
+
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
 

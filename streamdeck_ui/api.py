@@ -18,6 +18,8 @@ from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.display.image_filter import ImageFilter
+from streamdeck_ui.display.pipeline import Pipeline
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
@@ -25,6 +27,9 @@ decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
+
+# Deck, Page, Key
+displays: Dict[str, Dict[str, Dict[str, Pipeline]]] = {}
 
 
 class KeySignalEmitter(QObject):
@@ -310,6 +315,32 @@ def set_page(deck_id: str, page: int) -> None:
         _save_state()
 
 
+def load_display_pipelines():
+    for deck_id, deck_state in state.items():
+        deck = decks.get(deck_id, None)
+
+        if deck is None:
+            continue
+
+        size = deck.key_image_format()['size']
+
+        page = get_page(deck_id)
+
+        for button_id, button_settings in (
+            deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
+        ):
+            pipeline = Pipeline(size)
+            icon = button_settings.get("icon")
+            if icon:
+                # Now we have deck, page and buttons
+                pipeline.add(ImageFilter(size, icon))
+
+            displays.setdefault(deck_id, {})
+            displays[deck_id].setdefault(page, {})
+            displays[deck_id][page].setdefault(button_id, None)
+            displays[deck_id][page][button_id] = pipeline
+
+
 def render() -> None:
     """renders all decks"""
     for deck_id, deck_state in state.items():
@@ -318,6 +349,7 @@ def render() -> None:
             warn(f"{deck_id} has settings specified but is not seen. Likely unplugged!")
             continue
 
+        # Lookup which page is active for this deck
         page = get_page(deck_id)
         for button_id, button_settings in (
             deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
@@ -326,8 +358,11 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key][0]
             else:
-                pil_image = _render_key_image(deck, **button_settings)
-                image = ImageHelpers.PILHelper.to_native_format(deck, pil_image)
+
+                # TODO: The pipeline needs to be rendered here
+                pil_image = displays[deck_id][page][button_id].execute()
+                # pil_image = _render_key_image(deck, **button_settings) 
+                image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 
                 qt_image = ImageQt(pil_image)
                 qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
