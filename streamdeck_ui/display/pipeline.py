@@ -3,16 +3,16 @@ from typing import List, Tuple
 
 from PIL import Image
 
-from streamdeck_ui.display import empty_filter, filter
-
+from streamdeck_ui.display.empty_filter import EmptyFilter
+from streamdeck_ui.display.filter import Filter
 
 class Pipeline:
     def __init__(self, size: Tuple[int, int]) -> None:
         self.filters: List[filter.Filter] = []
-        self.filters.append(empty_filter.EmptyFilter(size))
+        self.filters.append(EmptyFilter(size))
         self.time = Fraction(0)
 
-    def add(self, filter: filter.Filter) -> None:
+    def add(self, filter: Filter) -> None:
         self.filters.append(filter)
 
     def execute(self) -> Image:
