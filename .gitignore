@@ -88,4 +88,4 @@ out
 .hypothesis
 
 # QT
-.qt_for_python
+.qt_for_python/
