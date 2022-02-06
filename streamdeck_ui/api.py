@@ -325,27 +325,26 @@ def load_display_pipelines():
 
         size = deck.key_image_format()["size"]
 
-        page = get_page(deck_id)
+        for page, button in deck_state.get("buttons", {}).items():
 
-        for button_id, button_settings in (
-            deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
-        ):
-            pipeline = Pipeline(size)
-            icon = button_settings.get("icon")
-            if icon:
-                # Now we have deck, page and buttons
-                pipeline.add(ImageFilter(size, icon))
+            for button_id, button_settings in button.items():
 
-            text = button_settings.get("text")
-            font = button_settings.get("font", DEFAULT_FONT)
+                pipeline = Pipeline(size)
+                icon = button_settings.get("icon")
+                if icon:
+                    # Now we have deck, page and buttons
+                    pipeline.add(ImageFilter(size, icon))
 
-            if text:
-                pipeline.add(TextFilter(size, text, font))
+                text = button_settings.get("text")
+                font = button_settings.get("font", DEFAULT_FONT)
 
-            displays.setdefault(deck_id, {})
-            displays[deck_id].setdefault(page, {})
-            displays[deck_id][page].setdefault(button_id, None)
-            displays[deck_id][page][button_id] = pipeline
+                if text:
+                    pipeline.add(TextFilter(size, text, font))
+
+                displays.setdefault(deck_id, {})
+                displays[deck_id].setdefault(page, {})
+                displays[deck_id][page].setdefault(button_id, None)
+                displays[deck_id][page][button_id] = pipeline
 
 
 def render() -> None:
@@ -366,9 +365,7 @@ def render() -> None:
                 image = image_cache[key][0]
             else:
 
-                # TODO: The pipeline needs to be rendered here
                 pil_image = displays[deck_id][page][button_id].execute()
-                # pil_image = _render_key_image(deck, **button_settings)
                 image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 
                 qt_image = ImageQt(pil_image)
