@@ -29,7 +29,7 @@ streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
 
 # Deck, Page, Key
-displays: Dict[str, Dict[str, Dict[str, Pipeline]]] = {}
+displays: Dict[str, Dict[int, Dict[int, Pipeline]]] = {}
 
 
 class KeySignalEmitter(QObject):
@@ -322,7 +322,7 @@ def load_display_pipelines():
         if deck is None:
             continue
 
-        size = deck.key_image_format()['size']
+        size = deck.key_image_format()["size"]
 
         page = get_page(deck_id)
 
@@ -361,7 +361,7 @@ def render() -> None:
 
                 # TODO: The pipeline needs to be rendered here
                 pil_image = displays[deck_id][page][button_id].execute()
-                # pil_image = _render_key_image(deck, **button_settings) 
+                # pil_image = _render_key_image(deck, **button_settings)
                 image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 
                 qt_image = ImageQt(pil_image)

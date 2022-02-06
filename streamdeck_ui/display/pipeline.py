@@ -3,12 +3,10 @@ from typing import List, Tuple
 
 from PIL import Image
 
-from streamdeck_ui.display import filter
-from streamdeck_ui.display import empty_filter
+from streamdeck_ui.display import empty_filter, filter
 
 
 class Pipeline:
-
     def __init__(self, size: Tuple[int, int]) -> None:
         self.filters: List[filter.Filter] = []
         self.filters.append(empty_filter.EmptyFilter(size))

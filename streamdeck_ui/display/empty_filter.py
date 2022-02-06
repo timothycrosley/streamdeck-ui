@@ -2,6 +2,7 @@ from fractions import Fraction
 from typing import Tuple
 
 from PIL import Image
+
 from streamdeck_ui.display import filter
 
 
