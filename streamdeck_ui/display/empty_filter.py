@@ -15,7 +15,7 @@ class EmptyFilter(filter.Filter):
 
     def __init__(self, size: Tuple[int, int]):
         super(EmptyFilter, self).__init__(size)
-        self.image = Image.new("RGBA", size)
+        self.image = Image.new("RGB", size)
 
     def transform(self, input: Image, time: Fraction) -> Image:
         """
