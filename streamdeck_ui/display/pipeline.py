@@ -8,10 +8,10 @@ from streamdeck_ui.display import empty_filter
 
 
 class Pipeline:
-    filters: List[filter.Filter] = []
 
     def __init__(self, size: Tuple[int, int]) -> None:
-        self.filters.append(empty_filter.EmptyFilter((32, 32)))
+        self.filters: List[filter.Filter] = []
+        self.filters.append(empty_filter.EmptyFilter(size))
         self.time = Fraction(0)
 
     def add(self, filter: filter.Filter) -> None:
