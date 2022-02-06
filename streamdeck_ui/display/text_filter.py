@@ -16,12 +16,14 @@ class TextFilter(Filter):
         super(TextFilter, self).__init__(size)
         self.text = text
         self.true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        # fmt: off
         kernel = [
             0, 1, 2, 1, 0,
             1, 2, 4, 2, 1,
             2, 4, 8, 4, 1,
             1, 2, 4, 2, 1,
             0, 1, 2, 1, 0]
+        # fmt: on
         TextFilter.font_blur = ImageFilter.Kernel((5, 5), kernel, scale=0.1 * sum(kernel))
 
     def transform(self, input: Image, time: Fraction):
