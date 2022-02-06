@@ -28,10 +28,10 @@ class ImageFilter(Filter):
                 image_file = BytesIO(png)
                 self.image = Image.open(image_file)
             else:
-                self.image = Image.open(self.file).convert("RGBA")
+                self.image = Image.open(self.file)
         except (OSError, IOError) as icon_error:
             print(f"Unable to load icon {self.file} with error {icon_error}")
-            self.image = Image.new("RGBA", size)
+            self.image = Image.new("RGB", size)
 
         self.image.thumbnail(size, Image.LANCZOS)
 
