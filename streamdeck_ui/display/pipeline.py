@@ -6,6 +6,7 @@ from PIL import Image
 from streamdeck_ui.display.empty_filter import EmptyFilter
 from streamdeck_ui.display.filter import Filter
 
+
 class Pipeline:
     def __init__(self, size: Tuple[int, int]) -> None:
         self.filters: List[filter.Filter] = []

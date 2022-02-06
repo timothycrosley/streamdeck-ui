@@ -1,9 +1,11 @@
 import os
-from streamdeck_ui.display.filter import Filter
-from typing import Tuple
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from fractions import Fraction
+from typing import Tuple
+
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
 from streamdeck_ui.config import FONTS_PATH
+from streamdeck_ui.display.filter import Filter
 
 
 class TextFilter(Filter):
@@ -27,7 +29,7 @@ class TextFilter(Filter):
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
-        blurred = Image.new('RGBA', input.size)
+        blurred = Image.new("RGBA", input.size)
         backdrop_draw = ImageDraw.Draw(blurred)
 
         # TODO: The hard coded position should be improved
