@@ -14,11 +14,11 @@ class ImageFilter(Filter):
     Represents a static image. It transforms the input image by replacing it with a static image.
     """
 
-    image = None
-
     def __init__(self, size: Tuple[int, int], file: str):
         super(ImageFilter, self).__init__(size)
         self.file = file
+        self.image = None
+
         try:
             kind = filetype.guess(self.file)
             if kind is None:
