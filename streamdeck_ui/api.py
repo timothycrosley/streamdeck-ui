@@ -20,6 +20,7 @@ from StreamDeck.ImageHelpers import PILHelper
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pipeline import Pipeline
+from streamdeck_ui.display.text_filter import TextFilter
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
@@ -334,6 +335,12 @@ def load_display_pipelines():
             if icon:
                 # Now we have deck, page and buttons
                 pipeline.add(ImageFilter(size, icon))
+
+            text = button_settings.get("text")
+            font = button_settings.get("font", DEFAULT_FONT)
+
+            if text:
+                pipeline.add(TextFilter(size, text, font))
 
             displays.setdefault(deck_id, {})
             displays[deck_id].setdefault(page, {})
