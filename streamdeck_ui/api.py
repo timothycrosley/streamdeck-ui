@@ -377,47 +377,5 @@ def render() -> None:
                 deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
-    """Renders an individual key image and returns
-    it as a PIL image"""
-    image = PILHelper.create_image(deck)
-    draw = ImageDraw.Draw(image)
-
-    if icon:
-        try:
-            kind = filetype.guess(icon)
-            if kind is None:
-                svg_code = open(icon).read()
-                png = cairosvg.svg2png(svg_code, output_height=72, output_width=72)
-                image_file = BytesIO(png)
-                rgba_icon = Image.open(image_file)
-            else:
-                rgba_icon = Image.open(icon).convert("RGBA")
-        except (OSError, IOError) as icon_error:
-            print(f"Unable to load icon {icon} with error {icon_error}")
-            rgba_icon = Image.new("RGBA", (300, 300))
-    else:
-        rgba_icon = Image.new("RGBA", (300, 300))
-
-    icon_width, icon_height = image.width, image.height
-    if text:
-        icon_height -= 20
-
-    rgba_icon.thumbnail((icon_width, icon_height), Image.LANCZOS)
-    icon_pos = ((image.width - rgba_icon.width) // 2, 0)
-    image.paste(rgba_icon, icon_pos, rgba_icon)
-
-    if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
-        label_w, label_h = draw.textsize(text, font=true_font)
-        if icon:
-            label_pos = ((image.width - label_w) // 2, image.height - 20)
-        else:
-            label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
-        draw.text(label_pos, text=text, font=true_font, fill="white")
-
-    return image
-
-
 if os.path.isfile(STATE_FILE):
     _open_config(STATE_FILE)

@@ -24,5 +24,4 @@ auto_pytest_magic(gui.queue_text_change, ui=MagicMock())
 
 def test_start():
     api.decks = {None: MagicMock()}
-    api._render_key_image = MagicMock()
     gui.start(_exit=True)
