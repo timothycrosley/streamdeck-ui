@@ -25,6 +25,8 @@ class TextFilter(Filter):
             0, 1, 2, 1, 0]
         # fmt: on
         TextFilter.font_blur = ImageFilter.Kernel((5, 5), kernel, scale=0.1 * sum(kernel))
+        self.offset = 0.0
+        self.offset_direction = 1
 
     def transform(self, input: Image, time: Fraction):
         """
@@ -39,7 +41,11 @@ class TextFilter(Filter):
         # because it varies (for example, a "g" character) and
         # causes label alignment issues.
         label_w, label_h = backdrop_draw.textsize(self.text, font=self.true_font)
-        label_pos = ((input.width - label_w) // 2, input.height - 20)
+        label_pos = ((input.width - label_w) // 2, input.height - 20 - int(self.offset))
+
+        self.offset += self.offset_direction
+        if (self.offset > 5 or self.offset < -5):
+            self.offset_direction *= -1
 
         backdrop_draw.text(label_pos, text=self.text, font=self.true_font, fill="black")
         blurred = blurred.filter(TextFilter.font_blur)
