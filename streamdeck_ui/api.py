@@ -18,6 +18,7 @@ from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pipeline import Pipeline
 from streamdeck_ui.display.text_filter import TextFilter
@@ -31,6 +32,8 @@ key_event_lock = threading.Lock()
 
 # Deck, Page, Key
 displays: Dict[str, Dict[int, Dict[int, Pipeline]]] = {}
+
+display_handler: DisplayGrid = None
 
 
 class KeySignalEmitter(QObject):
@@ -127,6 +130,10 @@ def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
 
 
 def close_decks() -> None:
+
+    # TODO: Stop display handler for each deck
+    display_handler.stop()
+
     """Closes open decks for input/ouput."""
     for _deck_serial, deck in decks.items():
         if deck.connected():
@@ -312,16 +319,25 @@ def set_page(deck_id: str, page: int) -> None:
     """Sets the current page shown on the stream deck"""
     if get_page(deck_id) != page:
         state.setdefault(deck_id, {})["page"] = page
+
+        # TODO: Update the display handler for the correct deck
+        display_handler.set_page(page)
         render()
         _save_state()
 
 
 def load_display_pipelines():
+    global display_handler
+
+    # TODO: Need to create a display handler for every streamdeck
     for deck_id, deck_state in state.items():
         deck = decks.get(deck_id, None)
 
         if deck is None:
             continue
+
+        display_handler = DisplayGrid(deck)
+        display_handler.set_page(get_page(deck_id))
 
         size = deck.key_image_format()["size"]
 
@@ -345,6 +361,10 @@ def load_display_pipelines():
                 displays[deck_id].setdefault(page, {})
                 displays[deck_id][page].setdefault(button_id, None)
                 displays[deck_id][page][button_id] = pipeline
+
+                display_handler.set_pipeline(page, button_id, pipeline)
+              
+        display_handler.start()
 
 
 def render() -> None:
@@ -373,8 +393,8 @@ def render() -> None:
                 pixmap = QPixmap(qt_image)
                 image_cache[key] = (image, pixmap)
 
-            with streamdecks_lock:
-                deck.set_key_image(button_id, image)
+            # with streamdecks_lock:
+                # deck.set_key_image(button_id, image)
 
 
 if os.path.isfile(STATE_FILE):
