@@ -27,33 +27,31 @@ class TextFilter(Filter):
         TextFilter.font_blur = ImageFilter.Kernel((5, 5), kernel, scale=0.1 * sum(kernel))
         self.offset = 0.0
         self.offset_direction = 1
+        self.image = None
+        self._create_text()
 
-    def transform(self, input: Image, time: Fraction):
-        """
-        The transformation returns the loaded image, ando overwrites whatever came before.
-        """
-
-        blurred = Image.new("RGBA", input.size)
-        backdrop_draw = ImageDraw.Draw(blurred)
+    def _create_text(self):
+        self.image = Image.new("RGBA", self.size)
+        backdrop_draw = ImageDraw.Draw(self.image)
 
         # TODO: The hard coded position should be improved
         # Note that you cannot simply take the height of the font
         # because it varies (for example, a "g" character) and
         # causes label alignment issues.
         label_w, label_h = backdrop_draw.textsize(self.text, font=self.true_font)
-        label_pos = ((input.width - label_w) // 2, input.height - 20 - int(self.offset))
-
-        self.offset += self.offset_direction
-        if (self.offset > 5 or self.offset < -5):
-            self.offset_direction *= -1
+        label_pos = ((self.size[0] - label_w) // 2, self.size[1] - 20)
 
         backdrop_draw.text(label_pos, text=self.text, font=self.true_font, fill="black")
-        blurred = blurred.filter(TextFilter.font_blur)
+        self.image = self.image.filter(TextFilter.font_blur)
 
-        # Apply the blurred font backdrop and use itself as a mask too (second arg)
-        input.paste(blurred, blurred)
+        foreground_draw = ImageDraw.Draw(self.image)
+        foreground_draw.text(label_pos, text=self.text, font=self.true_font, fill="white")
 
-        draw = ImageDraw.Draw(input)
-        draw.text(label_pos, text=self.text, font=self.true_font, fill="white")
+    def transform(self, input: Image, time: Fraction):
+        """
+        The transformation returns the loaded image, ando overwrites whatever came before.
+        """
+
+        input.paste(self.image, self.image)
 
         return input
