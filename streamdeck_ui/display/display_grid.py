@@ -1,25 +1,24 @@
-import time
-from typing import Dict
-from StreamDeck.Devices.StreamDeck import StreamDeck
-from StreamDeck import DeviceManager, ImageHelpers
-
-from streamdeck_ui.display.pipeline import Pipeline
 import threading
 from time import time
+from typing import Dict
+from StreamDeck import ImageHelpers
+from StreamDeck.Devices.StreamDeck import StreamDeck
+from streamdeck_ui.display.pipeline import Pipeline
+
 
 class DisplayGrid:
     """
     A DisplayGrid is made up of a collection of pipelines, each processing
     filters for one individual button display.
     """
-    def __init__(self, streamdeck : StreamDeck, fps : int = 25):
+    def __init__(self, streamdeck: StreamDeck, fps: int = 25):
         # Reference to the actual device, used to update icons
         self.streamdeck = streamdeck
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
-        self.pages : Dict[int, Dict[int, Pipeline]] = {}
-        self.current_page : int = None
-        self.pipeline_thread : threading.Thread = None
+        self.pages: Dict[int, Dict[int, Pipeline]] = {}
+        self.current_page: int = None
+        self.pipeline_thread: threading.Thread = None
         self.running = False
         self.fps = fps
 
@@ -32,12 +31,12 @@ class DisplayGrid:
         return self.pages[page][button]
 
     def _run(self):
-        """Method that runs on background thread and updates the pipelines.
-        """
+        """Method that runs on background thread and updates the pipelines."""
+        frames = 0
+        start = time()
         while self.running:
             page = self.pages[self.current_page]
 
-            start = time()
             for button, pipeline in page.items():
 
                 image = pipeline.execute()
@@ -45,10 +44,12 @@ class DisplayGrid:
 
                 # TODO: Should the last step convert it? What about UI?
                 self.streamdeck.set_key_image(button, image)
-            end = time()
-            #print(f'It took {end - start} seconds!')
 
-            #time.sleep(1/self.fps)
+            frames += 1
+            if time() - start > 1.0:
+                print(f"FPS: {frames}")
+                frames = 0
+                start = time()
 
     def set_page(self, page: int):
         """Switches to the given page. Pipelines for that page starts running,
