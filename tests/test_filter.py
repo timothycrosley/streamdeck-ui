@@ -7,7 +7,7 @@ from streamdeck_ui.display import empty_filter, image_filter, pipeline
 
 
 def get_asset(file_name):
-    """ Resolve the given file name to a full path. """
+    """Resolve the given file name to a full path."""
     return os.path.join(os.path.dirname(__file__), "assets", file_name)
 
 

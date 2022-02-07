@@ -363,7 +363,7 @@ def load_display_pipelines():
                 displays[deck_id][page][button_id] = pipeline
 
                 display_handler.set_pipeline(page, button_id, pipeline)
-              
+
         display_handler.start()
 
 
@@ -394,7 +394,7 @@ def render() -> None:
                 image_cache[key] = (image, pixmap)
 
             # with streamdecks_lock:
-                # deck.set_key_image(button_id, image)
+            # deck.set_key_image(button_id, image)
 
 
 if os.path.isfile(STATE_FILE):
