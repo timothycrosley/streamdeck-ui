@@ -1,5 +1,5 @@
 import threading
-from time import time
+from time import sleep, time
 from typing import Dict
 from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
@@ -21,6 +21,8 @@ class DisplayGrid:
         self.pipeline_thread: threading.Thread = None
         self.running = False
         self.fps = fps
+        # Configure the maximum frame rate we want to achieve
+        self.time_per_frame = 1/25
 
     def set_pipeline(self, page: int, button: int, pipeline: Pipeline):
         # TODO: Do we need to lock before manipulating?
@@ -35,29 +37,49 @@ class DisplayGrid:
         frames = 0
         start = time()
         last_page = -1
+        execution_time = 0
+
         while self.running:
             current_time = time()
             page = self.pages[self.current_page]
             force_update = False
+
             if last_page != page:
+                # When a page switch happen, force the pipelines to redraw so icons update
                 force_update = True
                 last_page = page
 
             for button, pipeline in page.items():
 
+                # Process all the steps in the pipeline and return the resulting image
                 image = pipeline.execute(current_time)
 
+                # If none of the filters in the pipeline yielded a change, use
+                # the last known result
                 if force_update and image is None:
                     image = pipeline.last_result()
 
                 if image:
+                    # TODO: Potential improvement point - can we avoid native conversion?
                     image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
-                    # TODO: Should the last step convert it? What about UI?
                     self.streamdeck.set_key_image(button, image)
+
+            # Calculate how long we took to process the pipeline
+            elapsed_time = time() - current_time
+            execution_time += elapsed_time
+
+            # Calculate how much we have to sleep between processing cycles to maintain the desired FPS
+            # If we have less than 5ms left, don't bother sleeping, as the context switch and
+            # overhead of sleeping/waking up is consumed
+            time_left = self.time_per_frame - elapsed_time
+            if time_left > 0.005:
+                sleep(time_left)
 
             frames += 1
             if time() - start > 1.0:
-                print(f"FPS: {frames}")
+                execution_time_ms = int(execution_time * 1000)
+                print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
+                execution_time = 0
                 frames = 0
                 start = time()
 
