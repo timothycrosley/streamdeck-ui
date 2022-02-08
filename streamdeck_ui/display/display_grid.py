@@ -1,8 +1,10 @@
 import threading
 from time import sleep, time
 from typing import Dict
+
 from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
+
 from streamdeck_ui.display.pipeline import Pipeline
 
 
@@ -11,6 +13,7 @@ class DisplayGrid:
     A DisplayGrid is made up of a collection of pipelines, each processing
     filters for one individual button display.
     """
+
     def __init__(self, streamdeck: StreamDeck, fps: int = 25):
         # Reference to the actual device, used to update icons
         self.streamdeck = streamdeck
@@ -22,7 +25,7 @@ class DisplayGrid:
         self.running = False
         self.fps = fps
         # Configure the maximum frame rate we want to achieve
-        self.time_per_frame = 1/25
+        self.time_per_frame = 1 / 25
 
     def set_pipeline(self, page: int, button: int, pipeline: Pipeline):
         # TODO: Do we need to lock before manipulating?

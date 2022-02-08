@@ -1,15 +1,17 @@
-from typing import Callable, Tuple
-from streamdeck_ui.display.filter import Filter
-from PIL import Image, ImageEnhance
-from fractions import Fraction
 import random
+from fractions import Fraction
+from typing import Callable, Tuple
+
+from PIL import Image, ImageEnhance
+
+from streamdeck_ui.display.filter import Filter
 
 
 class PulseFilter(Filter):
     def __init__(self, size: Tuple[int, int]):
         super(PulseFilter, self).__init__(size)
-        self.last_time : Fraction = 0
-        self.pulse_delay = 1/25
+        self.last_time: Fraction = 0
+        self.pulse_delay = 1 / 25
         self.brightness = random.uniform(0, 1)
         self.direction = -0.1
 

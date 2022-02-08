@@ -1,6 +1,6 @@
 from fractions import Fraction
 from io import BytesIO
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
 import cairosvg
 import filetype

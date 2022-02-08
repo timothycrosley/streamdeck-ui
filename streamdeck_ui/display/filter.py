@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from fractions import Fraction
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
 from PIL import Image
 
@@ -30,7 +30,7 @@ class Filter(ABC):
         the start of the pipeline.
 
         :rtype: PIL.Image
-        :return: The transformed output image. If this filter did not modify the input, return None. This signals to the 
+        :return: The transformed output image. If this filter did not modify the input, return None. This signals to the
         pipeline manager that there was no change and a cached version will be moved to the next stage.
         """
         pass
