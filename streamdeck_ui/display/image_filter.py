@@ -22,14 +22,15 @@ class ImageFilter(Filter):
         try:
             kind = filetype.guess(self.file)
             if kind is None:
+                # FIXME: Something going wrong with SVG files
                 svg_code = open(self.file).read()
-                # TODO: Verify that the size works properly here. Previously was hardcoded to 72x72
                 png = cairosvg.svg2png(svg_code, output_height=size[1], output_width=size[0])
                 image_file = BytesIO(png)
                 self.image = Image.open(image_file)
             else:
                 self.image = Image.open(self.file)
         except (OSError, IOError) as icon_error:
+            # FIXME: caller should handle this?
             print(f"Unable to load icon {self.file} with error {icon_error}")
             self.image = Image.new("RGB", size)
 
