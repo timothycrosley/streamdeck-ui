@@ -22,7 +22,6 @@ class ImageFilter(Filter):
         try:
             kind = filetype.guess(self.file)
             if kind is None:
-                # FIXME: Something going wrong with SVG files
                 svg_code = open(self.file).read()
                 png = cairosvg.svg2png(svg_code, output_height=size[1], output_width=size[0])
                 image_file = BytesIO(png)
@@ -42,7 +41,12 @@ class ImageFilter(Filter):
         """
         if input_changed:
             input = get_input()
-            Image.Image.paste(input, self.image)
+
+            if self.image.mode == "RGBA":
+                # Use the transparency mask of the image to paste
+                input.paste(self.image, self.image)
+            else:
+                input.paste(self.image)
             return input
         else:
             return None
