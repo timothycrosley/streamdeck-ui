@@ -10,7 +10,7 @@ from streamdeck_ui.display.filter import Filter
 class PulseFilter(Filter):
     def __init__(self, size: Tuple[int, int]):
         super(PulseFilter, self).__init__(size)
-        self.last_time: Fraction = 0
+        self.last_time: Fraction = Fraction()
         self.pulse_delay = 1 / 25
         self.brightness = random.uniform(0, 1)
         self.direction = -0.1

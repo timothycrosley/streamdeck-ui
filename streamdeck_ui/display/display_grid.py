@@ -20,8 +20,8 @@ class DisplayGrid:
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
         self.pages: Dict[int, Dict[int, Pipeline]] = {}
-        self.current_page: int = None
-        self.pipeline_thread: threading.Thread = None
+        self.current_page: int = -1
+        self.pipeline_thread: threading.Thread
         self.running = False
         self.fps = fps
         # Configure the maximum frame rate we want to achieve

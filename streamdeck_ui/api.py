@@ -4,7 +4,7 @@ import os
 import threading
 from functools import partial
 from io import BytesIO
-from typing import Dict, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 from warnings import warn
 
 import cairosvg
@@ -34,7 +34,7 @@ key_event_lock = threading.Lock()
 # Deck, Page, Key
 displays: Dict[str, Dict[int, Dict[int, Pipeline]]] = {}
 
-display_handler: DisplayGrid = None
+display_handler: DisplayGrid
 
 
 class KeySignalEmitter(QObject):
@@ -212,7 +212,7 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _save_state()
 
 
-def get_button_icon(deck_id: str, page: int, button: int) -> QPixmap:
+def get_button_icon(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
     """Returns the icon set for a particular button"""
 
     # TODO: Refine this logic - for now - anytime someone ask for a button
