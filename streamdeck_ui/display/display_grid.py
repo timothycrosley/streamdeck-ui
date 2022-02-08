@@ -34,16 +34,25 @@ class DisplayGrid:
         """Method that runs on background thread and updates the pipelines."""
         frames = 0
         start = time()
+        last_page = -1
         while self.running:
             page = self.pages[self.current_page]
+            force_update = False
+            if last_page != page:
+                force_update = True
+                last_page = page
 
             for button, pipeline in page.items():
 
                 image = pipeline.execute()
-                image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
 
-                # TODO: Should the last step convert it? What about UI?
-                self.streamdeck.set_key_image(button, image)
+                if force_update and image is None:
+                    image = pipeline.last_result()
+
+                if image:
+                    image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
+                    # TODO: Should the last step convert it? What about UI?
+                    self.streamdeck.set_key_image(button, image)
 
             frames += 1
             if time() - start > 1.0:

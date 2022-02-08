@@ -18,16 +18,18 @@ class Filter(ABC):
         self.size = size
 
     @abstractmethod
-    def transform(self, input: Image, time: Fraction) -> Image:
+    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
         """
         Transforms the given input image to te desired output image.
         The default behaviour is to return the orignal image.
 
         :param PIL.Image input: The input image to transform.
+        :param bool input_changed: True if the input is different from previous run, False otherwise.
         :param Fraction time: The current time in seconds, expressed as a fractional number since
         the start of the pipeline.
 
         :rtype: PIL.Image
-        :return: The transformed output image.
+        :return: The transformed output image. If this filter did not modify the input, return None. This signals to the 
+        pipeline manager that there was no change and a cached version will be moved to the next stage.
         """
         pass

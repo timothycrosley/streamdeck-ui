@@ -35,9 +35,12 @@ class ImageFilter(Filter):
 
         self.image.thumbnail(size, Image.LANCZOS)
 
-    def transform(self, input: Image, time: Fraction):
+    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
-        Image.Image.paste(input, self.image)
-        return input
+        if input_changed:
+            Image.Image.paste(input, self.image)
+            return input
+        else:
+            return None

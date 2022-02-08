@@ -17,7 +17,7 @@ class EmptyFilter(filter.Filter):
         super(EmptyFilter, self).__init__(size)
         self.image = Image.new("RGB", size)
 
-    def transform(self, input: Image, time: Fraction) -> Image:
+    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
         """
         Returns an empty Image object.
 
@@ -27,4 +27,7 @@ class EmptyFilter(filter.Filter):
         if input is not None:
             raise Exception("The EmptyFilter does not accept input.")
 
-        return self.image
+        if input_changed:
+            return self.image
+        else:
+            return None
