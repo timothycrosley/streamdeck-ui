@@ -344,14 +344,15 @@ def load_display_pipelines():
                     # Now we have deck, page and buttons
                     pipeline.add(ImageFilter(size, icon))
 
+                if button_settings.get("pulse"):
+                    pipeline.add(PulseFilter(size))                    
+
                 text = button_settings.get("text")
                 font = button_settings.get("font", DEFAULT_FONT)
 
                 if text:
                     pipeline.add(TextFilter(size, text, font))
 
-                if button_settings.get("pulse"):
-                    pipeline.add(PulseFilter(size))
 
                 # TODO: Remove the displays dictionary
                 # displays.setdefault(deck_id, {})
