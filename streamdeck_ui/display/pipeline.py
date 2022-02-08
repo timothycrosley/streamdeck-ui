@@ -11,14 +11,13 @@ class Pipeline:
     def __init__(self, size: Tuple[int, int]) -> None:
         self.filters: List[Tuple[Filter, Image]] = []
         self.filters.append((EmptyFilter(size), None))
-        self.time = Fraction(0)
         self.first_run = True
 
     def add(self, filter: Filter) -> None:
         self.filters.append((filter, None))
         self.first_run = True
 
-    def execute(self) -> Image:
+    def execute(self, time: Fraction) -> Image:
         """
         Executes all the filter in the pipeline and returns the final image, or None if the pipeline did not yield any changes.
         """
@@ -27,7 +26,7 @@ class Pipeline:
         image = None
         is_modified = False
         for i, (current_filter, cached) in enumerate(self.filters):
-            image = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, self.time)
+            image = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, time)
 
             if not image:
                 # Filter indicated that it did NOT change anything, pull up the last

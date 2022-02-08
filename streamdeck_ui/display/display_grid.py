@@ -36,6 +36,7 @@ class DisplayGrid:
         start = time()
         last_page = -1
         while self.running:
+            current_time = time()
             page = self.pages[self.current_page]
             force_update = False
             if last_page != page:
@@ -44,7 +45,7 @@ class DisplayGrid:
 
             for button, pipeline in page.items():
 
-                image = pipeline.execute()
+                image = pipeline.execute(current_time)
 
                 if force_update and image is None:
                     image = pipeline.last_result()
