@@ -1,6 +1,6 @@
 from fractions import Fraction
 from io import BytesIO
-from typing import Tuple
+from typing import Tuple, Callable
 
 import cairosvg
 import filetype
@@ -35,11 +35,12 @@ class ImageFilter(Filter):
 
         self.image.thumbnail(size, Image.LANCZOS)
 
-    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
         if input_changed:
+            input = get_input()
             Image.Image.paste(input, self.image)
             return input
         else:

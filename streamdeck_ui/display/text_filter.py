@@ -1,6 +1,6 @@
 import os
 from fractions import Fraction
-from typing import Tuple
+from typing import Tuple, Callable
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -47,11 +47,13 @@ class TextFilter(Filter):
         foreground_draw = ImageDraw.Draw(self.image)
         foreground_draw.text(label_pos, text=self.text, font=self.true_font, fill="white")
 
-    def transform(self, input: Image, time: Fraction):
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
-        input.paste(self.image, self.image)
-
-        return input
+        if input_changed:
+            input = get_input()
+            input.paste(self.image, self.image)
+            return input
+        return None

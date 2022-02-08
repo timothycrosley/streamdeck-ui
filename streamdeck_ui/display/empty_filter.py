@@ -1,5 +1,5 @@
 from fractions import Fraction
-from typing import Tuple
+from typing import Tuple, Callable
 
 from PIL import Image
 
@@ -17,16 +17,13 @@ class EmptyFilter(filter.Filter):
         super(EmptyFilter, self).__init__(size)
         self.image = Image.new("RGB", size)
 
-    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
         """
         Returns an empty Image object.
 
         :param Fraction time: The current time in seconds, expressed as a fractional number since
         the start of the pipeline.
         """
-        if input is not None:
-            raise Exception("The EmptyFilter does not accept input.")
-
         if input_changed:
             return self.image
         else:

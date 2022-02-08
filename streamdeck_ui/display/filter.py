@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from fractions import Fraction
-from typing import Tuple
+from typing import Tuple, Callable
 
 from PIL import Image
 
@@ -18,12 +18,13 @@ class Filter(ABC):
         self.size = size
 
     @abstractmethod
-    def transform(self, input: Image, input_changed: bool, time: Fraction) -> Image:
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
         """
         Transforms the given input image to te desired output image.
         The default behaviour is to return the orignal image.
 
-        :param PIL.Image input: The input image to transform.
+        :param PIL.Image input: A function that returns the input image to transform. Note that calling
+        this will create a copy of the input image, and it is safe to manipulate directly.
         :param bool input_changed: True if the input is different from previous run, False otherwise.
         :param Fraction time: The current time in seconds, expressed as a fractional number since
         the start of the pipeline.

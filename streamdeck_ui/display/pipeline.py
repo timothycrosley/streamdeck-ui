@@ -27,7 +27,7 @@ class Pipeline:
         image = None
         is_modified = False
         for i, (current_filter, cached) in enumerate(self.filters):
-            image = current_filter.transform(image, is_modified | self.first_run, self.time)
+            image = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, self.time)
 
             if not image:
                 # Filter indicated that it did NOT change anything, pull up the last
@@ -36,7 +36,7 @@ class Pipeline:
             else:
                 # The filter changed the image, cache it for future use
                 # Update tuple with cached image
-                self.filters[i] = (current_filter, image.copy())
+                self.filters[i] = (current_filter, image)
                 is_modified = True
 
         if self.first_run:
