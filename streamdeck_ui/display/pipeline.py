@@ -23,7 +23,7 @@ class Pipeline:
         """
 
         # TODO: Calculate new time value for pipeline run
-        image = None
+        image: Image
         is_modified = False
         for i, (current_filter, cached) in enumerate(self.filters):
             image = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, time)
