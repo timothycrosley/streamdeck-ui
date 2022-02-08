@@ -77,18 +77,11 @@ def _open_config(config_file: str):
         config = json.loads(state_file.read())
         file_version = config.get("streamdeck_ui_version", 0)
         if file_version != CONFIG_FILE_VERSION:
-            raise ValueError(
-                "Incompatible version of config file found: "
-                f"{file_version} does not match required version "
-                f"{CONFIG_FILE_VERSION}."
-            )
+            raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
 
         state = {}
         for deck_id, deck in config["state"].items():
-            deck["buttons"] = {
-                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
-                for page_id, buttons in deck.get("buttons", {}).items()
-            }
+            deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
             state[deck_id] = deck
 
 
@@ -124,10 +117,7 @@ def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
         decks[deck_id] = deck
         deck.set_key_callback(partial(_key_change_callback, deck_id))
 
-    return {
-        deck_id: {"type": deck.deck_type(), "layout": deck.key_layout()}
-        for deck_id, deck in decks.items()
-    }
+    return {deck_id: {"type": deck.deck_type(), "layout": deck.key_layout()} for deck_id, deck in decks.items()}
 
 
 def close_decks() -> None:
@@ -176,9 +166,7 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int) -> None:
     """Swaps the properties of the source and target buttons"""
     temp = cast(dict, state[deck_id]["buttons"])[page][source_button]
-    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(
-        dict, state[deck_id]["buttons"]
-    )[page][target_button]
+    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(dict, state[deck_id]["buttons"])[page][target_button]
     cast(dict, state[deck_id]["buttons"])[page][target_button] = temp
 
     # Clear the cache so images will be recreated on render
@@ -386,9 +374,7 @@ def render() -> None:
 
         # Lookup which page is active for this deck
         page = get_page(deck_id)
-        for button_id, button_settings in (
-            deck_state.get("buttons", {}).get(page, {}).items()  # type: ignore
-        ):
+        for button_id, _ in deck_state.get("buttons", {}).get(page, {}).items():  # type: ignore
             key = f"{deck_id}.{page}.{button_id}"
             if key in image_cache:
                 image = image_cache[key][0]

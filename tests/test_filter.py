@@ -33,9 +33,7 @@ def test_image_filter(image: str):
 def test_pipeline():
     pipe = pipeline.Pipeline((32, 32))
 
-    filter = image_filter.ImageFilter(
-        (32, 32), os.path.join(os.path.dirname(__file__), "assets/smile.png")
-    )
+    filter = image_filter.ImageFilter((32, 32), os.path.join(os.path.dirname(__file__), "assets/smile.png"))
     pipe.add(filter)
     final_image = pipe.execute()
 

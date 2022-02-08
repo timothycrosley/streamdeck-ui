@@ -1,6 +1,6 @@
 import threading
 from time import sleep, time
-from typing import Dict
+from typing import Dict, Optional
 
 from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
@@ -21,7 +21,7 @@ class DisplayGrid:
         # a list, corresponding to each button.
         self.pages: Dict[int, Dict[int, Pipeline]] = {}
         self.current_page: int = -1
-        self.pipeline_thread: threading.Thread
+        self.pipeline_thread: Optional[threading.Thread] = None
         self.running = False
         self.fps = fps
         # Configure the maximum frame rate we want to achieve

@@ -265,9 +265,7 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
                 section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
 
                 # Translate string to enum, or just the string itself if not found
-                section_keys = [
-                    getattr(Key, key_name.lower(), key_name) for key_name in section_keys
-                ]
+                section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
 
                 for key_name in section_keys:
                     if isinstance(key_name, str) and key_name.startswith("delay"):
@@ -383,9 +381,7 @@ def select_image(window) -> None:
             image_file = os.path.expanduser("~")
         else:
             image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg)"
-    )[0]
+    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg)")[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
@@ -505,15 +501,11 @@ def build_buttons(ui, tab) -> None:
     # Note that the button click event captures the ui variable, the current button
     #  and all the other buttons
     for button in buttons:
-        button.clicked.connect(
-            lambda button=button, buttons=buttons: button_clicked(ui, button, buttons)
-        )
+        button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(ui, button, buttons))
 
 
 def export_config(window) -> None:
-    file_name = QFileDialog.getSaveFileName(
-        window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)"
-    )[0]
+    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
     if not file_name:
         return
 
@@ -521,9 +513,7 @@ def export_config(window) -> None:
 
 
 def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(
-        window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)"
-    )[0]
+    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
     if not file_name:
         return
 
@@ -634,9 +624,7 @@ def show_settings(window) -> None:
         settings.ui.dim.addItem(f"{label}", userData=value)
 
     existing_timeout = api.get_display_timeout(deck_id)
-    existing_index = next(
-        (i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout), None
-    )
+    existing_index = next((i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout), None)
 
     if existing_index is None:
         settings.ui.dim.addItem(f"Custom: {existing_timeout}s", userData=existing_timeout)
@@ -658,9 +646,7 @@ def show_settings(window) -> None:
             dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
-        set_brightness_dimmed(
-            window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value()
-        )
+        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
