@@ -414,7 +414,14 @@ def redraw_buttons(ui) -> None:
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
         button.setText(api.get_button_text(deck_id, _page(ui), button.index))
-        button.setIcon(api.get_button_icon(deck_id, _page(ui), button.index))
+
+        # TODO: Fix the way we handle buttons - for now deal with
+        # case where the icon may not be ready yet. There is a race
+        # condition on startup as display rendering and UI buttons are
+        # tied.
+        icon = api.get_button_icon(deck_id, _page(ui), button.index)
+        if icon:
+            button.setIcon(icon)
 
 
 def set_brightness(ui, value: int) -> None:
@@ -527,6 +534,8 @@ def import_config(window) -> None:
 def sync(ui) -> None:
     api.ensure_decks_connected()
     ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    # TODO: For now, just sync up the buttons every second
+    redraw_buttons(ui)
 
 
 def build_device(ui, _device_index=None) -> None:

@@ -21,6 +21,7 @@ from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, 
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pipeline import Pipeline
+from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
@@ -213,9 +214,13 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
 
 def get_button_icon(deck_id: str, page: int, button: int) -> QPixmap:
     """Returns the icon set for a particular button"""
+
+    # TODO: Refine this logic - for now - anytime someone ask for a button
+    # update the button image cache
+    render()
     key = f"{deck_id}.{page}.{button}"
     if key not in image_cache:
-        render()
+        return None
     return image_cache[key][1]
 
 
@@ -357,10 +362,14 @@ def load_display_pipelines():
                 if text:
                     pipeline.add(TextFilter(size, text, font))
 
-                displays.setdefault(deck_id, {})
-                displays[deck_id].setdefault(page, {})
-                displays[deck_id][page].setdefault(button_id, None)
-                displays[deck_id][page][button_id] = pipeline
+                if button_settings.get("pulse"):
+                    pipeline.add(PulseFilter(size))
+
+                # TODO: Remove the displays dictionary
+                # displays.setdefault(deck_id, {})
+                # displays[deck_id].setdefault(page, {})
+                # displays[deck_id][page].setdefault(button_id, None)
+                # displays[deck_id][page][button_id] = pipeline
 
                 display_handler.set_pipeline(page, button_id, pipeline)
 
@@ -385,13 +394,16 @@ def render() -> None:
                 image = image_cache[key][0]
             else:
 
-                pil_image = displays[deck_id][page][button_id].execute()
-                image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
+                # TODO: Do we need this cache at all anymore? Decide how to update
+                # UI from display engine (keep in sync, show static?)
+                pil_image = display_handler.get_pipeline(page, button_id).last_result()
+                if pil_image:
+                    image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 
-                qt_image = ImageQt(pil_image)
-                qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
-                pixmap = QPixmap(qt_image)
-                image_cache[key] = (image, pixmap)
+                    qt_image = ImageQt(pil_image)
+                    qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
+                    pixmap = QPixmap(qt_image)
+                    image_cache[key] = (image, pixmap)
 
             # with streamdecks_lock:
             # deck.set_key_image(button_id, image)
