@@ -19,8 +19,8 @@ class PulseFilter(Filter):
         if time - self.last_time > self.pulse_delay:
             self.last_time = time
             self.brightness += self.direction
-            if self.brightness < 0:
-                self.brightness = 0
+            if self.brightness < 0.5:
+                self.brightness = 0.5
                 self.direction *= -1
 
             if self.brightness > 1:
