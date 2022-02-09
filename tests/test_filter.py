@@ -19,15 +19,19 @@ def test_default():
 
 
 # TODO: Incorrect file locations default to "empty". Probably better that it throws.
-@pytest.mark.parametrize("image", ["smile.png", "smile.jpg", "smile.svg"])
+@pytest.mark.parametrize("image", ["smile.png", "smile.jpg", "smile.svg", "dog.gif"])
 def test_image_filter(image: str):
-    default = empty_filter.EmptyFilter((32, 32))
+
+    size = (72, 72)
+    pipe = pipeline.Pipeline(size)
+
+    pipe.add(empty_filter.EmptyFilter(size))
     time = Fraction(0)
 
-    filter = image_filter.ImageFilter((32, 32), get_asset(image))
-    output = filter.transform(default.transform(None, time), time)
-
-    assert output is not None
+    pipe.add(image_filter.ImageFilter(size, get_asset(image)))
+    image = pipe.execute(time)
+    image = pipe.execute(1)
+    image = pipe.execute(2)
 
 
 def test_pipeline():
