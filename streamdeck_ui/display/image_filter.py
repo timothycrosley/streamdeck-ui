@@ -18,7 +18,8 @@ class ImageFilter(Filter):
     def __init__(self, size: Tuple[int, int], file: str):
         super(ImageFilter, self).__init__(size)
         self.file = file
-        self.image = None
+
+        frame_timestamp = [0]
 
         try:
             kind = filetype.guess(self.file)
@@ -26,45 +27,41 @@ class ImageFilter(Filter):
                 svg_code = open(self.file).read()
                 png = cairosvg.svg2png(svg_code, output_height=size[1], output_width=size[0])
                 image_file = BytesIO(png)
-                self.image = Image.open(image_file)
-                # TODO: refactor and remove self.image
-                frames = ImageSequence.Iterator(self.image)
+                image = Image.open(image_file)
+                frames = ImageSequence.Iterator(image)
             else:
-                rgba_icon = Image.open(self.file)
+                image = Image.open(self.file)
 
-                self.frame_timestamp = [0]
-
-                rgba_icon.seek(0)
+                image.seek(0)
                 frames_n = 1
                 while True:
                     try:
-                        self.frame_timestamp.append(self.frame_timestamp[-1]+rgba_icon.info['duration'])
-                        rgba_icon.seek(rgba_icon.tell() + 1)
+                        frame_timestamp.append(image.info['duration'])
+                        image.seek(image.tell() + 1)
                         frames_n += 1
                     except EOFError:  # end of gif
-                        # frames_n -= 1
                         break
                     except KeyError:  # no gif
                         break
-                frames = ImageSequence.Iterator(rgba_icon)
 
-                if len(self.frame_timestamp) > 1:
-                    del self.frame_timestamp[0]
+                if len(frame_timestamp) > 1:
+                    del frame_timestamp[0]
 
         except (OSError, IOError) as icon_error:
             # FIXME: caller should handle this?
             print(f"Unable to load icon {self.file} with error {icon_error}")
-            self.image = Image.new("RGB", size)
+            image = Image.new("RGB", size)
+
+        frames = ImageSequence.Iterator(image)
 
         # Scale all the frames to the target size
         self.frames = []
-        for frame, milliseconds in zip(frames, self.frame_timestamp):
+        for frame, milliseconds in zip(frames, frame_timestamp):
             frame = frame.copy()
             frame.thumbnail(size, Image.LANCZOS)
             self.frames.append((frame, milliseconds))
 
         self.frame_cycle = itertools.cycle(self.frames)
-
         self.current_frame = next(self.frame_cycle)
         self.frame_time = 0
 
@@ -73,7 +70,7 @@ class ImageFilter(Filter):
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
-        if time - self.frame_time > self.current_frame[1]/1000:
+        if len(self.frames) > 1 and time - self.frame_time > self.current_frame[1]/1000:
             self.frame_time = time
             self.current_frame = next(self.frame_cycle)
             input = get_input()
