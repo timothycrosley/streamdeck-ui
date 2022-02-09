@@ -198,12 +198,17 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _save_state()
 
 
-def get_button_icon(deck_id: str, page: int, button: int) -> QPixmap:
+def get_button_icon_pixmap(deck_id: str, page: int, button: int) -> QPixmap:
     """Returns the icon set for a particular button"""
     key = f"{deck_id}.{page}.{button}"
     if key not in image_cache:
         render()
     return image_cache[key][1]
+
+
+def get_button_icon(deck_id: str, page: int, button: int) -> str:
+    """Returns the icon set for a particular button"""
+    return _button_state(deck_id, page, button).get("icon", "")
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:

@@ -380,11 +380,11 @@ def select_image(window) -> None:
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
     if not image:
         if not last_image_dir:
-            image_file = os.path.expanduser("~")
+            image = os.path.expanduser("~")
         else:
-            image_file = last_image_dir
+            image = last_image_dir
     file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg)"
+        window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.svg)"
     )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
@@ -414,7 +414,7 @@ def redraw_buttons(ui) -> None:
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
         button.setText(api.get_button_text(deck_id, _page(ui), button.index))
-        button.setIcon(api.get_button_icon(deck_id, _page(ui), button.index))
+        button.setIcon(api.get_button_icon_pixmap(deck_id, _page(ui), button.index))
 
 
 def set_brightness(ui, value: int) -> None:
