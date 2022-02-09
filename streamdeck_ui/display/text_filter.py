@@ -29,6 +29,8 @@ class TextFilter(Filter):
         self.offset_direction = 1
         self.image = None
         self._create_text()
+        # Hashcode should be created for anything that makes this frame unique
+        self.hashcode = hash((self.__class__, text, font))
 
     def _create_text(self):
         self.image = Image.new("RGBA", self.size)
@@ -55,5 +57,5 @@ class TextFilter(Filter):
         if input_changed:
             input = get_input()
             input.paste(self.image, self.image)
-            return input
-        return None
+            return (input, self.hashcode)
+        return (None, self.hashcode)

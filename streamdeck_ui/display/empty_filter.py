@@ -17,7 +17,13 @@ class EmptyFilter(filter.Filter):
         super(EmptyFilter, self).__init__(size)
         self.image = Image.new("RGB", size)
 
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
+        # For EmptyFilter - create a unique hashcode based on the name of the type
+        # This will create "some value" that uniquely identifies this filter output
+        # Since it never changes, this works.
+        # Calculate it once for speed
+        self.hashcode = hash(self.__class__)
+
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         Returns an empty Image object.
 
@@ -25,6 +31,6 @@ class EmptyFilter(filter.Filter):
         the start of the pipeline.
         """
         if input_changed:
-            return self.image
+            return ((self.image), self.hashcode)
         else:
-            return None
+            return ((None, self.hashcode))

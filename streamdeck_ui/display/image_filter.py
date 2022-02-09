@@ -19,7 +19,10 @@ class ImageFilter(Filter):
         super(ImageFilter, self).__init__(size)
         self.file = file
 
+        # Each frame needs to have a unique hashcode. Start with file name as baseline.
+        image_hash = hash((self.__class__, file))
         frame_duration = []
+        frame_hash = []
 
         try:
             kind = filetype.guess(self.file)
@@ -29,19 +32,26 @@ class ImageFilter(Filter):
                 image_file = BytesIO(png)
                 image = Image.open(image_file)
                 frame_duration.append(-1)
+                frame_hash.append(image_hash)
             else:
                 image = Image.open(self.file)
                 image.seek(0)
+                # Frame number is used to create unique hash
+                frame_number = 1
                 while True:
                     try:
                         frame_duration.append(image.info['duration'])
+                        # Create tuple and hash it, to combine the image and frame hashcodes
+                        frame_hash.append(hash((image_hash, frame_number)))
                         image.seek(image.tell() + 1)
+                        frame_number += 1
                     except EOFError: 
                         # Reached the final frame
                         break
                     except KeyError:
                         # If the key 'duration' can't be found, it's not an animation
                         frame_duration.append(-1)
+                        frame_hash.append(image_hash)
                         break
 
         except (OSError, IOError) as icon_error:
@@ -53,22 +63,23 @@ class ImageFilter(Filter):
 
         # Scale all the frames to the target size
         self.frames = []
-        for frame, milliseconds in zip(frames, frame_duration):
+        for frame, milliseconds, hashcode in zip(frames, frame_duration, frame_hash):
             frame = frame.copy()
             frame.thumbnail(size, Image.LANCZOS)
-            self.frames.append((frame, milliseconds))
+            self.frames.append((frame, milliseconds, hashcode))
 
         self.frame_cycle = itertools.cycle(self.frames)
         self.current_frame = next(self.frame_cycle)
         self.frame_time = 0
 
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
         if self.current_frame[1] >= 0 and time - self.frame_time > self.current_frame[1]/1000:
             self.frame_time = time
+            # FIXME: Unpack the current frame tuple
             self.current_frame = next(self.frame_cycle)
             input = get_input()
             if self.current_frame[0].mode == "RGBA":
@@ -76,7 +87,7 @@ class ImageFilter(Filter):
                 input.paste(self.current_frame[0], self.current_frame[0])
             else:
                 input.paste(self.current_frame[0])
-            return input
+            return (input, self.current_frame[2])
 
         if input_changed:
             input = get_input()
@@ -86,6 +97,6 @@ class ImageFilter(Filter):
                 input.paste(self.current_frame[0], self.current_frame[0])
             else:
                 input.paste(self.current_frame[0])
-            return input
+            return (input, self.current_frame[2])
         else:
-            return None
+            return (None, self.current_frame[2])

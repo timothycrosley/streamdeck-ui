@@ -14,8 +14,10 @@ class PulseFilter(Filter):
         self.pulse_delay = 1 / 25
         self.brightness = random.uniform(0, 1)
         self.direction = -0.1
+        self.filter_hash = hash(self.__class__)
 
     def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
+        # FIXME: If a forced update is required, return image
         if time - self.last_time > self.pulse_delay:
             self.last_time = time
             self.brightness += self.direction
@@ -29,5 +31,5 @@ class PulseFilter(Filter):
             input = get_input()
             enhancer = ImageEnhance.Brightness(input)
             input = enhancer.enhance(self.brightness)
-            return input
+            return (input, hash((self.filter_hash, self.brightness)))
         return None

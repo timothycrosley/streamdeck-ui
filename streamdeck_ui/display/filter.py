@@ -18,7 +18,7 @@ class Filter(ABC):
         self.size = size
 
     @abstractmethod
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
+    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         Transforms the given input image to te desired output image.
         The default behaviour is to return the orignal image.

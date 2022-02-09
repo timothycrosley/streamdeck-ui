@@ -41,6 +41,7 @@ class DisplayGrid:
         start = time()
         last_page = -1
         execution_time = 0
+        frame_cache = {}
 
         while self.running:
             current_time = time()
@@ -55,7 +56,7 @@ class DisplayGrid:
             for button, pipeline in page.items():
 
                 # Process all the steps in the pipeline and return the resulting image
-                image = pipeline.execute(current_time)
+                image, hashcode = pipeline.execute(current_time)
 
                 # If none of the filters in the pipeline yielded a change, use
                 # the last known result
@@ -84,7 +85,15 @@ class DisplayGrid:
                     #     with the next hash. This yields a final hash code that can then be
                     #     used to cache the output. At the end of the pipeline the hash can
                     #     be checked and final bytes will be ready to pipe to the device.
-                    image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
+
+                    # FIXME:
+                    # This will be unbounded, old frames will need to be evicted
+                    if hashcode not in frame_cache:
+                        image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
+                        frame_cache[hashcode] = image
+                    else:
+                        image = frame_cache[hashcode]
+
                     self.streamdeck.set_key_image(button, image)
 
             # Calculate how long we took to process the pipeline

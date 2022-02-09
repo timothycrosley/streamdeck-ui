@@ -17,7 +17,7 @@ class Pipeline:
         self.filters.append((filter, None))
         self.first_run = True
 
-    def execute(self, time: Fraction) -> Image:
+    def execute(self, time: Fraction) -> Tuple[Image, int]:
         """
         Executes all the filter in the pipeline and returns the final image, or None if the pipeline did not yield any changes.
         """
@@ -25,8 +25,11 @@ class Pipeline:
         # TODO: Calculate new time value for pipeline run
         image: Image
         is_modified = False
+        pipeline_hash = 0
         for i, (current_filter, cached) in enumerate(self.filters):
-            image = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, time)
+            (image, hashcode) = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, time)
+
+            pipeline_hash = hash((hashcode, pipeline_hash))
 
             if not image:
                 # Filter indicated that it did NOT change anything, pull up the last
@@ -43,7 +46,7 @@ class Pipeline:
             is_modified = True
             self.first_run = False
 
-        return image if is_modified else None
+        return (image if is_modified else None, pipeline_hash)
 
     def last_result(self) -> Image:
         """
