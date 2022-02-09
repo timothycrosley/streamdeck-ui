@@ -63,7 +63,7 @@ class DisplayGrid:
                     image = pipeline.last_result()
 
                 if image:
-                    # FIXME: We cannot affort to do this conversion on every final frame. 
+                    # FIXME: We cannot afford to do this conversion on every final frame.
                     # Since we want the flexibilty of a pipeline engine that can mutate the
                     # images along a chain of filters, the outcome can be somewhat unpredicatable
                     # For example - a clock that changes time or an animation that changes
@@ -83,7 +83,7 @@ class DisplayGrid:
                     #     The hash can then be passed to the next step and XOR'd or combined
                     #     with the next hash. This yields a final hash code that can then be
                     #     used to cache the output. At the end of the pipeline the hash can
-                    #      be checked and final bytes will be ready to pipe to the device.
+                    #     be checked and final bytes will be ready to pipe to the device.
                     image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
                     self.streamdeck.set_key_image(button, image)
 
