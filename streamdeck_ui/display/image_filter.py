@@ -19,7 +19,7 @@ class ImageFilter(Filter):
         super(ImageFilter, self).__init__(size)
         self.file = file
 
-        frame_timestamp = [0]
+        frame_duration = []
 
         try:
             kind = filetype.guess(self.file)
@@ -28,24 +28,21 @@ class ImageFilter(Filter):
                 png = cairosvg.svg2png(svg_code, output_height=size[1], output_width=size[0])
                 image_file = BytesIO(png)
                 image = Image.open(image_file)
-                frames = ImageSequence.Iterator(image)
+                frame_duration.append(-1)
             else:
                 image = Image.open(self.file)
-
                 image.seek(0)
-                frames_n = 1
                 while True:
                     try:
-                        frame_timestamp.append(image.info['duration'])
+                        frame_duration.append(image.info['duration'])
                         image.seek(image.tell() + 1)
-                        frames_n += 1
-                    except EOFError:  # end of gif
+                    except EOFError: 
+                        # Reached the final frame
                         break
-                    except KeyError:  # no gif
+                    except KeyError:
+                        # If the key 'duration' can't be found, it's not an animation
+                        frame_duration.append(-1)
                         break
-
-                if len(frame_timestamp) > 1:
-                    del frame_timestamp[0]
 
         except (OSError, IOError) as icon_error:
             # FIXME: caller should handle this?
@@ -56,7 +53,7 @@ class ImageFilter(Filter):
 
         # Scale all the frames to the target size
         self.frames = []
-        for frame, milliseconds in zip(frames, frame_timestamp):
+        for frame, milliseconds in zip(frames, frame_duration):
             frame = frame.copy()
             frame.thumbnail(size, Image.LANCZOS)
             self.frames.append((frame, milliseconds))
@@ -70,7 +67,7 @@ class ImageFilter(Filter):
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
-        if len(self.frames) > 1 and time - self.frame_time > self.current_frame[1]/1000:
+        if self.current_frame[1] >= 0 and time - self.frame_time > self.current_frame[1]/1000:
             self.frame_time = time
             self.current_frame = next(self.frame_cycle)
             input = get_input()
