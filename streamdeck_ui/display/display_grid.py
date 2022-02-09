@@ -63,7 +63,27 @@ class DisplayGrid:
                     image = pipeline.last_result()
 
                 if image:
-                    # TODO: Potential improvement point - can we avoid native conversion?
+                    # FIXME: We cannot affort to do this conversion on every final frame. 
+                    # Since we want the flexibilty of a pipeline engine that can mutate the
+                    # images along a chain of filters, the outcome can be somewhat unpredicatable
+                    # For example - a clock that changes time or an animation that changes
+                    # the frame and font that overlays. In many instances there is a finite
+                    # number of frames per pipeline (a looping GIF with image, a pulsing icon etc)
+                    # Some may also be virtually have infinite mutations. A cache per pipeline
+                    # with an eviction policy of the oldest would likely suffice.
+                    # The main problem is since the pipeline can mutate it's too expensive to
+                    # calculate the actual hash of the final frame.
+                    #  Options:
+                    #  1. Sample part of the image - fast. Downside is that some images may
+                    #     appear to be the same if sampling is done poorly and incorrect image
+                    #     will be displayed.
+                    #  2. Create a hash function that the filter itself defines. It has to
+                    #     update the hashcode with the unique attributes of the input it requires
+                    #     to make the frame. This could be time, text, frame number etc.
+                    #     The hash can then be passed to the next step and XOR'd or combined
+                    #     with the next hash. This yields a final hash code that can then be
+                    #     used to cache the output. At the end of the pipeline the hash can
+                    #      be checked and final bytes will be ready to pipe to the device.
                     image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
                     self.streamdeck.set_key_image(button, image)
 
