@@ -58,6 +58,8 @@ class ImageFilter(Filter):
             # FIXME: caller should handle this?
             print(f"Unable to load icon {self.file} with error {icon_error}")
             image = Image.new("RGB", size)
+            frame_duration.append(-1)
+            frame_hash.append(image_hash)
 
         frames = ImageSequence.Iterator(image)
 
