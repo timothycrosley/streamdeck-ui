@@ -18,14 +18,21 @@ class Filter(ABC):
         self.size = size
 
     @abstractmethod
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         Transforms the given input image to te desired output image.
         The default behaviour is to return the orignal image.
 
-        :param PIL.Image input: A function that returns the input image to transform. Note that calling
+        :param Callable[[], PIL.Image] get_input: A function that returns the input image to transform. Note that calling
         this will create a copy of the input image, and it is safe to manipulate directly.
+
+        :param Callable[[int], PIL.Image] get_output: Provide the hashcode of the new frame and it will
+        return the output frame if it already exists. This avoids having to redraw an output frame that is already
+        cached.
+
         :param bool input_changed: True if the input is different from previous run, False otherwise.
+        When true, you have to return an Image.
+
         :param Fraction time: The current time in seconds, expressed as a fractional number since
         the start of the pipeline.
 

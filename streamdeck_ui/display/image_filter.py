@@ -74,7 +74,7 @@ class ImageFilter(Filter):
         self.current_frame = next(self.frame_cycle)
         self.frame_time = 0
 
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
@@ -83,6 +83,11 @@ class ImageFilter(Filter):
             self.frame_time = time
             # FIXME: Unpack the current frame tuple
             self.current_frame = next(self.frame_cycle)
+
+            image = get_output(self.current_frame[2])
+            if image:
+                return (image, self.current_frame[2])
+
             input = get_input()
             if self.current_frame[0].mode == "RGBA":
                 # Use the transparency mask of the image to paste
@@ -92,6 +97,10 @@ class ImageFilter(Filter):
             return (input, self.current_frame[2])
 
         if input_changed:
+            image = get_output(self.current_frame[2])
+            if image:
+                return (image, self.current_frame[2])
+                
             input = get_input()
 
             if self.current_frame[0].mode == "RGBA":

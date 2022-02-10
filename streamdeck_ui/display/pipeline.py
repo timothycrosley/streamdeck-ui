@@ -1,4 +1,5 @@
 from fractions import Fraction
+from operator import contains
 from typing import List, Tuple
 
 from PIL.Image import Image
@@ -12,6 +13,7 @@ class Pipeline:
         self.filters: List[Tuple[Filter, Image]] = []
         self.filters.append((EmptyFilter(size), None))
         self.first_run = True
+        self.output_cache = {}
 
     def add(self, filter: Filter) -> None:
         self.filters.append((filter, None))
@@ -23,11 +25,15 @@ class Pipeline:
         """
 
         # TODO: Calculate new time value for pipeline run
-        image: Image
+        image: Image = None
         is_modified = False
         pipeline_hash = 0
+
         for i, (current_filter, cached) in enumerate(self.filters):
-            (image, hashcode) = current_filter.transform(lambda: image.copy(), is_modified | self.first_run, time)
+            
+            (image, hashcode) = current_filter.transform(lambda: image.copy(),
+                                                         lambda output_hash: self.output_cache.get(hash((output_hash, pipeline_hash)), None),
+                                                         is_modified | self.first_run, time)
 
             pipeline_hash = hash((hashcode, pipeline_hash))
 
@@ -40,6 +46,10 @@ class Pipeline:
                 # Update tuple with cached image
                 self.filters[i] = (current_filter, image)
                 is_modified = True
+
+            # Store this image with pipeline hash if we haven't seen it.
+            if pipeline_hash not in self.output_cache:
+                self.output_cache[pipeline_hash] = image
 
         if self.first_run:
             # Force an update the first time the pipeline runs

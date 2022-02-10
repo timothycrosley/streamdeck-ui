@@ -25,7 +25,7 @@ class DisplayGrid:
         self.running = False
         self.fps = fps
         # Configure the maximum frame rate we want to achieve
-        self.time_per_frame = 1 / 25
+        self.time_per_frame = 1 / 10
 
     def set_pipeline(self, page: int, button: int, pipeline: Pipeline):
         # TODO: Do we need to lock before manipulating?
@@ -53,10 +53,14 @@ class DisplayGrid:
                 force_update = True
                 last_page = page
 
+            pipeline_cache_count = 0
+
             for button, pipeline in page.items():
 
                 # Process all the steps in the pipeline and return the resulting image
                 image, hashcode = pipeline.execute(current_time)
+
+                pipeline_cache_count += len(pipeline.output_cache)
 
                 # If none of the filters in the pipeline yielded a change, use
                 # the last known result
@@ -111,6 +115,8 @@ class DisplayGrid:
             if time() - start > 1.0:
                 execution_time_ms = int(execution_time * 1000)
                 print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
+                print(f"Output cache size: {len(frame_cache)}")
+                print(f"Pipeline cache size: {pipeline_cache_count}")
                 execution_time = 0
                 frames = 0
                 start = time()

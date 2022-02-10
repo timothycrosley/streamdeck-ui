@@ -49,12 +49,16 @@ class TextFilter(Filter):
         foreground_draw = ImageDraw.Draw(self.image)
         foreground_draw.text(label_pos, text=self.text, font=self.true_font, fill="white")
 
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Image.Image:
+    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
         if input_changed:
+            image = get_output(self.hashcode)
+            if image:
+                return (Image, self.hashcode)
+
             input = get_input()
             input.paste(self.image, self.image)
             return (input, self.hashcode)

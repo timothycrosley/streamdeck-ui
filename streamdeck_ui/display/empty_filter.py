@@ -23,14 +23,13 @@ class EmptyFilter(filter.Filter):
         # Calculate it once for speed
         self.hashcode = hash(self.__class__)
 
-    def transform(self, get_input: Callable[[], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
         Returns an empty Image object.
 
         :param Fraction time: The current time in seconds, expressed as a fractional number since
         the start of the pipeline.
         """
-        if input_changed:
-            return ((self.image), self.hashcode)
-        else:
+        if not input_changed:
             return ((None, self.hashcode))
+        return ((self.image), self.hashcode)

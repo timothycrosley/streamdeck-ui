@@ -345,7 +345,7 @@ def load_display_pipelines():
                     pipeline.add(ImageFilter(size, icon))
 
                 if button_settings.get("pulse"):
-                    pipeline.add(PulseFilter(size))                    
+                    pipeline.add(PulseFilter(size))
 
                 text = button_settings.get("text")
                 font = button_settings.get("font", DEFAULT_FONT)
