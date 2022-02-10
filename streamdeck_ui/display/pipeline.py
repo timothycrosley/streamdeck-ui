@@ -24,8 +24,7 @@ class Pipeline:
         Executes all the filter in the pipeline and returns the final image, or None if the pipeline did not yield any changes.
         """
 
-        # TODO: Calculate new time value for pipeline run
-        image: Image = None
+        image: Image
         is_modified = False
         pipeline_hash = 0
 
