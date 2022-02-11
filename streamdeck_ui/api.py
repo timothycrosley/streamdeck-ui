@@ -7,32 +7,26 @@ from io import BytesIO
 from typing import Dict, Optional, Tuple, Union, cast
 from warnings import warn
 
-from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
-from StreamDeck import DeviceManager, ImageHelpers
+from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.image_filter import ImageFilter
-from streamdeck_ui.display.pipeline import Pipeline
 from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
-from streamdeck_ui.display.empty_filter import EmptyFilter
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+# FIXME: Should the lock move to the display manager, including other display operations
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
-
-# Deck, Page, Key
-displays: Dict[str, Dict[int, Dict[int, Pipeline]]] = {}
-
 display_handler: DisplayGrid
 
 
@@ -353,18 +347,14 @@ def load_display_pipelines():
                 if text:
                     display_handler.add_filter(page, button_id, TextFilter(size, text, font))
 
-
-                # TODO: Remove the displays dictionary
-                # displays.setdefault(deck_id, {})
-                # displays[deck_id].setdefault(page, {})
-                # displays[deck_id][page].setdefault(button_id, None)
-                # displays[deck_id][page][button_id] = pipeline
-
         display_handler.start()
 
 
 def render() -> None:
     """renders all decks"""
+
+    global display_handler
+
     for deck_id, deck_state in state.items():
         deck = decks.get(deck_id, None)
         if not deck:
@@ -383,15 +373,12 @@ def render() -> None:
                 # UI from display engine (keep in sync, show static?)
                 pil_image = display_handler.get_image(page, button_id)
                 if pil_image:
-                    image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
+                    image = PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 
                     qt_image = ImageQt(pil_image)
                     qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
                     pixmap = QPixmap(qt_image)
                     image_cache[key] = (image, pixmap)
-
-            # with streamdecks_lock:
-            # deck.set_key_image(button_id, image)
 
 
 if os.path.isfile(STATE_FILE):
