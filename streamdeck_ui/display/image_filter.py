@@ -45,7 +45,7 @@ class ImageFilter(Filter):
                         frame_hash.append(hash((image_hash, frame_number)))
                         image.seek(image.tell() + 1)
                         frame_number += 1
-                    except EOFError: 
+                    except EOFError:
                         # Reached the final frame
                         break
                     except KeyError:
@@ -79,35 +79,40 @@ class ImageFilter(Filter):
         The transformation returns the loaded image, ando overwrites whatever came before.
         """
 
-        if self.current_frame[1] >= 0 and time - self.frame_time > self.current_frame[1]/1000:
+        # Unpack tuple to make code a bit easier to understand
+        frame, duration, hashcode = self.current_frame
+
+        if duration >= 0 and time - self.frame_time > duration/1000:
             self.frame_time = time
-            # FIXME: Unpack the current frame tuple
             self.current_frame = next(self.frame_cycle)
 
-            image = get_output(self.current_frame[2])
+            # Unpack updated value
+            frame, duration, hashcode = self.current_frame
+
+            image = get_output(hashcode)
             if image:
-                return (image, self.current_frame[2])
+                return (image, hashcode)
 
             input = get_input()
-            if self.current_frame[0].mode == "RGBA":
+            if frame.mode == "RGBA":
                 # Use the transparency mask of the image to paste
-                input.paste(self.current_frame[0], self.current_frame[0])
+                input.paste(frame, frame)
             else:
-                input.paste(self.current_frame[0])
-            return (input, self.current_frame[2])
+                input.paste(frame)
+            return (input, hashcode)
 
         if input_changed:
-            image = get_output(self.current_frame[2])
+            image = get_output(hashcode)
             if image:
-                return (image, self.current_frame[2])
-                
+                return (image, hashcode)
+
             input = get_input()
 
-            if self.current_frame[0].mode == "RGBA":
+            if frame.mode == "RGBA":
                 # Use the transparency mask of the image to paste
-                input.paste(self.current_frame[0], self.current_frame[0])
+                input.paste(frame, frame)
             else:
-                input.paste(self.current_frame[0])
-            return (input, self.current_frame[2])
+                input.paste(frame)
+            return (input, hashcode)
         else:
-            return (None, self.current_frame[2])
+            return (None, hashcode)
