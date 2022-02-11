@@ -57,7 +57,7 @@ class TextFilter(Filter):
         if input_changed:
             image = get_output(self.hashcode)
             if image:
-                return (Image, self.hashcode)
+                return (image, self.hashcode)
 
             input = get_input()
             input.paste(self.image, self.image)
