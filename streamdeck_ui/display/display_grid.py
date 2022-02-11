@@ -22,18 +22,24 @@ class DisplayGrid:
         self.pages: Dict[int, Dict[int, Pipeline]] = {}
         self.current_page: int = -1
         self.pipeline_thread: Optional[threading.Thread] = None
-        self.running = False
+        self.quit = threading.Event()
         self.fps = fps
         # Configure the maximum frame rate we want to achieve
         self.time_per_frame = 1 / 10
+        self.lock = threading.Lock()
 
+    # TODO: The get and set pipeline is probably the wrong API
+    # There should be a way to add/remove filters but the concept of pipeline
+    # is hidden from the outside.
+    # Even though we're locking, modifying the pipeline is unsafe
     def set_pipeline(self, page: int, button: int, pipeline: Pipeline):
-        # TODO: Do we need to lock before manipulating?
-        page_dict = self.pages.setdefault(page, {})
-        page_dict.setdefault(button, pipeline)
+        with self.lock:
+            page_dict = self.pages.setdefault(page, {})
+            page_dict.setdefault(button, pipeline)
 
     def get_pipeline(self, page: int, button: int) -> Pipeline:
-        return self.pages[page][button]
+        with self.lock:
+            return self.pages[page][button]
 
     def _run(self):
         """Method that runs on background thread and updates the pipelines."""
@@ -43,9 +49,12 @@ class DisplayGrid:
         execution_time = 0
         frame_cache = {}
 
-        while self.running:
+        while not self.quit.isSet():
             current_time = time()
-            page = self.pages[self.current_page]
+
+            with self.lock:
+                page = self.pages[self.current_page]
+
             force_update = False
 
             if last_page != page:
@@ -114,6 +123,7 @@ class DisplayGrid:
             frames += 1
             if time() - start > 1.0:
                 execution_time_ms = int(execution_time * 1000)
+                # TODO: push an event or callback so the UI can get access to this data
                 print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
                 print(f"Output cache size: {len(frame_cache)}")
                 print(f"Pipeline cache size: {pipeline_cache_count}")
@@ -128,25 +138,25 @@ class DisplayGrid:
         Args:
             page (int): The page number to switch to.
         """
-        self.current_page = page
+        with self.lock:
+            self.current_page = page
 
     def start(self):
         if self.pipeline_thread is not None:
-            self.running = False
+            self.quit.set()
             try:
                 self.pipeline_thread.join()
             except RuntimeError:
                 pass
 
-        self.running = True
+        self.quit.clear()
         self.pipeline_thread = threading.Thread(target=self._run)
         self.pipeline_thread.daemon = True
         self.pipeline_thread.start()
 
     def stop(self):
-
         if self.pipeline_thread is not None:
-            self.running = False
+            self.quit.set()
             try:
                 self.pipeline_thread.join()
             except RuntimeError:
