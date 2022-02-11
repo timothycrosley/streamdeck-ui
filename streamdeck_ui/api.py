@@ -7,8 +7,6 @@ from io import BytesIO
 from typing import Dict, Optional, Tuple, Union, cast
 from warnings import warn
 
-import cairosvg
-import filetype
 from PIL import Image, ImageDraw, ImageFont
 from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
@@ -23,6 +21,7 @@ from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pipeline import Pipeline
 from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
+from streamdeck_ui.display.empty_filter import EmptyFilter
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
@@ -329,29 +328,30 @@ def load_display_pipelines():
         if deck is None:
             continue
 
-        display_handler = DisplayGrid(deck)
+        pages = len(deck_state["buttons"])
+        display_handler = DisplayGrid(deck, pages)
         display_handler.set_page(get_page(deck_id))
 
+        # FIXME: Remove this once we've refactored create and initialize of filter
         size = deck.key_image_format()["size"]
 
         for page, button in deck_state.get("buttons", {}).items():
 
             for button_id, button_settings in button.items():
 
-                pipeline = Pipeline(size)
                 icon = button_settings.get("icon")
                 if icon:
                     # Now we have deck, page and buttons
-                    pipeline.add(ImageFilter(size, icon))
+                    display_handler.add_filter(page, button_id, ImageFilter(size, icon))
 
                 if button_settings.get("pulse"):
-                    pipeline.add(PulseFilter(size))
+                    display_handler.add_filter(page, button_id, PulseFilter(size))
 
                 text = button_settings.get("text")
                 font = button_settings.get("font", DEFAULT_FONT)
 
                 if text:
-                    pipeline.add(TextFilter(size, text, font))
+                    display_handler.add_filter(page, button_id, TextFilter(size, text, font))
 
 
                 # TODO: Remove the displays dictionary
@@ -359,8 +359,6 @@ def load_display_pipelines():
                 # displays[deck_id].setdefault(page, {})
                 # displays[deck_id][page].setdefault(button_id, None)
                 # displays[deck_id][page][button_id] = pipeline
-
-                display_handler.set_pipeline(page, button_id, pipeline)
 
         display_handler.start()
 
@@ -383,7 +381,7 @@ def render() -> None:
 
                 # TODO: Do we need this cache at all anymore? Decide how to update
                 # UI from display engine (keep in sync, show static?)
-                pil_image = display_handler.get_pipeline(page, button_id).last_result()
+                pil_image = display_handler.get_image(page, button_id)
                 if pil_image:
                     image = ImageHelpers.PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 

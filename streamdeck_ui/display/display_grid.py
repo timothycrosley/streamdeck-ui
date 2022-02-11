@@ -6,6 +6,9 @@ from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
 
 from streamdeck_ui.display.pipeline import Pipeline
+from streamdeck_ui.display.filter import Filter
+
+from PIL import Image
 
 
 class DisplayGrid:
@@ -14,32 +17,44 @@ class DisplayGrid:
     filters for one individual button display.
     """
 
-    def __init__(self, streamdeck: StreamDeck, fps: int = 25):
+    def __init__(self, streamdeck: StreamDeck, pages: int, fps: int = 25):
         # Reference to the actual device, used to update icons
         self.streamdeck = streamdeck
+        # TODO: Makes more sense that the display tells the filters what size
+        # images to create than to have to create the filter with a size in mind.
+        # This also means that filter creation and intialization needs to be
+        # seperated. Maybe also needs a method to provide a thumbnail?
+        self.size = streamdeck.key_image_format()["size"]
+
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
         self.pages: Dict[int, Dict[int, Pipeline]] = {}
+
+        # Initialize with a pipeline per key for all pages
+        for page in range(pages):
+            self.pages[page] = {}
+            for button in range(self.streamdeck.key_count()):
+                self.pages[page][button] = Pipeline(self.size)
+
         self.current_page: int = -1
         self.pipeline_thread: Optional[threading.Thread] = None
         self.quit = threading.Event()
         self.fps = fps
         # Configure the maximum frame rate we want to achieve
-        self.time_per_frame = 1 / 10
+        self.time_per_frame = 1 / fps
         self.lock = threading.Lock()
 
-    # TODO: The get and set pipeline is probably the wrong API
-    # There should be a way to add/remove filters but the concept of pipeline
-    # is hidden from the outside.
-    # Even though we're locking, modifying the pipeline is unsafe
-    def set_pipeline(self, page: int, button: int, pipeline: Pipeline):
+    def add_filter(self, page: int, button: int, filter: Filter):
         with self.lock:
-            page_dict = self.pages.setdefault(page, {})
-            page_dict.setdefault(button, pipeline)
+            self.pages[page][button].add(filter)
 
-    def get_pipeline(self, page: int, button: int) -> Pipeline:
+    def get_image(self, page: int, button: int) -> Image.Image:
         with self.lock:
-            return self.pages[page][button]
+            # FIXME: Consider returning not the last result, but an thumbnail
+            # or something that represents the current "static" look of
+            # a button. This will need to be added to the interface
+            # of a filter.
+            return self.pages[page][button].last_result()
 
     def _run(self):
         """Method that runs on background thread and updates the pipelines."""
@@ -77,7 +92,7 @@ class DisplayGrid:
                     image = pipeline.last_result()
 
                 if image:
-                    # FIXME: We cannot afford to do this conversion on every final frame.
+                    # We cannot afford to do this conversion on every final frame.
                     # Since we want the flexibilty of a pipeline engine that can mutate the
                     # images along a chain of filters, the outcome can be somewhat unpredicatable
                     # For example - a clock that changes time or an animation that changes
@@ -87,17 +102,13 @@ class DisplayGrid:
                     # with an eviction policy of the oldest would likely suffice.
                     # The main problem is since the pipeline can mutate it's too expensive to
                     # calculate the actual hash of the final frame.
-                    #  Options:
-                    #  1. Sample part of the image - fast. Downside is that some images may
-                    #     appear to be the same if sampling is done poorly and incorrect image
-                    #     will be displayed.
-                    #  2. Create a hash function that the filter itself defines. It has to
-                    #     update the hashcode with the unique attributes of the input it requires
-                    #     to make the frame. This could be time, text, frame number etc.
-                    #     The hash can then be passed to the next step and XOR'd or combined
-                    #     with the next hash. This yields a final hash code that can then be
-                    #     used to cache the output. At the end of the pipeline the hash can
-                    #     be checked and final bytes will be ready to pipe to the device.
+                    # Create a hash function that the filter itself defines. It has to
+                    # update the hashcode with the unique attributes of the input it requires
+                    # to make the frame. This could be time, text, frame number etc.
+                    # The hash can then be passed to the next step and XOR'd or combined
+                    # with the next hash. This yields a final hash code that can then be
+                    # used to cache the output. At the end of the pipeline the hash can
+                    # be checked and final bytes will be ready to pipe to the device.
 
                     # FIXME:
                     # This will be unbounded, old frames will need to be evicted
