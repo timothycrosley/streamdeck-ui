@@ -1,4 +1,3 @@
-import random
 from fractions import Fraction
 from typing import Callable, Tuple
 
