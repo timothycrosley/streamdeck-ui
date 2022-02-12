@@ -666,6 +666,67 @@ def dim_all_displays() -> None:
         dimmer.dim(True)
 
 
+def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
+    """Creates the main application window and configures slots and signals
+
+    :param logo: The icon displayed in the main application window
+    :type logo: QIcon
+    :param app: The QApplication that started it all
+    :type app: QApplication
+    :return: Returns the MainWindow instance
+    :rtype: MainWindow
+    """
+    main_window = MainWindow()
+    ui = main_window.ui
+    ui.text.textChanged.connect(partial(queue_text_change, ui))
+    ui.command.textChanged.connect(partial(update_button_command, ui))
+    ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
+    ui.write.textChanged.connect(partial(update_button_write, ui))
+    ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
+    ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
+    ui.imageButton.clicked.connect(partial(select_image, main_window))
+    ui.removeButton.clicked.connect(partial(remove_image, main_window))
+    ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+    ui.actionExport.triggered.connect(partial(export_config, main_window))
+    ui.actionImport.triggered.connect(partial(import_config, main_window))
+    ui.actionExit.triggered.connect(app.exit)
+    ui.actionAbout.triggered.connect(main_window.about_dialog)
+    ui.actionDocs.triggered.connect(browse_documentation)
+    ui.actionGithub.triggered.connect(browse_github)
+    return main_window
+
+
+def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSystemTrayIcon:
+    """Creates a system tray with the provided icon and parent. The main
+    window passed will be activated when clicked.
+
+    :param logo: The icon to show in the system tray
+    :type logo: QIcon
+    :param app: The parent object the tray is bound to
+    :type app: QApplication
+    :param main_window: The window what will be activated by the tray
+    :type main_window: QMainWindow
+    :return: Returns the QSystemTrayIcon instance
+    :rtype: QSystemTrayIcon
+    """
+    tray = QSystemTrayIcon(logo, app)
+    tray.activated.connect(main_window.systray_clicked)
+
+    menu = QMenu()
+    action_dim = QAction("Dim display (toggle)")
+    action_dim.triggered.connect(dim_all_displays)
+    action_configure = QAction("Configure...")
+    action_configure.triggered.connect(main_window.bring_to_top)
+    menu.addAction(action_dim)
+    menu.addAction(action_configure)
+    menu.addSeparator()
+    action_exit = QAction("Exit")
+    action_exit.triggered.connect(app.exit)
+    menu.addAction(action_exit)
+    tray.setContextMenu(menu)
+    return tray
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -687,35 +748,9 @@ def start(_exit: bool = False) -> None:
     app.setApplicationVersion(version)
     logo = QIcon(LOGO)
     app.setWindowIcon(logo)
-
-    main_window = MainWindow()
+    main_window = create_main_window(logo, app)
     ui = main_window.ui
-    tray = QSystemTrayIcon(logo, app)
-    tray.activated.connect(main_window.systray_clicked)
-
-    menu = QMenu()
-    action_dim = QAction("Dim display (toggle)")
-    action_dim.triggered.connect(dim_all_displays)
-    action_configure = QAction("Configure...")
-    action_configure.triggered.connect(main_window.bring_to_top)
-    menu.addAction(action_dim)
-    menu.addAction(action_configure)
-    menu.addSeparator()
-    action_exit = QAction("Exit")
-    action_exit.triggered.connect(app.exit)
-    menu.addAction(action_exit)
-
-    tray.setContextMenu(menu)
-
-    ui.text.textChanged.connect(partial(queue_text_change, ui))
-    ui.command.textChanged.connect(partial(update_button_command, ui))
-    ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
-    ui.write.textChanged.connect(partial(update_button_write, ui))
-    ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
-    ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
-    ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.removeButton.clicked.connect(partial(remove_image, main_window))
-    ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+    tray = create_tray(logo, app, main_window)
 
     api.streamdesk_keys.key_pressed.connect(handle_keypress)
 
@@ -742,12 +777,6 @@ def start(_exit: bool = False) -> None:
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
     ui.pages.currentChanged.connect(partial(change_page, ui))
-    ui.actionExport.triggered.connect(partial(export_config, main_window))
-    ui.actionImport.triggered.connect(partial(import_config, main_window))
-    ui.actionExit.triggered.connect(app.exit)
-    ui.actionAbout.triggered.connect(main_window.about_dialog)
-    ui.actionDocs.triggered.connect(browse_documentation)
-    ui.actionGithub.triggered.connect(browse_github)
 
     timer = QTimer()
     timer.timeout.connect(partial(sync, ui))
