@@ -376,12 +376,13 @@ def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
+    image_file = None
     if not image:
         if not last_image_dir:
             image_file = os.path.expanduser("~")
         else:
             image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg)")[0]
+    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
@@ -735,13 +736,12 @@ def start(_exit: bool = False) -> None:
         )
         dimmers[deck_id].reset()
 
+    # FIXME: Display per streamdeck is required
     api.load_display_pipelines()
 
     build_device(ui)
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
-
     ui.pages.currentChanged.connect(partial(change_page, ui))
-
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
     ui.actionExit.triggered.connect(app.exit)
