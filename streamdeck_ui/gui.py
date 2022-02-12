@@ -359,9 +359,11 @@ def update_switch_page(ui, page: int) -> None:
 
 
 def _highlight_first_button(ui) -> None:
-    button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
-    button.setChecked(False)
-    button.click()
+    buttons = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)
+    if len(buttons) > 0:
+        button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
+        button.setChecked(False)
+        button.click()
 
 
 def change_page(ui, page: int) -> None:
@@ -467,6 +469,9 @@ def browse_github():
 
 def build_buttons(ui, tab) -> None:
     deck_id = _deck_id(ui)
+
+    if not deck_id:
+        return
     deck = api.get_deck(deck_id)
 
     if hasattr(tab, "deck_buttons"):
@@ -545,6 +550,20 @@ def build_device(ui, _device_index=None) -> None:
 
 
 class MainWindow(QMainWindow):
+    """Represents the main streamdeck-ui configuration Window. A QMainWindow
+    object provides a lot of standard main window features out the box.
+
+    The QtCreator UI designer allows you to create a UI quickly. It compiles
+    into a class called Ui_MainWindow() and everything comes together by
+    calling the setupUi() method and passing a reference to the QMainWindow.
+
+    :param QMainWindow: The parent QMainWindow object
+    :type QMainWindow: [type]
+    """
+
+    ui : Ui_MainWindow
+    "A reference to all the UI objects for the main window"
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -608,12 +627,12 @@ def change_brightness(deck_id: str, brightness: int):
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        self.ui = Ui_SettingsDialog()
+        self.ui : Ui_SettingsDialog = Ui_SettingsDialog()
         self.ui.setupUi(self)
         self.show()
 
 
-def show_settings(window) -> None:
+def show_settings(window : MainWindow) -> None:
     """Shows the settings dialog and allows the user the change deck specific
     settings. Settings are not saved until OK is clicked."""
     ui = window.ui
@@ -743,6 +762,8 @@ def start(_exit: bool = False) -> None:
     except pkg_resources.DistributionNotFound:
         version = "devel"
 
+    # The QApplication object holds the Qt event loop and you need one of these
+    # for your application
     app = QApplication(sys.argv)
     app.setApplicationName("Streamdeck UI")
     app.setApplicationVersion(version)
