@@ -2,9 +2,10 @@
 import json
 import os
 import threading
+import time
 from functools import partial
 from io import BytesIO
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast, List
 from warnings import warn
 
 from PIL.ImageQt import ImageQt
@@ -16,25 +17,43 @@ from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.display.display_grid import DisplayGrid
+from streamdeck_ui.display.filter import Filter
 from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
+from streamdeck_ui.stream_deck_monitor import StreamDeckMonitor
 
 # Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
 decks: Dict[str, StreamDeck.StreamDeck] = {}
+
+# Keep track of device.id -> Serial Number
+deck_ids: Dict[str, str] = {}
+
 state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 # FIXME: Should the lock move to the display manager, including other display operations
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
-display_handler: DisplayGrid
+
+display_handlers: Dict[str, DisplayGrid] = {}
 
 
 class KeySignalEmitter(QObject):
     key_pressed = Signal(str, int, bool)
 
 
-streamdesk_keys = KeySignalEmitter()
+# TODO: Review if this will work for multiple streamdecks
+streamdeck_keys = KeySignalEmitter()
+
+
+class StreamDeckSignalEmitter(QObject):
+    attached = Signal(dict)
+    "A signal that is raised whenever a new StreamDeck is attached."
+    detatched = Signal(str)
+    "A signal that is raised whenever a StreamDeck is detatched. "
+
+
+plugevents = StreamDeckSignalEmitter()
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
@@ -45,7 +64,7 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     # Since multiple keys could fire simultaniously, we need to protect
     # shared state with a lock
     with key_event_lock:
-        streamdesk_keys.key_pressed.emit(deck_id, key, state)
+        streamdeck_keys.key_pressed.emit(deck_id, key, state)
 
 
 def get_display_timeout(deck_id: str) -> int:
@@ -101,31 +120,51 @@ def export_config(output_file: str) -> None:
         os.replace(output_file + ".tmp", os.path.realpath(output_file))
 
 
-def open_decks() -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
-    """Opens and then returns all known stream deck devices"""
-    for deck in DeviceManager.DeviceManager().enumerate():
-        deck.open()
-        deck.reset()
-        deck_id = deck.get_serial_number()
-        decks[deck_id] = deck
-        deck.set_key_callback(partial(_key_change_callback, deck_id))
-
-    return {deck_id: {"type": deck.deck_type(), "layout": deck.key_layout()} for deck_id, deck in decks.items()}
+monitor : StreamDeckMonitor
 
 
-def close_decks() -> None:
+def attached(streamdeck_id: str, streamdeck: StreamDeck):
+    streamdeck.open()
+    streamdeck.reset()
+    serial_number = streamdeck.get_serial_number()
 
-    # TODO: Stop display handler for each deck
-    display_handler.stop()
+    # Store mapping from device id -> serial number
+    # The detatched event only knows about the id that got detatched
+    deck_ids[streamdeck_id] = serial_number
+    print(f"Streamdeck attached! {streamdeck_id}")
+    decks[serial_number] = streamdeck
+    streamdeck.set_key_callback(partial(_key_change_callback, streamdeck_id))
+    update_streamdeck_filters(serial_number)
+    plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
 
-    """Closes open decks for input/ouput."""
-    for _deck_serial, deck in decks.items():
+
+def detatched(id: str):
+    serial_number = deck_ids.get(id, None)
+    if serial_number:
+        plugevents.detatched.emit(id)
+
+
+def start():
+    global monitor
+    monitor = StreamDeckMonitor(attached, detatched)
+    monitor.start()
+
+
+def stop():
+    global monitor
+    monitor.stop()
+
+    for _, display_grid in display_handlers.items():
+        display_grid.stop()
+
+    for _, deck in decks.items():
         if deck.connected():
             deck.set_brightness(50)
             deck.reset()
             deck.close()
 
 
+# FIXME: This needs to be deprecated
 def ensure_decks_connected() -> None:
     """Reconnects to any decks that lost connection. If they did, re-renders them."""
     for deck_serial, deck in decks.copy().items():
@@ -175,7 +214,11 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        render()
+
+        # FIXME: Load only new pipeline for key
+        # FIXME: Refresh screen display button
+        update_button_filters(deck_id, page, button)
+        #render()
         _save_state()
 
 
@@ -189,7 +232,11 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
-        render()
+
+        # Can we update just the one?
+        update_button_filters(deck_id, page, button)
+        #render()
+
         _save_state()
 
 
@@ -198,11 +245,17 @@ def get_button_icon(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
 
     # TODO: Refine this logic - for now - anytime someone ask for a button
     # update the button image cache
-    render()
-    key = f"{deck_id}.{page}.{button}"
-    if key not in image_cache:
-        return None
-    return image_cache[key][1]
+    # render()
+    # key = f"{deck_id}.{page}.{button}"
+    # if key not in image_cache:
+    #     return None
+    # return image_cache[key][1]
+
+    pil_image = display_handlers[deck_id].get_image(page, button)
+    if pil_image:
+        qt_image = ImageQt(pil_image)
+        qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
+        return QPixmap(qt_image)
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
@@ -306,53 +359,79 @@ def set_page(deck_id: str, page: int) -> None:
     if get_page(deck_id) != page:
         state.setdefault(deck_id, {})["page"] = page
 
-        # TODO: Update the display handler for the correct deck
-        display_handler.set_page(page)
+        display_handlers[deck_id].set_page(page)
         render()
         _save_state()
 
 
-def load_display_pipelines():
-    global display_handler
+def update_streamdeck_filters(serial_number: str):
+    """Updates the filters for all the StreamDeck buttons.
 
-    # TODO: Need to create a display handler for every streamdeck
+    :param serial_number: The StreamDeck serial number.
+    :type serial_number: str
+    """
+
     for deck_id, deck_state in state.items():
+
         deck = decks.get(deck_id, None)
 
+        # Deck is not attached right now
         if deck is None:
             continue
 
         pages = len(deck_state["buttons"])
-        display_handler = DisplayGrid(deck, pages)
+
+        display_handler = display_handlers.get(serial_number, DisplayGrid(deck, pages))
         display_handler.set_page(get_page(deck_id))
+        display_handlers[serial_number] = display_handler
 
         # FIXME: Remove this once we've refactored create and initialize of filter
         size = deck.key_image_format()["size"]
 
-        for page, button in deck_state.get("buttons", {}).items():
-
-            for button_id, button_settings in button.items():
-
-                icon = button_settings.get("icon")
-                if icon:
-                    # Now we have deck, page and buttons
-                    display_handler.add_filter(page, button_id, ImageFilter(size, icon))
-
-                if button_settings.get("pulse"):
-                    display_handler.add_filter(page, button_id, PulseFilter(size))
-
-                text = button_settings.get("text")
-                font = button_settings.get("font", DEFAULT_FONT)
-
-                if text:
-                    display_handler.add_filter(page, button_id, TextFilter(size, text, font))
+        for page, buttons in deck_state.get("buttons", {}).items():
+            for button in buttons:
+                update_button_filters(serial_number, page, button, size)
 
         display_handler.start()
 
 
+def update_button_filters(serial_number: str, page: int, button: int, size=(72, 72)):
+    """Sets the filters for a given button. Any previous filters are replaced.
+
+    :param serial_number: The StreamDeck serial number
+    :type serial_number: str
+    :param page: The page number
+    :type page: int
+    :param button: The button to update
+    :type button: int
+    :param size: The size of the image. This will be refactored out. defaults to (72, 72)
+    :type size: tuple, optional
+    """
+    display_handler = display_handlers[serial_number]
+    button_settings = _button_state(serial_number, page, button)
+    filters: List[Filter] = []
+
+    icon = button_settings.get("icon")
+    if icon:
+        # Now we have deck, page and buttons
+        filters.append(ImageFilter(size, icon))
+
+    if button_settings.get("pulse"):
+        filters.append(PulseFilter(size))
+
+    text = button_settings.get("text")
+    font = button_settings.get("font", DEFAULT_FONT)
+
+    if text:
+        filters.append(TextFilter(size, text, font))
+
+    display_handler.replace(page, button, filters)
+
+
+# FIXME: Remove all references?
 def render() -> None:
     """renders all decks"""
-
+    return
     global display_handler
 
     for deck_id, deck_state in state.items():
@@ -371,7 +450,7 @@ def render() -> None:
 
                 # TODO: Do we need this cache at all anymore? Decide how to update
                 # UI from display engine (keep in sync, show static?)
-                pil_image = display_handler.get_image(page, button_id)
+                pil_image = display_handlers[deck_id].get_image(page, button_id)
                 if pil_image:
                     image = PILHelper.to_native_format(deck, pil_image.convert("RGB"))
 

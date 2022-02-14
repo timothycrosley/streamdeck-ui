@@ -10,7 +10,7 @@ from typing import Callable, Dict
 import pkg_resources
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl
+from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl, QSignalBlocker
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import (
     QAction,
@@ -328,8 +328,12 @@ def _page(ui) -> int:
 
 
 def update_button_text(ui, text: str) -> None:
+    print("update_button_text")
     deck_id = _deck_id(ui)
     api.set_button_text(deck_id, _page(ui), selected_button.index, text)
+    # FIXME: When the text changes, what needs to happen?
+    # Do we really need to redraw all the buttons?  In theory we only
+    # Need to update the current button.
     redraw_buttons(ui)
 
 
@@ -360,6 +364,7 @@ def update_switch_page(ui, page: int) -> None:
 
 def _highlight_first_button(ui) -> None:
     buttons = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)
+    # TODO: Can this check be removed?
     if len(buttons) > 0:
         button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
         button.setChecked(False)
@@ -367,9 +372,11 @@ def _highlight_first_button(ui) -> None:
 
 
 def change_page(ui, page: int) -> None:
+    print("change_page")
     deck_id = _deck_id(ui)
     api.set_page(deck_id, page)
-    redraw_buttons(ui)
+    # Don't redraw here, but hilight will redraw
+    #redraw_buttons(ui)
     _highlight_first_button(ui)
     dimmers[deck_id].reset()
 
@@ -408,19 +415,27 @@ def remove_image(window) -> None:
 
 
 def redraw_buttons(ui) -> None:
+    print("redraw buttons")
     deck_id = _deck_id(ui)
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
-        button.setText(api.get_button_text(deck_id, _page(ui), button.index))
 
-        # TODO: Fix the way we handle buttons - for now deal with
-        # case where the icon may not be ready yet. There is a race
-        # condition on startup as display rendering and UI buttons are
-        # tied.
-        icon = api.get_button_icon(deck_id, _page(ui), button.index)
-        if icon:
-            button.setIcon(icon)
+        blocker = QSignalBlocker(button)
+        try:
+            #button.setText(api.get_button_text(deck_id, _page(ui), button.index))
+
+
+            # TODO: Fix the way we handle buttons - for now deal with
+            # case where the icon may not be ready yet. There is a race
+            # condition on startup as display rendering and UI buttons are
+            # tied.
+            icon = api.get_button_icon(deck_id, _page(ui), button.index)
+            if icon:
+                button.setIcon(icon)
+
+        finally:
+            blocker.unblock()
 
 
 def set_brightness(ui, value: int) -> None:
@@ -528,13 +543,38 @@ def import_config(window) -> None:
 
 
 def sync(ui) -> None:
-    api.ensure_decks_connected()
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
-    # TODO: For now, just sync up the buttons every second
-    redraw_buttons(ui)
+    # Fixme - need to look for NEW or missing decks
+    # items = api.open_decks().items()
+    # if len(items) == 0:
+    #     print("Waiting for Stream Deck(s)...")
+    #     while len(items) == 0:
+    #         time.sleep(3)
+    #         items = api.open_decks().items()
+
+    # for deck_id, deck in items:
+    #     ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
+    #     dimmers[deck_id] = Dimmer(
+    #         api.get_display_timeout(deck_id),
+    #         api.get_brightness(deck_id),
+    #         api.get_brightness_dimmed(deck_id),
+    #         partial(change_brightness, deck_id),
+    #     )
+    #     dimmers[deck_id].reset()
+
+    # FIXME: Display per streamdeck is required
+    #api.load_display_pipelines()
+
+    #build_device(ui)
+
+    # api.ensure_decks_connected()
+    # ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    # # TODO: For now, just sync up the buttons every second
+    # redraw_buttons(ui)
+    pass
 
 
 def build_device(ui, _device_index=None) -> None:
+    print("build_device")
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
         page.setStyleSheet("background-color: black")
@@ -545,7 +585,7 @@ def build_device(ui, _device_index=None) -> None:
 
     # Draw the buttons for the active page
     redraw_buttons(ui)
-    sync(ui)
+    #sync(ui)
     _highlight_first_button(ui)
 
 
@@ -699,6 +739,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui = main_window.ui
     ui.text.textChanged.connect(partial(queue_text_change, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
+    # TODO: Review why currentTextChanged vs textChanged?
     ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
@@ -746,6 +787,39 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     return tray
 
 
+def streamdeck_attached(ui, deck: Dict):
+
+    serial_number = deck["serial_number"]
+    blocker = QSignalBlocker(ui.device_list)
+    try:
+        ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
+    finally:
+        blocker.unblock()
+    dimmers[serial_number] = Dimmer(
+        api.get_display_timeout(serial_number),
+        api.get_brightness(serial_number),
+        api.get_brightness_dimmed(serial_number),
+        partial(change_brightness, serial_number),
+    )
+    dimmers[serial_number].reset()
+    build_device(ui)
+
+    #api.load_display_pipelines()
+
+    #build_device(ui)
+
+    # api.ensure_decks_connected()
+    # ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    # # TODO: For now, just sync up the buttons every second
+    # redraw_buttons(ui)
+
+
+# TODO: Remove item, clear buttons if needed
+def streamdeck_detatched(id):
+    print("Detatched")
+    pass
+
+
 def start(_exit: bool = False) -> None:
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
@@ -773,35 +847,18 @@ def start(_exit: bool = False) -> None:
     ui = main_window.ui
     tray = create_tray(logo, app, main_window)
 
-    api.streamdesk_keys.key_pressed.connect(handle_keypress)
+    api.streamdeck_keys.key_pressed.connect(handle_keypress)
 
-    items = api.open_decks().items()
-    if len(items) == 0:
-        print("Waiting for Stream Deck(s)...")
-        while len(items) == 0:
-            time.sleep(3)
-            items = api.open_decks().items()
-
-    for deck_id, deck in items:
-        ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-        dimmers[deck_id] = Dimmer(
-            api.get_display_timeout(deck_id),
-            api.get_brightness(deck_id),
-            api.get_brightness_dimmed(deck_id),
-            partial(change_brightness, deck_id),
-        )
-        dimmers[deck_id].reset()
-
-    # FIXME: Display per streamdeck is required
-    api.load_display_pipelines()
-
-    build_device(ui)
+    # FIXME: When the device list changes AND when the tab changes, buttons are redrawn
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
-    timer = QTimer()
-    timer.timeout.connect(partial(sync, ui))
-    timer.start(1000)
+    api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+    api.start()
+
+    # timer = QTimer()
+    # timer.timeout.connect(partial(sync, ui))
+    # timer.start(1000)
 
     api.render()
     tray.show()
@@ -813,7 +870,7 @@ def start(_exit: bool = False) -> None:
         return
     else:
         app.exec_()
-        api.close_decks()
+        api.stop()
         sys.exit()
 
 
