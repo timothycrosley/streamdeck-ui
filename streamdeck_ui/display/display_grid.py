@@ -1,6 +1,6 @@
 import threading
 from time import sleep, time
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
@@ -43,6 +43,13 @@ class DisplayGrid:
         # Configure the maximum frame rate we want to achieve
         self.time_per_frame = 1 / fps
         self.lock = threading.Lock()
+
+    def replace(self, page: int, button: int, filters: List[Filter]):
+        with self.lock:
+            pipeline = Pipeline(self.size)
+            for filter in filters:
+                pipeline.add(filter)
+            self.pages[page][button] = pipeline
 
     def add_filter(self, page: int, button: int, filter: Filter):
         with self.lock:
@@ -135,9 +142,9 @@ class DisplayGrid:
             if time() - start > 1.0:
                 execution_time_ms = int(execution_time * 1000)
                 # TODO: push an event or callback so the UI can get access to this data
-                print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
-                print(f"Output cache size: {len(frame_cache)}")
-                print(f"Pipeline cache size: {pipeline_cache_count}")
+                #print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
+                #print(f"Output cache size: {len(frame_cache)}")
+                #print(f"Pipeline cache size: {pipeline_cache_count}")
                 execution_time = 0
                 frames = 0
                 start = time()
@@ -172,3 +179,4 @@ class DisplayGrid:
                 self.pipeline_thread.join()
             except RuntimeError:
                 pass
+            self.pipeline_thread = None
