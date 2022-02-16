@@ -9,8 +9,10 @@ from streamdeck_ui.display.filter import Filter
 
 
 class TextFilter(Filter):
+    font_blur: ImageFilter.Kernel = None
     # Static instance - no need to create one per Filter instance
-    font_blur = None
+
+    image: Image
 
     def __init__(self, text: str, font: str):
         super(TextFilter, self).__init__()

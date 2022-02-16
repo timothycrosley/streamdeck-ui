@@ -1,5 +1,5 @@
 from fractions import Fraction
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from PIL.Image import Image
 
@@ -10,7 +10,7 @@ class Pipeline:
     def __init__(self) -> None:
         self.filters: List[Tuple[Filter, Image]] = []
         self.first_run = True
-        self.output_cache = {}
+        self.output_cache: Dict[int, Image] = {}
 
     def add(self, filter: Filter) -> None:
         self.filters.append((filter, None))

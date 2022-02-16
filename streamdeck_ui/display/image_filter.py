@@ -73,7 +73,7 @@ class ImageFilter(Filter):
 
         self.frame_cycle = itertools.cycle(self.frames)
         self.current_frame = next(self.frame_cycle)
-        self.frame_time = 0
+        self.frame_time = Fraction()
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """

@@ -241,6 +241,7 @@ def _replace_special_keys(key):
 
 def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
+    # TODO: Handle both key down and key up events in future.
     if state:
 
         if dimmers[deck_id].reset():
@@ -385,7 +386,7 @@ def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
-    image_file = None
+    image_file = ""
     if not image:
         if not last_image_dir:
             image_file = os.path.expanduser("~")
@@ -805,9 +806,7 @@ def streamdeck_attached(ui, deck: Dict):
     build_device(ui)
 
     #api.load_display_pipelines()
-
     #build_device(ui)
-
     # api.ensure_decks_connected()
     # ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
     # # TODO: For now, just sync up the buttons every second
@@ -815,9 +814,9 @@ def streamdeck_attached(ui, deck: Dict):
 
 
 # TODO: Remove item, clear buttons if needed
-def streamdeck_detatched(id):
-    print("Detatched")
-    pass
+def streamdeck_detatched(ui, id):
+    for item in ui.device_list.items():
+        print(item)
 
 
 def start(_exit: bool = False) -> None:
@@ -854,11 +853,8 @@ def start(_exit: bool = False) -> None:
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
     api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+    api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
     api.start()
-
-    # timer = QTimer()
-    # timer.timeout.connect(partial(sync, ui))
-    # timer.start(1000)
 
     api.render()
     tray.show()

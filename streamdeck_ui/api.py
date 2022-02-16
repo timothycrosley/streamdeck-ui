@@ -30,7 +30,7 @@ decks: Dict[str, StreamDeck.StreamDeck] = {}
 # Keep track of device.id -> Serial Number
 deck_ids: Dict[str, str] = {}
 
-state: Dict[str, Dict[str, Union[int, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+state: Dict[str, Dict[str, Union[int, str, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 # FIXME: Should the lock move to the display manager, including other display operations
 streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
@@ -131,7 +131,6 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     # Store mapping from device id -> serial number
     # The detatched event only knows about the id that got detatched
     deck_ids[streamdeck_id] = serial_number
-    print(f"Streamdeck attached! {streamdeck_id}")
     decks[serial_number] = streamdeck
     streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
     update_streamdeck_filters(serial_number)
@@ -229,6 +228,9 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
+
+    # FIXME: This isn't right - it's supposed to compare if the icon changed, 
+    # but the api returns a QBitMap. Apples to Oranges.
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
@@ -256,6 +258,7 @@ def get_button_icon(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
         qt_image = ImageQt(pil_image)
         qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
         return QPixmap(qt_image)
+    return None
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
@@ -379,6 +382,7 @@ def update_streamdeck_filters(serial_number: str):
         if deck is None:
             continue
 
+        # TODO: Debug this - says there should not be a length
         pages = len(deck_state["buttons"])
 
         display_handler = display_handlers.get(serial_number, DisplayGrid(deck, pages))
