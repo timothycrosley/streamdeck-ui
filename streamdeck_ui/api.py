@@ -140,7 +140,7 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
 def detatched(id: str):
     serial_number = deck_ids.get(id, None)
     if serial_number:
-        plugevents.detatched.emit(id)
+        plugevents.detatched.emit(serial_number)
 
 
 def start():
