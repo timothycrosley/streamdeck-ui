@@ -13,15 +13,17 @@ class EmptyFilter(filter.Filter):
     :param str name: The name of the filter. The name is useful for debugging purposes.
     """
 
-    def __init__(self, size: Tuple[int, int]):
-        super(EmptyFilter, self).__init__(size)
-        self.image = Image.new("RGB", size)
+    def __init__(self):
+        super(EmptyFilter, self).__init__()
 
         # For EmptyFilter - create a unique hashcode based on the name of the type
         # This will create "some value" that uniquely identifies this filter output
         # Since it never changes, this works.
         # Calculate it once for speed
         self.hashcode = hash(self.__class__)
+
+    def initialize(self, size: Tuple[int, int]):
+        self.image = Image.new("RGB", size)
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """

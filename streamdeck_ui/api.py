@@ -385,17 +385,14 @@ def update_streamdeck_filters(serial_number: str):
         display_handler.set_page(get_page(deck_id))
         display_handlers[serial_number] = display_handler
 
-        # FIXME: Remove this once we've refactored create and initialize of filter
-        size = deck.key_image_format()["size"]
-
         for page, buttons in deck_state.get("buttons", {}).items():
             for button in buttons:
-                update_button_filters(serial_number, page, button, size)
+                update_button_filters(serial_number, page, button)
 
         display_handler.start()
 
 
-def update_button_filters(serial_number: str, page: int, button: int, size=(72, 72)):
+def update_button_filters(serial_number: str, page: int, button: int):
     """Sets the filters for a given button. Any previous filters are replaced.
 
     :param serial_number: The StreamDeck serial number
@@ -414,16 +411,16 @@ def update_button_filters(serial_number: str, page: int, button: int, size=(72, 
     icon = button_settings.get("icon")
     if icon:
         # Now we have deck, page and buttons
-        filters.append(ImageFilter(size, icon))
+        filters.append(ImageFilter(icon))
 
     if button_settings.get("pulse"):
-        filters.append(PulseFilter(size))
+        filters.append(PulseFilter())
 
     text = button_settings.get("text")
     font = button_settings.get("font", DEFAULT_FONT)
 
     if text:
-        filters.append(TextFilter(size, text, font))
+        filters.append(TextFilter(text, font))
 
     display_handler.replace(page, button, filters)
 

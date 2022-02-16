@@ -12,8 +12,8 @@ class TextFilter(Filter):
     # Static instance - no need to create one per Filter instance
     font_blur = None
 
-    def __init__(self, size: Tuple[int, int], text: str, font: str):
-        super(TextFilter, self).__init__(size)
+    def __init__(self, text: str, font: str):
+        super(TextFilter, self).__init__()
         self.text = text
         self.true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
         # fmt: off
@@ -28,12 +28,12 @@ class TextFilter(Filter):
         self.offset = 0.0
         self.offset_direction = 1
         self.image = None
-        self._create_text()
+
         # Hashcode should be created for anything that makes this frame unique
         self.hashcode = hash((self.__class__, text, font))
 
-    def _create_text(self):
-        self.image = Image.new("RGBA", self.size)
+    def initialize(self, size: Tuple[int, int]):
+        self.image = Image.new("RGBA", size)
         backdrop_draw = ImageDraw.Draw(self.image)
 
         # TODO: The hard coded position should be improved
@@ -41,7 +41,7 @@ class TextFilter(Filter):
         # because it varies (for example, a "g" character) and
         # causes label alignment issues.
         label_w, label_h = backdrop_draw.textsize(self.text, font=self.true_font)
-        label_pos = ((self.size[0] - label_w) // 2, self.size[1] - 20)
+        label_pos = ((size[0] - label_w) // 2, size[1] - 20)
 
         backdrop_draw.text(label_pos, text=self.text, font=self.true_font, fill="black")
         self.image = self.image.filter(TextFilter.font_blur)

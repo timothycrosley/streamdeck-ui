@@ -12,10 +12,25 @@ class Filter(ABC):
 
     :param str name: The name of the filter. The name is useful for debugging purposes.
     """
+    size : Tuple[int, int]
+    "The image size (width, height) in pixels that this filter transforms."
 
-    def __init__(self, size: Tuple[int, int]):
+    is_complete : bool
+    "Indicates if the filter is complete and should no longer be processed."
+
+    def __init__(self):
         self.is_complete = False
-        self.size = size
+
+    @abstractmethod
+    def initialize(self, size: Tuple[int, int]):
+        """Initializes the filter with the provided frame size. Since the construction
+        of the filter can happen before the size of the display is known, initialization
+        should be done here.
+
+        :param size: The filter image size
+        :type size: Tuple[int, int]
+        """
+        pass
 
     @abstractmethod
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:

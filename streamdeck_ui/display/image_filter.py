@@ -15,12 +15,13 @@ class ImageFilter(Filter):
     Represents a static image. It transforms the input image by replacing it with a static image.
     """
 
-    def __init__(self, size: Tuple[int, int], file: str):
-        super(ImageFilter, self).__init__(size)
+    def __init__(self, file: str):
+        super(ImageFilter, self).__init__()
         self.file = file
 
+    def initialize(self, size: Tuple[int, int]):
         # Each frame needs to have a unique hashcode. Start with file name as baseline.
-        image_hash = hash((self.__class__, file))
+        image_hash = hash((self.__class__, self.file))
         frame_duration = []
         frame_hash = []
 

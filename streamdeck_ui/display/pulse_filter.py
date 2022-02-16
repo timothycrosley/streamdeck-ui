@@ -7,13 +7,16 @@ from streamdeck_ui.display.filter import Filter
 
 
 class PulseFilter(Filter):
-    def __init__(self, size: Tuple[int, int]):
-        super(PulseFilter, self).__init__(size)
+    def __init__(self):
+        super(PulseFilter, self).__init__()
         self.last_time: Fraction = Fraction()
         self.pulse_delay = 0.5
         self.brightness = 1
         self.dim_brightness = 0.5
         self.filter_hash = hash(self.__class__)
+
+    def initialize(self, size: Tuple[int, int]):
+        pass
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
 

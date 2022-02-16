@@ -4,6 +4,7 @@ from typing import Dict, Optional, List
 
 from StreamDeck import ImageHelpers
 from StreamDeck.Devices.StreamDeck import StreamDeck
+from streamdeck_ui.display.empty_filter import EmptyFilter
 
 from streamdeck_ui.display.pipeline import Pipeline
 from streamdeck_ui.display.filter import Filter
@@ -16,6 +17,8 @@ class DisplayGrid:
     A DisplayGrid is made up of a collection of pipelines, each processing
     filters for one individual button display.
     """
+    _empty_filter: EmptyFilter = EmptyFilter()
+    "Static instance of EmptyFilter shared by all pipelines"
 
     def __init__(self, streamdeck: StreamDeck, pages: int, fps: int = 25):
         # Reference to the actual device, used to update icons
@@ -34,7 +37,7 @@ class DisplayGrid:
         for page in range(pages):
             self.pages[page] = {}
             for button in range(self.streamdeck.key_count()):
-                self.pages[page][button] = Pipeline(self.size)
+                self.pages[page][button] = Pipeline()
 
         self.current_page: int = -1
         self.pipeline_thread: Optional[threading.Thread] = None
@@ -43,17 +46,16 @@ class DisplayGrid:
         # Configure the maximum frame rate we want to achieve
         self.time_per_frame = 1 / fps
         self.lock = threading.Lock()
+        DisplayGrid._empty_filter.initialize(self.size)
 
     def replace(self, page: int, button: int, filters: List[Filter]):
         with self.lock:
-            pipeline = Pipeline(self.size)
+            pipeline = Pipeline()
+            pipeline.add(DisplayGrid._empty_filter)
             for filter in filters:
+                filter.initialize(self.size)
                 pipeline.add(filter)
             self.pages[page][button] = pipeline
-
-    def add_filter(self, page: int, button: int, filter: Filter):
-        with self.lock:
-            self.pages[page][button].add(filter)
 
     def get_image(self, page: int, button: int) -> Image.Image:
         with self.lock:
