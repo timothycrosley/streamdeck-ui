@@ -66,8 +66,6 @@ class StreamDeckMonitor:
         while not self.quit.is_set():
 
             # TODO: Is it OK to enumerate and create decks each time? How expensive is it
-            # TODO: Do we mock out interface for various StreamDeck operations so this is
-            # easier to test?
             attached_streamdecks = DeviceManager.DeviceManager().enumerate()
             for streamdeck in attached_streamdecks:
                 streamdeck_id = streamdeck.id()
