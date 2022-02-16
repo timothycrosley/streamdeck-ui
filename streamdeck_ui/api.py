@@ -133,7 +133,7 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     deck_ids[streamdeck_id] = serial_number
     print(f"Streamdeck attached! {streamdeck_id}")
     decks[serial_number] = streamdeck
-    streamdeck.set_key_callback(partial(_key_change_callback, streamdeck_id))
+    streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
     update_streamdeck_filters(serial_number)
     plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
 
