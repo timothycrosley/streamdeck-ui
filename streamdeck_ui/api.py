@@ -23,12 +23,13 @@ from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
 from streamdeck_ui.stream_deck_monitor import StreamDeckMonitor
 
-# Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
+# Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
+
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 
-# Keep track of device.id -> Serial Number
 deck_ids: Dict[str, str] = {}
+# Keep track of device.id -> Serial Number
 
 state: Dict[str, Dict[str, Union[int, str, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
 # FIXME: Should the lock move to the display manager, including other display operations
@@ -140,6 +141,18 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
 def detatched(id: str):
     serial_number = deck_ids.get(id, None)
     if serial_number:
+        streamdeck = decks[serial_number]
+        try:
+            streamdeck.close()
+        except Exception as error:
+            print(f"Error during detatch: {error}")
+            pass
+        del decks[serial_number]
+        del deck_ids[id]
+        display_handler = display_handlers[serial_number]
+        display_handler.stop()
+        del display_handlers[serial_number]
+
         plugevents.detatched.emit(serial_number)
 
 

@@ -424,9 +424,7 @@ def redraw_buttons(ui) -> None:
 
         blocker = QSignalBlocker(button)
         try:
-            #button.setText(api.get_button_text(deck_id, _page(ui), button.index))
-
-
+            # button.setText(api.get_button_text(deck_id, _page(ui), button.index))
             # TODO: Fix the way we handle buttons - for now deal with
             # case where the icon may not be ready yet. There is a race
             # condition on startup as display rendering and UI buttons are
@@ -543,38 +541,13 @@ def import_config(window) -> None:
     redraw_buttons(window.ui)
 
 
-def sync(ui) -> None:
-    # Fixme - need to look for NEW or missing decks
-    # items = api.open_decks().items()
-    # if len(items) == 0:
-    #     print("Waiting for Stream Deck(s)...")
-    #     while len(items) == 0:
-    #         time.sleep(3)
-    #         items = api.open_decks().items()
-
-    # for deck_id, deck in items:
-    #     ui.device_list.addItem(f"{deck['type']} - {deck_id}", userData=deck_id)
-    #     dimmers[deck_id] = Dimmer(
-    #         api.get_display_timeout(deck_id),
-    #         api.get_brightness(deck_id),
-    #         api.get_brightness_dimmed(deck_id),
-    #         partial(change_brightness, deck_id),
-    #     )
-    #     dimmers[deck_id].reset()
-
-    # FIXME: Display per streamdeck is required
-    #api.load_display_pipelines()
-
-    #build_device(ui)
-
-    # api.ensure_decks_connected()
-    # ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
-    # # TODO: For now, just sync up the buttons every second
-    # redraw_buttons(ui)
-    pass
-
-
 def build_device(ui, _device_index=None) -> None:
+    if ui.device_list.count() == 0:
+        for page_id in range(ui.pages.count()):
+            page = ui.pages.widget(page_id)
+            page.setStyleSheet("")
+        # TODO: Remove/reset all the buttons
+        return
     print("build_device")
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
@@ -740,7 +713,6 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui = main_window.ui
     ui.text.textChanged.connect(partial(queue_text_change, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
-    # TODO: Review why currentTextChanged vs textChanged?
     ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
@@ -815,8 +787,11 @@ def streamdeck_attached(ui, deck: Dict):
 
 # TODO: Remove item, clear buttons if needed
 def streamdeck_detatched(ui, id):
-    for item in ui.device_list.items():
-        print(item)
+    index = ui.device_list.findData(id)
+    if index != -1:
+        # Should not be (how can you remove a device that was never attached?)
+        # Check anyways
+        ui.device_list.removeItem(index)
 
 
 def start(_exit: bool = False) -> None:
