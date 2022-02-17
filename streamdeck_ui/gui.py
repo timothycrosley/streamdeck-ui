@@ -777,20 +777,15 @@ def streamdeck_attached(ui, deck: Dict):
     dimmers[serial_number].reset()
     build_device(ui)
 
-    #api.load_display_pipelines()
-    #build_device(ui)
-    # api.ensure_decks_connected()
-    # ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
-    # # TODO: For now, just sync up the buttons every second
-    # redraw_buttons(ui)
 
-
-# TODO: Remove item, clear buttons if needed
-def streamdeck_detatched(ui, id):
-    index = ui.device_list.findData(id)
+def streamdeck_detatched(ui, serial_number):
+    index = ui.device_list.findData(serial_number)
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
         # Check anyways
+        dimmer = dimmers[serial_number]
+        dimmer.stop()
+        del dimmers[serial_number]
         ui.device_list.removeItem(index)
 
 
