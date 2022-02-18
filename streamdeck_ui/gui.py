@@ -441,7 +441,7 @@ def redraw_buttons(ui) -> None:
             # case where the icon may not be ready yet. There is a race
             # condition on startup as display rendering and UI buttons are
             # tied.
-            icon = api.get_button_icon(deck_id, _page(ui), button.index)
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
             if icon:
                 button.setIcon(icon)
 
@@ -565,17 +565,13 @@ def import_config(window) -> None:
 
 
 def build_device(ui, _device_index=None) -> None:
-    if ui.device_list.count() == 0:
-        for page_id in range(ui.pages.count()):
-            page = ui.pages.widget(page_id)
-            page.setStyleSheet("")
-            build_buttons(ui, page)
-        # TODO: Remove/reset all the buttons
-        return
-    print("build_device")
+    style = ""
+    if ui.device_list.count() > 0:
+        style = "background-color: black"
+
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
-        page.setStyleSheet("background-color: black")
+        page.setStyleSheet(style)
         build_buttons(ui, page)
 
     # Set the active page for this device
@@ -583,7 +579,6 @@ def build_device(ui, _device_index=None) -> None:
 
     # Draw the buttons for the active page
     redraw_buttons(ui)
-    #sync(ui)
     _highlight_first_button(ui)
 
 

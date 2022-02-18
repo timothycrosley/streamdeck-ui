@@ -221,36 +221,46 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
 
-    # FIXME: This isn't right - it's supposed to compare if the icon changed, 
-    # but the api returns a QBitMap. Apples to Oranges.
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
-        image_cache.pop(f"{deck_id}.{page}.{button}", None)
-
-        # Can we update just the one?
-        update_button_filters(deck_id, page, button)
-        #render()
-
         _save_state()
 
+        # TODO: Review image caching - remove as needed
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        update_button_filters(deck_id, page, button)
 
-def get_button_icon(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
-    """Returns the icon set for a particular button"""
 
-    # TODO: Refine this logic - for now - anytime someone ask for a button
+def get_button_icon_pixmap(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
+    """Returns the QPixmap value for the given button (streamdeck, page, button)
+
+    :param deck_id: The Stream Deck serial number
+    :type deck_id: str
+    :param page: The page index
+    :type page: int
+    :param button: The button index
+    :type button: int
+    :return: A QPixmap object containing the image currently on the button
+    :rtype: Optional[QPixmap]
+    """
+
+    # TODO: Review of we want to cache this or not
     # update the button image cache
     # render()
     # key = f"{deck_id}.{page}.{button}"
     # if key not in image_cache:
     #     return None
     # return image_cache[key][1]
-
     pil_image = display_handlers[deck_id].get_image(page, button)
     if pil_image:
         qt_image = ImageQt(pil_image)
         qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
         return QPixmap(qt_image)
     return None
+
+
+def get_button_icon(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
+    """Returns the icon path for the specified button"""
+    return _button_state(deck_id, page, button).get("icon", "")
 
 
 def set_button_change_brightness(deck_id: str, page: int, button: int, amount: int) -> None:
@@ -374,7 +384,8 @@ def update_streamdeck_filters(serial_number: str):
         if deck is None:
             continue
 
-        # TODO: Debug this - says there should not be a length
+        # FIXME: Debug this - linter says there should not be a length. Issue is the way
+        # the type hinting is defined causes it to believe there *may* not be a list
         pages = len(deck_state["buttons"])
 
         display_handler = display_handlers.get(serial_number, DisplayGrid(deck, pages))
