@@ -176,27 +176,6 @@ def stop():
             deck.close()
 
 
-# FIXME: This needs to be deprecated
-def ensure_decks_connected() -> None:
-    """Reconnects to any decks that lost connection. If they did, re-renders them."""
-    for deck_serial, deck in decks.copy().items():
-        if not deck.connected():
-            for new_deck in DeviceManager.DeviceManager().enumerate():
-                try:
-                    new_deck.open()
-                    new_deck_serial = new_deck.get_serial_number()
-                except Exception as error:
-                    warn(f"A {error} error occurred when trying to reconnect to {deck_serial}")
-                    new_deck_serial = None
-
-                if new_deck_serial == deck_serial:
-                    deck.close()
-                    new_deck.reset()
-                    new_deck.set_key_callback(partial(_key_change_callback, new_deck_serial))
-                    decks[new_deck_serial] = new_deck
-                    render()
-
-
 def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
     return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
