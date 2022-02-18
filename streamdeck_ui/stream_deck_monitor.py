@@ -60,6 +60,11 @@ class StreamDeckMonitor:
             pass
         self.pipelmonitor_thread = None
 
+        for streamdeck_id in self.streamdecks:
+            self.detatched(streamdeck_id)
+
+        self.streamdecks = {}
+
     def _run(self):
         """Runs the internal monitor thread until completion
         """
