@@ -2,18 +2,14 @@
 import json
 import os
 import threading
-import time
 from functools import partial
 from io import BytesIO
 from typing import Dict, Optional, Tuple, Union, cast, List
-from warnings import warn
 
 from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
-from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
-from StreamDeck.ImageHelpers import PILHelper
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.display.display_grid import DisplayGrid
@@ -205,10 +201,8 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
         _button_state(deck_id, page, button)["text"] = text
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
 
-        # FIXME: Load only new pipeline for key
         # FIXME: Refresh screen display button
         update_button_filters(deck_id, page, button)
-        #render()
         _save_state()
 
 
@@ -427,38 +421,6 @@ def update_button_filters(serial_number: str, page: int, button: int):
         filters.append(TextFilter(text, font))
 
     display_handler.replace(page, button, filters)
-
-
-# FIXME: Remove all references?
-def render() -> None:
-    """renders all decks"""
-    return
-    global display_handler
-
-    for deck_id, deck_state in state.items():
-        deck = decks.get(deck_id, None)
-        if not deck:
-            warn(f"{deck_id} has settings specified but is not seen. Likely unplugged!")
-            continue
-
-        # Lookup which page is active for this deck
-        page = get_page(deck_id)
-        for button_id, _ in deck_state.get("buttons", {}).get(page, {}).items():  # type: ignore
-            key = f"{deck_id}.{page}.{button_id}"
-            if key in image_cache:
-                image = image_cache[key][0]
-            else:
-
-                # TODO: Do we need this cache at all anymore? Decide how to update
-                # UI from display engine (keep in sync, show static?)
-                pil_image = display_handlers[deck_id].get_image(page, button_id)
-                if pil_image:
-                    image = PILHelper.to_native_format(deck, pil_image.convert("RGB"))
-
-                    qt_image = ImageQt(pil_image)
-                    qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
-                    pixmap = QPixmap(qt_image)
-                    image_cache[key] = (image, pixmap)
 
 
 if os.path.isfile(STATE_FILE):

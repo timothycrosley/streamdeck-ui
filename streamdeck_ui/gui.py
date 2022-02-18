@@ -388,8 +388,9 @@ def change_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
     if deck_id:
         api.set_page(deck_id, page)
+        # TODO: Review
         # Don't redraw here, but hilight will redraw
-        #redraw_buttons(ui)
+        # redraw_buttons(ui)
         _highlight_first_button(ui)
         dimmers[deck_id].reset()
 
@@ -787,6 +788,7 @@ def streamdeck_attached(ui, deck: Dict):
         ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
     finally:
         blocker.unblock()
+        # TODO: Does dimmer belong in UI layer? Seems like API logic.
     dimmers[serial_number] = Dimmer(
         api.get_display_timeout(serial_number),
         api.get_brightness(serial_number),
@@ -845,7 +847,7 @@ def start(_exit: bool = False) -> None:
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
     api.start()
 
-    api.render()
+    # FIXME: Tray handler not working
     tray.show()
 
     if show_ui:

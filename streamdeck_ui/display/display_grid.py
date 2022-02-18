@@ -2,7 +2,7 @@ import threading
 from time import sleep, time
 from typing import Dict, Optional, List
 
-from StreamDeck import ImageHelpers
+from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from streamdeck_ui.display.empty_filter import EmptyFilter
 
@@ -122,7 +122,7 @@ class DisplayGrid:
                     # FIXME:
                     # This will be unbounded, old frames will need to be evicted
                     if hashcode not in frame_cache:
-                        image = ImageHelpers.PILHelper.to_native_format(self.streamdeck, image)
+                        image = PILHelper.to_native_format(self.streamdeck, image)
                         frame_cache[hashcode] = image
                     else:
                         image = frame_cache[hashcode]
@@ -142,11 +142,11 @@ class DisplayGrid:
 
             frames += 1
             if time() - start > 1.0:
-                execution_time_ms = int(execution_time * 1000)
+                # execution_time_ms = int(execution_time * 1000)
                 # TODO: push an event or callback so the UI can get access to this data
-                #print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
-                #print(f"Output cache size: {len(frame_cache)}")
-                #print(f"Pipeline cache size: {pipeline_cache_count}")
+                # print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
+                # print(f"Output cache size: {len(frame_cache)}")
+                # print(f"Pipeline cache size: {pipeline_cache_count}")
                 execution_time = 0
                 frames = 0
                 start = time()
