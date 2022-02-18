@@ -384,7 +384,14 @@ def _highlight_first_button(ui) -> None:
 
 
 def change_page(ui, page: int) -> None:
-    print("change_page")
+    """Change the Stream Deck to the desired page and update 
+    the on-screen buttons.
+
+    :param ui: Reference to the ui
+    :type ui: _type_
+    :param page: The page number to switch to
+    :type page: int
+    """
     deck_id = _deck_id(ui)
     if deck_id:
         api.set_page(deck_id, page)
@@ -393,6 +400,8 @@ def change_page(ui, page: int) -> None:
         # redraw_buttons(ui)
         _highlight_first_button(ui)
         dimmers[deck_id].reset()
+    else:
+        clear_settings(ui)
 
 
 def select_image(window) -> None:
@@ -475,13 +484,41 @@ def button_clicked(ui, clicked_button, buttons) -> None:
 
     deck_id = _deck_id(ui)
     button_id = selected_button.index
-    ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
-    ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
-    ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
-    ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
-    ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
-    ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
-    dimmers[deck_id].reset()
+    if selected_button.isChecked():
+        enable_settings(ui, True)
+        ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+        ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
+        ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
+        ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
+        ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
+        ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
+        dimmers[deck_id].reset()
+    else:
+        clear_settings(ui)
+
+
+def enable_settings(ui, enabled: bool):
+    ui.text.setEnabled(enabled)
+    ui.command.setEnabled(enabled)
+    ui.keys.setEnabled(enabled)
+    ui.write.setEnabled(enabled)
+    ui.change_brightness.setEnabled(enabled)
+    ui.switch_page.setEnabled(enabled)
+    ui.imageButton.setEnabled(enabled)
+    ui.removeButton.setEnabled(enabled)
+
+
+def clear_settings(ui):
+    """Clears all the settings and disables editing of them. This is done when
+    there is no key selected or if there are no devices connected.
+    """
+    ui.text.clear()
+    ui.command.clear()
+    ui.keys.clear()
+    ui.write.clear()
+    ui.change_brightness.setValue(0)
+    ui.switch_page.setValue(0)
+    enable_settings(ui, False)
 
 
 def browse_documentation():
@@ -746,6 +783,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.actionAbout.triggered.connect(main_window.about_dialog)
     ui.actionDocs.triggered.connect(browse_documentation)
     ui.actionGithub.triggered.connect(browse_github)
+    enable_settings(ui, False)
     return main_window
 
 
