@@ -99,9 +99,10 @@ def _open_config(config_file: str):
 
 
 def import_config(config_file: str) -> None:
+    stop()
     _open_config(config_file)
-    render()
     _save_state()
+    start()
 
 
 def export_config(output_file: str) -> None:
@@ -121,7 +122,7 @@ def export_config(output_file: str) -> None:
         os.replace(output_file + ".tmp", os.path.realpath(output_file))
 
 
-monitor : StreamDeckMonitor
+monitor : StreamDeckMonitor = None
 
 
 def attached(streamdeck_id: str, streamdeck: StreamDeck):
@@ -141,39 +142,39 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
 def detatched(id: str):
     serial_number = deck_ids.get(id, None)
     if serial_number:
-        streamdeck = decks[serial_number]
-        try:
-            streamdeck.close()
-        except Exception as error:
-            print(f"Error during detatch: {error}")
-            pass
-        del decks[serial_number]
-        del deck_ids[id]
-        display_handler = display_handlers[serial_number]
-        display_handler.stop()
-        del display_handlers[serial_number]
-
+        cleanup(id, serial_number)
         plugevents.detatched.emit(serial_number)
+
+
+def cleanup(id: str, serial_number: str):
+    display_grid = display_handlers[serial_number]
+    display_grid.stop()
+    del display_handlers[serial_number]
+
+    streamdeck = decks[serial_number]
+    try:
+        if streamdeck.connected():
+            streamdeck.set_brightness(50)
+            streamdeck.reset()
+            streamdeck.close()
+    except Exception as error:
+        print(f"Error during detatch: {error}")
+        pass
+
+    del decks[serial_number]
+    del deck_ids[id]
 
 
 def start():
     global monitor
-    monitor = StreamDeckMonitor(attached, detatched)
+    if not monitor:
+        monitor = StreamDeckMonitor(attached, detatched)
     monitor.start()
 
 
 def stop():
     global monitor
     monitor.stop()
-
-    for _, display_grid in display_handlers.items():
-        display_grid.stop()
-
-    for _, deck in decks.items():
-        if deck.connected():
-            deck.set_brightness(50)
-            deck.reset()
-            deck.close()
 
 
 def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
