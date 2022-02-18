@@ -401,7 +401,7 @@ def change_page(ui, page: int) -> None:
         _highlight_first_button(ui)
         dimmers[deck_id].reset()
     else:
-        clear_settings(ui)
+        reset_button_configuration(ui)
 
 
 def select_image(window) -> None:
@@ -485,7 +485,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     if selected_button.isChecked():
-        enable_settings(ui, True)
+        enable_button_configuration(ui, True)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
         ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
@@ -494,10 +494,10 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         dimmers[deck_id].reset()
     else:
-        clear_settings(ui)
+        reset_button_configuration(ui)
 
 
-def enable_settings(ui, enabled: bool):
+def enable_button_configuration(ui, enabled: bool):
     ui.text.setEnabled(enabled)
     ui.command.setEnabled(enabled)
     ui.keys.setEnabled(enabled)
@@ -508,8 +508,8 @@ def enable_settings(ui, enabled: bool):
     ui.removeButton.setEnabled(enabled)
 
 
-def clear_settings(ui):
-    """Clears all the settings and disables editing of them. This is done when
+def reset_button_configuration(ui):
+    """Clears the configuration for a button and disables editing of them. This is done when
     there is no key selected or if there are no devices connected.
     """
     ui.text.clear()
@@ -518,7 +518,7 @@ def clear_settings(ui):
     ui.write.clear()
     ui.change_brightness.setValue(0)
     ui.switch_page.setValue(0)
-    enable_settings(ui, False)
+    enable_button_configuration(ui, False)
 
 
 def browse_documentation():
@@ -783,7 +783,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.actionAbout.triggered.connect(main_window.about_dialog)
     ui.actionDocs.triggered.connect(browse_documentation)
     ui.actionGithub.triggered.connect(browse_github)
-    enable_settings(ui, False)
+    enable_button_configuration(ui, False)
     return main_window
 
 
