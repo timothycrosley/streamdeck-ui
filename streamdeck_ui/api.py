@@ -3,7 +3,6 @@ import json
 import os
 import threading
 from functools import partial
-from io import BytesIO
 from typing import Dict, Optional, Tuple, Union, cast, List
 
 from PIL.ImageQt import ImageQt
@@ -18,9 +17,6 @@ from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.pulse_filter import PulseFilter
 from streamdeck_ui.display.text_filter import TextFilter
 from streamdeck_ui.stream_deck_monitor import StreamDeckMonitor
-
-image_cache: Dict[str, Tuple[BytesIO, QPixmap]] = {}
-# Cache consists of a tuple. The native streamdeck image and the QPixmap for screen rendering
 
 decks: Dict[str, StreamDeck.StreamDeck] = {}
 
@@ -39,7 +35,6 @@ class KeySignalEmitter(QObject):
     key_pressed = Signal(str, int, bool)
 
 
-# TODO: Review if this will work for multiple streamdecks
 streamdeck_keys = KeySignalEmitter()
 
 
@@ -54,12 +49,13 @@ plugevents = StreamDeckSignalEmitter()
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
-    """Callback whenever a key is pressed. This is method runs the various actions defined
-    for the key being pressed, sequentially."""
-    # Stream Desk key events fire on a background thread. Emit a signal
-    # to bring it back to UI thread, so we can use Qt objects for timers etc.
-    # Since multiple keys could fire simultaniously, we need to protect
-    # shared state with a lock
+    """Callback whenever a key is pressed.
+
+    Stream Deck key events fire on a background thread. Emit a signal
+    to bring it back to UI thread, so we can use Qt objects for timers etc.
+    Since multiple keys could fire simultaniously, we need to protect
+    shared state with a lock
+    """
     with key_event_lock:
         streamdeck_keys.key_pressed.emit(deck_id, key, state)
 
@@ -199,7 +195,6 @@ def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
-        image_cache.pop(f"{deck_id}.{page}.{button}", None)
 
         # FIXME: Refresh screen display button
         update_button_filters(deck_id, page, button)
@@ -217,9 +212,6 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     if get_button_icon(deck_id, page, button) != icon:
         _button_state(deck_id, page, button)["icon"] = icon
         _save_state()
-
-        # TODO: Review image caching - remove as needed
-        image_cache.pop(f"{deck_id}.{page}.{button}", None)
         update_button_filters(deck_id, page, button)
 
 
@@ -236,13 +228,6 @@ def get_button_icon_pixmap(deck_id: str, page: int, button: int) -> Optional[QPi
     :rtype: Optional[QPixmap]
     """
 
-    # TODO: Review of we want to cache this or not
-    # update the button image cache
-    # render()
-    # key = f"{deck_id}.{page}.{button}"
-    # if key not in image_cache:
-    #     return None
-    # return image_cache[key][1]
     pil_image = display_handlers[deck_id].get_image(page, button)
     if pil_image:
         qt_image = ImageQt(pil_image)
