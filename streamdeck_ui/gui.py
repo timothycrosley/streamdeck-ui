@@ -108,7 +108,11 @@ class Dimmer:
             self.__change_timer.stop()
 
         self.__dimmer_brightness = self.brightness
-        self.brightness_callback(self.brightness)
+        try:
+            self.brightness_callback(self.brightness)
+        except KeyError:
+            # During detach cleanup, this is likely to happen
+            pass
         self.__stopped = True
 
     def reset(self) -> bool:
@@ -321,6 +325,13 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
 
 
 def _deck_id(ui) -> str:
+    """Returns the currently selected Stream Deck serial number
+
+    :param ui: A reference to the ui object
+    :type ui: _type_
+    :return: The serial number
+    :rtype: str
+    """
     return ui.device_list.itemData(ui.device_list.currentIndex())
 
 
@@ -375,11 +386,12 @@ def _highlight_first_button(ui) -> None:
 def change_page(ui, page: int) -> None:
     print("change_page")
     deck_id = _deck_id(ui)
-    api.set_page(deck_id, page)
-    # Don't redraw here, but hilight will redraw
-    #redraw_buttons(ui)
-    _highlight_first_button(ui)
-    dimmers[deck_id].reset()
+    if deck_id:
+        api.set_page(deck_id, page)
+        # Don't redraw here, but hilight will redraw
+        #redraw_buttons(ui)
+        _highlight_first_button(ui)
+        dimmers[deck_id].reset()
 
 
 def select_image(window) -> None:
@@ -482,18 +494,29 @@ def browse_github():
 
 
 def build_buttons(ui, tab) -> None:
+    if hasattr(tab, "deck_buttons"):
+        tab.deck_buttons.hide()
+        tab.deck_buttons.deleteLater()
+        # Remove the inner page
+        del tab.children()[0]
+        # Remove the property
+        del tab.deck_buttons
+
     deck_id = _deck_id(ui)
 
     if not deck_id:
         return
     deck = api.get_deck(deck_id)
 
-    if hasattr(tab, "deck_buttons"):
-        tab.deck_buttons.hide()
-        tab.deck_buttons.deleteLater()
-
+    # Create a new base_widget with tab as it's parent
+    # This is effectively a "blank tab"
     base_widget = QtWidgets.QWidget(tab)
+
+    # Add an inner page (QtQidget) to the page
     tab.children()[0].addWidget(base_widget)
+
+    # Set a property - this allows us to check later
+    # if we've already created the buttons
     tab.deck_buttons = base_widget
 
     row_layout = QtWidgets.QVBoxLayout(base_widget)
@@ -546,6 +569,7 @@ def build_device(ui, _device_index=None) -> None:
         for page_id in range(ui.pages.count()):
             page = ui.pages.widget(page_id)
             page.setStyleSheet("")
+            build_buttons(ui, page)
         # TODO: Remove/reset all the buttons
         return
     print("build_device")
