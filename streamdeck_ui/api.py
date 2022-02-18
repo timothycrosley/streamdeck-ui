@@ -191,13 +191,11 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
     temp = cast(dict, state[deck_id]["buttons"])[page][source_button]
     cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(dict, state[deck_id]["buttons"])[page][target_button]
     cast(dict, state[deck_id]["buttons"])[page][target_button] = temp
-
-    # Clear the cache so images will be recreated on render
-    image_cache.pop(f"{deck_id}.{page}.{source_button}", None)
-    image_cache.pop(f"{deck_id}.{page}.{target_button}", None)
-
     _save_state()
-    render()
+
+    # Update rendering for these two images
+    update_button_filters(deck_id, page, source_button)
+    update_button_filters(deck_id, page, target_button)
 
 
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
@@ -267,7 +265,6 @@ def set_button_change_brightness(deck_id: str, page: int, button: int, amount: i
     """Sets the brightness changing associated with a button"""
     if get_button_change_brightness(deck_id, page, button) != amount:
         _button_state(deck_id, page, button)["brightness_change"] = amount
-        render()
         _save_state()
 
 
@@ -365,7 +362,6 @@ def set_page(deck_id: str, page: int) -> None:
         state.setdefault(deck_id, {})["page"] = page
 
         display_handlers[deck_id].set_page(page)
-        render()
         _save_state()
 
 
