@@ -70,7 +70,7 @@ class StreamDeckMonitor:
         """
         while not self.quit.is_set():
 
-            # TODO: Is it OK to enumerate and create decks each time? How expensive is it
+            # REVIEW: Is it OK to enumerate and create decks each time? How expensive is it
             attached_streamdecks = DeviceManager.DeviceManager().enumerate()
             for streamdeck in attached_streamdecks:
                 streamdeck_id = streamdeck.id()
