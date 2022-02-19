@@ -5,6 +5,7 @@ from typing import Dict, Optional, List, Callable
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Devices.StreamDeck import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
+from streamdeck_ui.display.keypress_filter import KeypressFilter
 from streamdeck_ui.display.empty_filter import EmptyFilter
 
 from streamdeck_ui.display.pipeline import Pipeline
@@ -72,6 +73,9 @@ class DisplayGrid:
             for filter in filters:
                 filter.initialize(self.size)
                 pipeline.add(filter)
+            keypress = KeypressFilter()
+            keypress.initialize(self.size)
+            pipeline.add(keypress)
             self.pages[page][button] = pipeline
 
     def get_image(self, page: int, button: int) -> Image.Image:
@@ -81,6 +85,12 @@ class DisplayGrid:
             # a button. This will need to be added to the interface
             # of a filter.
             return self.pages[page][button].last_result()
+
+    def set_keypress(self, button: int, active: bool):
+        with self.lock:
+            for filter in self.pages[self.current_page][button].filters:
+                if isinstance(filter[0], KeypressFilter):
+                    filter[0].active = active
 
     def synchronize(self):
         # Wait until the next cycle is complete.

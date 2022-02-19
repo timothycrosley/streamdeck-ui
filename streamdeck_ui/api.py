@@ -63,6 +63,8 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     shared state with a lock
     """
     with key_event_lock:
+        displayhandler = display_handlers[deck_id]
+        displayhandler.set_keypress(key, state)
         streamdeck_keys.key_pressed.emit(deck_id, key, state)
 
 
