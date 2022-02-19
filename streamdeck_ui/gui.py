@@ -834,7 +834,6 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     action_exit.triggered.connect(app.exit)
     menu.addAction(action_exit)
     tray.setContextMenu(menu)
-    tray.show()
     return tray
 
 
