@@ -207,6 +207,15 @@ class DisplayGrid:
             page (int): The page number to switch to.
         """
         with self.lock:
+            if self.current_page > 0:
+                # Ensure none of the button filters are active anymore
+                old_page = self.pages[self.current_page]
+                for _, pipeline in old_page.items():
+                    for filter in pipeline.filters:
+                        if isinstance(filter[0], KeypressFilter):
+                            filter[0].active = False
+            # REVIEW: We could detect the active key on the last page, and make it active
+            # on the target page
             self.current_page = page
 
     def start(self):

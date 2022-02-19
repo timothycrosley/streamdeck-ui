@@ -255,7 +255,7 @@ def _replace_special_keys(key):
     return key
 
 
-def handle_keypress(deck_id: str, key: int, state: bool) -> None:
+def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
 
     # TODO: Handle both key down and key up events in future.
     if state:
@@ -334,6 +334,8 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
         switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
             api.set_page(deck_id, switch_page - 1)
+            if _deck_id(ui) == deck_id:
+                ui.pages.setCurrentIndex(switch_page - 1)
 
 
 def _deck_id(ui) -> str:
@@ -902,7 +904,7 @@ def start(_exit: bool = False) -> None:
     ui = main_window.ui
     tray = create_tray(logo, app, main_window)
 
-    api.streamdeck_keys.key_pressed.connect(handle_keypress)
+    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
     ui.pages.currentChanged.connect(partial(change_page, ui))

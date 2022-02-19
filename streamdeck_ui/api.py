@@ -355,6 +355,7 @@ def set_page(deck_id: str, page: int) -> None:
         _save_state()
 
         display_handler = display_handlers[deck_id]
+        
         # Let the display know to process new set of pipelines
         display_handler.set_page(page)
         # Wait for at least one cycle
