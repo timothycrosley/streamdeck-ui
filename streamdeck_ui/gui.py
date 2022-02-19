@@ -823,14 +823,14 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     tray.activated.connect(main_window.systray_clicked)
 
     menu = QMenu()
-    action_dim = QAction("Dim display (toggle)")
+    action_dim = QAction("Dim display (toggle)", main_window)
     action_dim.triggered.connect(dim_all_displays)
-    action_configure = QAction("Configure...")
+    action_configure = QAction("Configure...", main_window)
     action_configure.triggered.connect(main_window.bring_to_top)
     menu.addAction(action_dim)
     menu.addAction(action_configure)
     menu.addSeparator()
-    action_exit = QAction("Exit")
+    action_exit = QAction("Exit", main_window)
     action_exit.triggered.connect(app.exit)
     menu.addAction(action_exit)
     tray.setContextMenu(menu)
@@ -903,9 +903,7 @@ def start(_exit: bool = False) -> None:
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
     api.start()
 
-    # FIXME: Tray handler not working
     tray.show()
-
     if show_ui:
         main_window.show()
 
