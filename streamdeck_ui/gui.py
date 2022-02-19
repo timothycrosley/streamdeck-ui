@@ -354,10 +354,12 @@ def _page(ui) -> int:
 def update_button_text(ui, text: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_text(deck_id, _page(ui), selected_button.index, text)
-        icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
-        if icon:
-            selected_button.setIcon(icon)
+        if deck_id:
+            # There may be no decks attached
+            api.set_button_text(deck_id, _page(ui), selected_button.index, text)
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
+            if icon:
+                selected_button.setIcon(icon)
 
 
 def update_button_command(ui, command: str) -> None:

@@ -76,7 +76,7 @@ class DisplayGrid:
 
     def get_image(self, page: int, button: int) -> Image.Image:
         with self.lock:
-            # FIXME: Consider returning not the last result, but an thumbnail
+            # REVIEW: Consider returning not the last result, but an thumbnail
             # or something that represents the current "static" look of
             # a button. This will need to be added to the interface
             # of a filter.
@@ -182,7 +182,6 @@ class DisplayGrid:
                 if self.cpu_callback:
                     self.cpu_callback(self.serial_number, int(execution_time_ms/1000 * 100))
                 # execution_time_ms = int(execution_time * 1000)
-                # TODO: push an event or callback so the UI can get access to this data
                 # print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
                 # print(f"Output cache size: {len(frame_cache)}")
                 # print(f"Pipeline cache size: {pipeline_cache_count}")
