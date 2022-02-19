@@ -18,6 +18,10 @@ class StreamDeckMonitor:
     def __init__(self, lock: Lock,  attached : Callable[[str, StreamDeck], None], detatched : Callable[[str], None]):
         """Creates a new StreamDeckMonitor instance
 
+        :param lock: A lock object that will be used to get exclusive access while enumerating
+        Stream Decks. This lock must be shared by any object that will read or write to the
+        Stream Deck.
+        :type lock: threading.Lock
         :param attached: A callback function that is called when a new StreamDeck is attached. Note
         this runs on a background thread.
         :type attached: Callable[[StreamDeck], None]
@@ -71,7 +75,6 @@ class StreamDeckMonitor:
         """
         while not self.quit.is_set():
 
-            # REVIEW: Is it OK to enumerate and create decks each time? How expensive is it
             with self.lock:
                 attached_streamdecks = DeviceManager.DeviceManager().enumerate()
             for streamdeck in attached_streamdecks:
@@ -85,5 +88,4 @@ class StreamDeckMonitor:
                     streamdeck = self.streamdecks[streamdeck_id]
                     del self.streamdecks[streamdeck_id]
                     self.detatched(streamdeck_id)
-            
-            sleep(2)
+            sleep(1)

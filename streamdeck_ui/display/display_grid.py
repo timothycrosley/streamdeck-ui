@@ -22,18 +22,30 @@ class DisplayGrid:
     "Static instance of EmptyFilter shared by all pipelines"
 
     def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: int, cpu_callback: Callable[[str, int], None], fps: int = 25):
-        # Reference to the actual device, used to update icons
+        """Creates a new display instance
+
+        :param lock: A lock object that will be used to get exclusive access while enumerating
+        Stream Decks. This lock must be shared by any object that will read or write to the
+        Stream Deck.
+        :type lock: threading.Lock
+        :param streamdeck: The StreamDeck instance associated with this display
+        :type streamdeck: StreamDeck
+        :param pages: The number of logical pages (screen sets)
+        :type pages: int
+        :param cpu_callback: A function to call whenever the CPU changes
+        :type cpu_callback: Callable[[str, int], None]
+        :param fps: The desired FPS, defaults to 25
+        :type fps: int, optional
+        """
         self.streamdeck = streamdeck
-        # TODO: Makes more sense that the display tells the filters what size
-        # images to create than to have to create the filter with a size in mind.
-        # This also means that filter creation and intialization needs to be
-        # seperated. Maybe also needs a method to provide a thumbnail?
+        # Reference to the actual device, used to update icons
+
         self.size = streamdeck.key_image_format()["size"]
         self.serial_number = streamdeck.get_serial_number()
 
+        self.pages: Dict[int, Dict[int, Pipeline]] = {}
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
-        self.pages: Dict[int, Dict[int, Pipeline]] = {}
 
         # Initialize with a pipeline per key for all pages
         for page in range(pages):
