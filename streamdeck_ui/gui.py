@@ -442,7 +442,6 @@ def remove_image(window) -> None:
 
 
 def redraw_buttons(ui) -> None:
-    print("redraw buttons")
     deck_id = _deck_id(ui)
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
@@ -478,7 +477,6 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     if selected_button.isChecked():
-        print("Start the update timer")
         enable_button_configuration(ui, True)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
