@@ -4,6 +4,7 @@ from typing import Dict, Optional, List
 
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Devices.StreamDeck import StreamDeck
+from StreamDeck.Transport.Transport import TransportError
 from streamdeck_ui.display.empty_filter import EmptyFilter
 
 from streamdeck_ui.display.pipeline import Pipeline
@@ -68,7 +69,12 @@ class DisplayGrid:
             return self.pages[page][button].last_result()
 
     def synchronize(self):
-        # Wait until the next cycle is complete
+        # Wait until the next cycle is complete.
+        # To *guarantee* that you have one complete pass, two waits are needed.
+        # The first gets you to the end of one cycle (you could have called it
+        # mid cycle). The second gets you one pass through. Worst case, you 
+        # do two full cycles. Best case, you do 1 full and one partial.
+        self.sync.wait()
         self.sync.wait()
 
     def _run(self):
@@ -134,7 +140,14 @@ class DisplayGrid:
                     else:
                         image = frame_cache[hashcode]
 
-                    self.streamdeck.set_key_image(button, image)
+                    try:
+                        self.streamdeck.set_key_image(button, image)
+                    except TransportError:
+                        # Review - deadlock if you wait on yourself?
+                        self.stop()
+                        pass
+                        return
+
 
             self.sync.set()
             self.sync.clear()

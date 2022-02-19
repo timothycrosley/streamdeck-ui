@@ -189,16 +189,18 @@ def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int
     # Update rendering for these two images
     update_button_filters(deck_id, page, source_button)
     update_button_filters(deck_id, page, target_button)
+    display_handler = display_handlers[deck_id]
+    display_handler.synchronize()
 
 
 def set_button_text(deck_id: str, page: int, button: int, text: str) -> None:
     """Set the text associated with a button"""
     if get_button_text(deck_id, page, button) != text:
         _button_state(deck_id, page, button)["text"] = text
-
-        # FIXME: Refresh screen display button
-        update_button_filters(deck_id, page, button)
         _save_state()
+        update_button_filters(deck_id, page, button)
+        display_handler = display_handlers[deck_id]
+        display_handler.synchronize()
 
 
 def get_button_text(deck_id: str, page: int, button: int) -> str:
@@ -213,6 +215,8 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         _button_state(deck_id, page, button)["icon"] = icon
         _save_state()
         update_button_filters(deck_id, page, button)
+        display_handler = display_handlers[deck_id]
+        display_handler.synchronize()
 
 
 def get_button_icon_pixmap(deck_id: str, page: int, button: int) -> Optional[QPixmap]:
@@ -340,9 +344,13 @@ def set_page(deck_id: str, page: int) -> None:
     """Sets the current page shown on the stream deck"""
     if get_page(deck_id) != page:
         state.setdefault(deck_id, {})["page"] = page
-
-        display_handlers[deck_id].set_page(page)
         _save_state()
+
+        display_handler = display_handlers[deck_id]
+        # Let the display know to process new set of pipelines
+        display_handler.set_page(page)
+        # Wait for at least one cycle
+        display_handler.synchronize()
 
 
 def update_streamdeck_filters(serial_number: str):

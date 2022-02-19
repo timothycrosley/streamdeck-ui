@@ -53,7 +53,7 @@ BUTTON_DRAG_STYLE = """
     border-style: outset;}
 """
 
-selected_button: QtWidgets.QToolButton
+selected_button: QtWidgets.QToolButton = None
 text_timer = None
 dimmer_options = {
     "Never": 0,
@@ -341,37 +341,50 @@ def _page(ui) -> int:
 
 def update_button_text(ui, text: str) -> None:
     print("update_button_text")
-    deck_id = _deck_id(ui)
-    api.set_button_text(deck_id, _page(ui), selected_button.index, text)
-    # FIXME: When the text changes, what needs to happen?
-    # Do we really need to redraw all the buttons?  In theory we only
-    # Need to update the current button.
-    redraw_buttons(ui)
+    if selected_button:
+        deck_id = _deck_id(ui)
+        # FIXME: when we uncheck the button, the event fires and the text has been cleared
+        # don't write!
+        api.set_button_text(deck_id, _page(ui), selected_button.index, text)
+        # FIXME: When the text changes, what needs to happen?
+        # Do we really need to redraw all the buttons?  In theory we only
+        # Need to update the current button.
+        # redraw_buttons(ui)
+
+        deck_id = _deck_id(ui)
+        icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
+        if icon:
+            selected_button.setIcon(icon)
 
 
 def update_button_command(ui, command: str) -> None:
-    deck_id = _deck_id(ui)
-    api.set_button_command(deck_id, _page(ui), selected_button.index, command)
+    if selected_button:
+        deck_id = _deck_id(ui)
+        api.set_button_command(deck_id, _page(ui), selected_button.index, command)
 
 
 def update_button_keys(ui, keys: str) -> None:
-    deck_id = _deck_id(ui)
-    api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
+    if selected_button:
+        deck_id = _deck_id(ui)
+        api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
 
 
 def update_button_write(ui) -> None:
-    deck_id = _deck_id(ui)
-    api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
+    if selected_button:
+        deck_id = _deck_id(ui)
+        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
 
 
 def update_change_brightness(ui, amount: int) -> None:
-    deck_id = _deck_id(ui)
-    api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
+    if selected_button:
+        deck_id = _deck_id(ui)
+        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
 
 
 def update_switch_page(ui, page: int) -> None:
-    deck_id = _deck_id(ui)
-    api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
+    if selected_button:
+        deck_id = _deck_id(ui)
+        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
 
 
 def _highlight_first_button(ui) -> None:
@@ -384,7 +397,7 @@ def _highlight_first_button(ui) -> None:
 
 
 def change_page(ui, page: int) -> None:
-    """Change the Stream Deck to the desired page and update 
+    """Change the Stream Deck to the desired page and update
     the on-screen buttons.
 
     :param ui: Reference to the ui
@@ -395,10 +408,7 @@ def change_page(ui, page: int) -> None:
     deck_id = _deck_id(ui)
     if deck_id:
         api.set_page(deck_id, page)
-        # TODO: Review
-        # Don't redraw here, but hilight will redraw
-        # redraw_buttons(ui)
-        _highlight_first_button(ui)
+        redraw_buttons(ui)
         dimmers[deck_id].reset()
     else:
         reset_button_configuration(ui)
@@ -443,20 +453,9 @@ def redraw_buttons(ui) -> None:
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
-
-        blocker = QSignalBlocker(button)
-        try:
-            # button.setText(api.get_button_text(deck_id, _page(ui), button.index))
-            # TODO: Fix the way we handle buttons - for now deal with
-            # case where the icon may not be ready yet. There is a race
-            # condition on startup as display rendering and UI buttons are
-            # tied.
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
-            if icon:
-                button.setIcon(icon)
-
-        finally:
-            blocker.unblock()
+        icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
+        if icon:
+            button.setIcon(icon)
 
 
 def set_brightness(ui, value: int) -> None:
@@ -485,6 +484,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     if selected_button.isChecked():
+        print("Start the update timer")
         enable_button_configuration(ui, True)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
@@ -494,6 +494,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         dimmers[deck_id].reset()
     else:
+        selected_button = None
         reset_button_configuration(ui)
 
 
@@ -603,6 +604,17 @@ def import_config(window) -> None:
 
 
 def build_device(ui, _device_index=None) -> None:
+    """This method builds the device configuration user interface.
+    It is called if you switch to a different Stream Deck, 
+    a Stream Deck is added or when the last one is removed.
+    It must deal with the case where there is no Stream Deck as
+    a result.
+
+    :param ui: A reference to the ui
+    :type ui: _type_
+    :param _device_index: Not used, defaults to None
+    :type _device_index: _type_, optional
+    """
     style = ""
     if ui.device_list.count() > 0:
         style = "background-color: black"
@@ -612,12 +624,14 @@ def build_device(ui, _device_index=None) -> None:
         page.setStyleSheet(style)
         build_buttons(ui, page)
 
-    # Set the active page for this device
-    ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+    if ui.device_list.count() > 0:
+        # Set the active page for this device
+        ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
-    # Draw the buttons for the active page
-    redraw_buttons(ui)
-    _highlight_first_button(ui)
+        # Draw the buttons for the active page
+        redraw_buttons(ui)
+    else:
+        reset_button_configuration(ui)
 
 
 class MainWindow(QMainWindow):
@@ -677,7 +691,7 @@ class MainWindow(QMainWindow):
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
 
-def queue_text_change(ui, text: str) -> None:
+def queue_update_button_text(ui, text: str) -> None:
     global text_timer
 
     if text_timer:
@@ -768,7 +782,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     """
     main_window = MainWindow()
     ui = main_window.ui
-    ui.text.textChanged.connect(partial(queue_text_change, ui))
+    ui.text.textChanged.connect(partial(queue_update_button_text, ui))
     ui.command.textChanged.connect(partial(update_button_command, ui))
     ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
