@@ -54,7 +54,11 @@ BUTTON_DRAG_STYLE = """
 """
 
 selected_button: QtWidgets.QToolButton = None
-text_timer = None
+"A reference to the currently selected button"
+
+text_update_timer: QTimer = None
+"Timer used to delay updates to the button text"
+
 dimmer_options = {
     "Never": 0,
     "10 Seconds": 10,
@@ -200,13 +204,15 @@ class DraggableButton(QtWidgets.QToolButton):
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
+        serial_number = _deck_id(self.ui)
+        page = _page(self.ui)
 
         if e.source():
             # Ignore drag and drop on yourself
             if e.source().index == self.index:
                 return
 
-            api.swap_buttons(_deck_id(self.ui), _page(self.ui), e.source().index, self.index)
+            api.swap_buttons(serial_number, page, e.source().index, self.index)
             # In the case that we've dragged the currently selected button, we have to
             # check the target button instead so it appears that it followed the drag/drop
             if e.source().isChecked():
@@ -217,9 +223,15 @@ class DraggableButton(QtWidgets.QToolButton):
             # Handle drag and drop from outside the application
             if e.mimeData().hasUrls:
                 file_name = e.mimeData().urls()[0].toLocalFile()
-                api.set_button_icon(_deck_id(self.ui), _page(self.ui), self.index, file_name)
+                api.set_button_icon(serial_number, page, self.index, file_name)
 
-        redraw_buttons(self.ui)
+        icon = api.get_button_icon_pixmap(serial_number, page, e.source().index)
+        if icon:
+            e.source().setIcon(icon)
+
+        icon = api.get_button_icon_pixmap(serial_number, page, self.index)
+        if icon:
+            self.setIcon(icon)
 
     def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
         if type(self) is DraggableButton:
@@ -692,15 +704,26 @@ class MainWindow(QMainWindow):
 
 
 def queue_update_button_text(ui, text: str) -> None:
-    global text_timer
+    """Instead of directly updating the text (label) associated with
+    the button, add a small delay. If this is called before the
+    timer fires, delay it again. Effectively this creates an update
+    queue. It makes the textbox more response, as rendering the button
+    and saving to the API each time can feel somewhat slow.
 
-    if text_timer:
-        text_timer.stop()
+    :param ui: Reference to the ui
+    :type ui: _type_
+    :param text: The new text value
+    :type text: str
+    """
+    global text_update_timer
 
-    text_timer = QTimer()
-    text_timer.setSingleShot(True)
-    text_timer.timeout.connect(partial(update_button_text, ui, text))
-    text_timer.start(500)
+    if text_update_timer:
+        text_update_timer.stop()
+
+    text_update_timer = QTimer()
+    text_update_timer.setSingleShot(True)
+    text_update_timer.timeout.connect(partial(update_button_text, ui, text))
+    text_update_timer.start(500)
 
 
 def change_brightness(deck_id: str, brightness: int):
