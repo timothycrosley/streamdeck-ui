@@ -24,8 +24,6 @@ deck_ids: Dict[str, str] = {}
 # Keep track of device.id -> Serial Number
 
 state: Dict[str, Dict[str, Union[int, str, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
-# FIXME: Should the lock move to the display manager, including other display operations
-streamdecks_lock = threading.Lock()
 key_event_lock = threading.Lock()
 
 display_handlers: Dict[str, DisplayGrid] = {}

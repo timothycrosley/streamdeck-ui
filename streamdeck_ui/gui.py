@@ -845,7 +845,7 @@ def streamdeck_attached(ui, deck: Dict):
         ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
     finally:
         blocker.unblock()
-        # TODO: Does dimmer belong in UI layer? Seems like API logic.
+        # REVIEW: Does dimmer belong in UI layer? Seems like API logic.
     dimmers[serial_number] = Dimmer(
         api.get_display_timeout(serial_number),
         api.get_brightness(serial_number),
