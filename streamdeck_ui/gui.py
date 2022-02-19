@@ -835,6 +835,14 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     return tray
 
 
+def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
+    if (cpu > 100):
+        cpu == 100
+    if _deck_id(ui) == serial_number:
+        ui.cpu_usage.setValue(cpu)
+        ui.cpu_usage.update()
+
+
 def streamdeck_attached(ui, deck: Dict):
 
     serial_number = deck["serial_number"]
@@ -899,6 +907,7 @@ def start(_exit: bool = False) -> None:
 
     api.plugevents.attached.connect(partial(streamdeck_attached, ui))
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
+    api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
     api.start()
 
     tray.show()

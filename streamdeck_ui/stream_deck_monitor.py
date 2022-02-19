@@ -1,4 +1,4 @@
-from threading import Event, Thread
+from threading import Event, Thread, Lock
 from time import sleep
 from StreamDeck import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
@@ -15,7 +15,7 @@ class StreamDeckMonitor:
     monitor_thread : Optional[Thread]
     "The thread the monitors Stream Decks"
 
-    def __init__(self, attached : Callable[[str, StreamDeck], None], detatched : Callable[[str], None]):
+    def __init__(self, lock: Lock,  attached : Callable[[str, StreamDeck], None], detatched : Callable[[str], None]):
         """Creates a new StreamDeckMonitor instance
 
         :param attached: A callback function that is called when a new StreamDeck is attached. Note
@@ -31,6 +31,7 @@ class StreamDeckMonitor:
         self.monitor_thread = None
         self.attached = attached
         self.detatched = detatched
+        self.lock = lock
 
     def start(self):
         """Starts the monitor thread. If it is already running, nothing
@@ -71,7 +72,8 @@ class StreamDeckMonitor:
         while not self.quit.is_set():
 
             # REVIEW: Is it OK to enumerate and create decks each time? How expensive is it
-            attached_streamdecks = DeviceManager.DeviceManager().enumerate()
+            with self.lock:
+                attached_streamdecks = DeviceManager.DeviceManager().enumerate()
             for streamdeck in attached_streamdecks:
                 streamdeck_id = streamdeck.id()
                 if streamdeck_id not in self.streamdecks:
@@ -83,4 +85,5 @@ class StreamDeckMonitor:
                     streamdeck = self.streamdecks[streamdeck_id]
                     del self.streamdecks[streamdeck_id]
                     self.detatched(streamdeck_id)
-            sleep(1)
+            
+            sleep(2)

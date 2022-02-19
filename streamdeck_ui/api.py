@@ -28,6 +28,8 @@ key_event_lock = threading.Lock()
 
 display_handlers: Dict[str, DisplayGrid] = {}
 
+lock: threading.Lock = threading.Lock()
+
 
 class KeySignalEmitter(QObject):
     key_pressed = Signal(str, int, bool)
@@ -41,9 +43,15 @@ class StreamDeckSignalEmitter(QObject):
     "A signal that is raised whenever a new StreamDeck is attached."
     detatched = Signal(str)
     "A signal that is raised whenever a StreamDeck is detatched. "
+    cpu_changed = Signal(str, int)
 
 
 plugevents = StreamDeckSignalEmitter()
+
+
+def cpu_usage_callback(serial_number: str, cpu_usage: int):
+    print(f"{serial_number} at {cpu_usage}%")
+    plugevents.cpu_changed.emit(serial_number, cpu_usage)
 
 
 def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
@@ -158,7 +166,7 @@ def cleanup(id: str, serial_number: str):
 def start():
     global monitor
     if not monitor:
-        monitor = StreamDeckMonitor(attached, detatched)
+        monitor = StreamDeckMonitor(lock, attached, detatched)
     monitor.start()
 
 
@@ -370,7 +378,7 @@ def update_streamdeck_filters(serial_number: str):
         # the type hinting is defined causes it to believe there *may* not be a list
         pages = len(deck_state["buttons"])
 
-        display_handler = display_handlers.get(serial_number, DisplayGrid(deck, pages))
+        display_handler = display_handlers.get(serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback))
         display_handler.set_page(get_page(deck_id))
         display_handlers[serial_number] = display_handler
 

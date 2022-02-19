@@ -107,7 +107,7 @@ class Ui_SettingsDialog(object):
         self.label_streamdeck.setText("")
         self.label_brightness.setText(QCoreApplication.translate("SettingsDialog", u"Brightness:", None))
         self.label_dim.setText(QCoreApplication.translate("SettingsDialog", u"Auto dim after:", None))
-        self.label_brightness_dimmed.setText(QCoreApplication.translate("SettingsDialog", u"Dim to %:", None))
         self.dim.setCurrentText("")
+        self.label_brightness_dimmed.setText(QCoreApplication.translate("SettingsDialog", u"Dim to %:", None))
     # retranslateUi
 

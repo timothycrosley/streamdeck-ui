@@ -1,6 +1,6 @@
 import threading
 from time import sleep, time
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Callable
 
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Devices.StreamDeck import StreamDeck
@@ -21,7 +21,7 @@ class DisplayGrid:
     _empty_filter: EmptyFilter = EmptyFilter()
     "Static instance of EmptyFilter shared by all pipelines"
 
-    def __init__(self, streamdeck: StreamDeck, pages: int, fps: int = 25):
+    def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: int, cpu_callback: Callable[[str, int], None], fps: int = 25):
         # Reference to the actual device, used to update icons
         self.streamdeck = streamdeck
         # TODO: Makes more sense that the display tells the filters what size
@@ -29,6 +29,7 @@ class DisplayGrid:
         # This also means that filter creation and intialization needs to be
         # seperated. Maybe also needs a method to provide a thumbnail?
         self.size = streamdeck.key_image_format()["size"]
+        self.serial_number = streamdeck.get_serial_number()
 
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
@@ -46,8 +47,9 @@ class DisplayGrid:
         self.fps = fps
         # Configure the maximum frame rate we want to achieve
         self.time_per_frame = 1 / fps
-        self.lock = threading.Lock()
+        self.lock = lock
         self.sync = threading.Event()
+        self.cpu_callback = cpu_callback
         # The sync event allows a caller to wait until all the buttons have been processed
         DisplayGrid._empty_filter.initialize(self.size)
 
@@ -141,13 +143,13 @@ class DisplayGrid:
                         image = frame_cache[hashcode]
 
                     try:
-                        self.streamdeck.set_key_image(button, image)
+                        with self.lock:
+                            self.streamdeck.set_key_image(button, image)
                     except TransportError:
                         # Review - deadlock if you wait on yourself?
                         self.stop()
                         pass
                         return
-
 
             self.sync.set()
             self.sync.clear()
@@ -164,6 +166,9 @@ class DisplayGrid:
 
             frames += 1
             if time() - start > 1.0:
+                execution_time_ms = int(execution_time * 1000)
+                if self.cpu_callback:
+                    self.cpu_callback(self.serial_number, int(execution_time_ms/1000 * 100))
                 # execution_time_ms = int(execution_time * 1000)
                 # TODO: push an event or callback so the UI can get access to this data
                 # print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
