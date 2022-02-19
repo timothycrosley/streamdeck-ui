@@ -46,6 +46,8 @@ class DisplayGrid:
         # Configure the maximum frame rate we want to achieve
         self.time_per_frame = 1 / fps
         self.lock = threading.Lock()
+        self.sync = threading.Event()
+        # The sync event allows a caller to wait until all the buttons have been processed
         DisplayGrid._empty_filter.initialize(self.size)
 
     def replace(self, page: int, button: int, filters: List[Filter]):
@@ -64,6 +66,10 @@ class DisplayGrid:
             # a button. This will need to be added to the interface
             # of a filter.
             return self.pages[page][button].last_result()
+
+    def synchronize(self):
+        # Wait until the next cycle is complete
+        self.sync.wait()
 
     def _run(self):
         """Method that runs on background thread and updates the pipelines."""
@@ -91,7 +97,8 @@ class DisplayGrid:
             for button, pipeline in page.items():
 
                 # Process all the steps in the pipeline and return the resulting image
-                image, hashcode = pipeline.execute(current_time)
+                with self.lock:
+                    image, hashcode = pipeline.execute(current_time)
 
                 pipeline_cache_count += len(pipeline.output_cache)
 
@@ -129,6 +136,8 @@ class DisplayGrid:
 
                     self.streamdeck.set_key_image(button, image)
 
+            self.sync.set()
+            self.sync.clear()
             # Calculate how long we took to process the pipeline
             elapsed_time = time() - current_time
             execution_time += elapsed_time
@@ -173,6 +182,8 @@ class DisplayGrid:
         self.pipeline_thread = threading.Thread(target=self._run)
         self.pipeline_thread.daemon = True
         self.pipeline_thread.start()
+        self.synchronize()
+        # Wait for first frames to become ready
 
     def stop(self):
         if self.pipeline_thread is not None:
