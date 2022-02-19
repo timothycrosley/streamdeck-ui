@@ -352,18 +352,9 @@ def _page(ui) -> int:
 
 
 def update_button_text(ui, text: str) -> None:
-    print("update_button_text")
     if selected_button:
         deck_id = _deck_id(ui)
-        # FIXME: when we uncheck the button, the event fires and the text has been cleared
-        # don't write!
         api.set_button_text(deck_id, _page(ui), selected_button.index, text)
-        # FIXME: When the text changes, what needs to happen?
-        # Do we really need to redraw all the buttons?  In theory we only
-        # Need to update the current button.
-        # redraw_buttons(ui)
-
-        deck_id = _deck_id(ui)
         icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
         if icon:
             selected_button.setIcon(icon)
@@ -397,15 +388,6 @@ def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
         api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
-
-
-def _highlight_first_button(ui) -> None:
-    buttons = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)
-    # TODO: Can this check be removed?
-    if len(buttons) > 0:
-        button = ui.pages.currentWidget().findChildren(QtWidgets.QToolButton)[0]
-        button.setChecked(False)
-        button.click()
 
 
 def change_page(ui, page: int) -> None:
@@ -852,6 +834,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     action_exit.triggered.connect(app.exit)
     menu.addAction(action_exit)
     tray.setContextMenu(menu)
+    tray.show()
     return tray
 
 
@@ -914,7 +897,6 @@ def start(_exit: bool = False) -> None:
 
     api.streamdeck_keys.key_pressed.connect(handle_keypress)
 
-    # FIXME: When the device list changes AND when the tab changes, buttons are redrawn
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
