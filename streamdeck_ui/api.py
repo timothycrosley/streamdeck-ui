@@ -376,6 +376,10 @@ def update_streamdeck_filters(serial_number: str):
         if deck is None:
             continue
 
+        # REVIEW: Is there a better way to enumerate
+        if deck_id != serial_number:
+            continue
+
         # FIXME: Debug this - linter says there should not be a length. Issue is the way
         # the type hinting is defined causes it to believe there *may* not be a list
         pages = len(deck_state["buttons"])
