@@ -405,7 +405,8 @@ def change_page(ui, page: int) -> None:
     :param page: The page number to switch to
     :type page: int
     """
-    selected_button.setChecked(False)
+    if selected_button:
+        selected_button.setChecked(False)
 
     deck_id = _deck_id(ui)
     if deck_id:
