@@ -152,7 +152,7 @@ class Dimmer:
         if self.__stopped:
             return
 
-        if toggle and self.__dimmer_brightness == 0:
+        if toggle and self.__dimmer_brightness <= self.brightness_dimmed:
             self.reset()
         elif self.__timer and self.__timer.isActive():
             # No need for the timer anymore, stop it
