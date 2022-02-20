@@ -79,7 +79,7 @@ class Ui_MainWindow(object):
         sizePolicy1.setHeightForWidth(self.cpu_usage.sizePolicy().hasHeightForWidth())
         self.cpu_usage.setSizePolicy(sizePolicy1)
         self.cpu_usage.setMaximumSize(QSize(25, 25))
-        self.cpu_usage.setMaximum(100)
+        self.cpu_usage.setMaximum(130)
         self.cpu_usage.setValue(0)
         self.cpu_usage.setOrientation(Qt.Vertical)
 

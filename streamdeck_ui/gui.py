@@ -395,6 +395,8 @@ def update_switch_page(ui, page: int) -> None:
 
 
 def change_page(ui, page: int) -> None:
+    global selected_button
+
     """Change the Stream Deck to the desired page and update
     the on-screen buttons.
 
@@ -403,13 +405,15 @@ def change_page(ui, page: int) -> None:
     :param page: The page number to switch to
     :type page: int
     """
+    selected_button.setChecked(False)
+
     deck_id = _deck_id(ui)
     if deck_id:
         api.set_page(deck_id, page)
         redraw_buttons(ui)
         dimmers[deck_id].reset()
-    else:
-        reset_button_configuration(ui)
+
+    reset_button_configuration(ui)
 
 
 def select_image(window) -> None:
@@ -511,7 +515,7 @@ def reset_button_configuration(ui):
     """
     ui.text.clear()
     ui.command.clear()
-    ui.keys.clear()
+    ui.keys.clearEditText()
     ui.write.clear()
     ui.change_brightness.setValue(0)
     ui.switch_page.setValue(0)
@@ -844,6 +848,7 @@ def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
         cpu == 100
     if _deck_id(ui) == serial_number:
         ui.cpu_usage.setValue(cpu)
+        ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
         ui.cpu_usage.update()
 
 

@@ -50,7 +50,6 @@ plugevents = StreamDeckSignalEmitter()
 
 
 def cpu_usage_callback(serial_number: str, cpu_usage: int):
-    print(f"{serial_number} at {cpu_usage}%")
     plugevents.cpu_changed.emit(serial_number, cpu_usage)
 
 
