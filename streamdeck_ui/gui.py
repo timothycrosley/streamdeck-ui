@@ -594,7 +594,7 @@ def import_config(window) -> None:
 
 def build_device(ui, _device_index=None) -> None:
     """This method builds the device configuration user interface.
-    It is called if you switch to a different Stream Deck, 
+    It is called if you switch to a different Stream Deck,
     a Stream Deck is added or when the last one is removed.
     It must deal with the case where there is no Stream Deck as
     a result.

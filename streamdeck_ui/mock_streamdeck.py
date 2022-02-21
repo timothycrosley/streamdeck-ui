@@ -120,7 +120,7 @@ class StreamDeckMock(StreamDeck.StreamDeck):
         :return: Identifier for the attached device.
         """
         return "/dev/dummy"
-    
+
     def _reset_key_stream(self):
         """
         Sends a blank key report to the StreamDeck, resetting the key image
@@ -131,7 +131,7 @@ class StreamDeckMock(StreamDeck.StreamDeck):
 
         payload = bytearray(self.IMAGE_REPORT_LENGTH)
         payload[0] = 0x02
-        #self.device.write(payload)
+        # self.device.write(payload)
 
     def reset(self):
         """
@@ -141,7 +141,7 @@ class StreamDeckMock(StreamDeck.StreamDeck):
 
         payload = bytearray(17)
         payload[0:2] = [0x0B, 0x63]
-        #self.device.write_feature(payload)
+        # self.device.write_feature(payload)
 
     def set_brightness(self, percent):
         """
@@ -159,8 +159,8 @@ class StreamDeckMock(StreamDeck.StreamDeck):
         percent = min(max(percent, 0), 100)
 
         payload = bytearray(17)
-        payload[0:6] = [0x05, 0x55, 0xaa, 0xd1, 0x01, percent]
-        #self.device.write_feature(payload)
+        payload[0:6] = [0x05, 0x55, 0xAA, 0xD1, 0x01, percent]
+        # self.device.write_feature(payload)
 
     def get_serial_number(self):
         """
@@ -170,8 +170,8 @@ class StreamDeckMock(StreamDeck.StreamDeck):
         :return: String containing the serial number of the attached device.
         """
 
-        #serial = self.device.read_feature(0x03, 17)
-        #return self._extract_string(serial[5:])
+        # serial = self.device.read_feature(0x03, 17)
+        # return self._extract_string(serial[5:])
         return "FAKE"
 
     def get_firmware_version(self):
@@ -182,8 +182,8 @@ class StreamDeckMock(StreamDeck.StreamDeck):
         :return: String containing the firmware version of the attached device.
         """
 
-        #version = self.device.read_feature(0x04, 17)
-        #return self._extract_string(version[5:])
+        # version = self.device.read_feature(0x04, 17)
+        # return self._extract_string(version[5:])
         return "1.0"
 
     def set_key_image(self, key, image):
@@ -201,42 +201,4 @@ class StreamDeckMock(StreamDeck.StreamDeck):
                                  color.
         """
 
-        if min(max(key, 0), self.KEY_COUNT) != key:
-            raise IndexError("Invalid key index {}.".format(key))
-
-        image = bytes(image or self.BLANK_KEY_IMAGE)
-        image_report_payload_length = len(image) // 2
-
-        key = self._convert_key_id_origin(key)
-
-        page_number = 0
-        bytes_remaining = len(image)
-        while bytes_remaining > 0:
-            this_length = min(bytes_remaining, image_report_payload_length)
-            bytes_sent = page_number * image_report_payload_length
-
-            header = [
-                0x02,
-                0x01,
-                page_number + 1,
-                0,
-                1 if this_length == bytes_remaining else 0,
-                key + 1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ]
-
-            payload = bytes(header) + image[bytes_sent:bytes_sent + this_length]
-            padding = bytearray(self.IMAGE_REPORT_LENGTH - len(payload))
-            #self.device.write(payload + padding)
-
-            bytes_remaining = bytes_remaining - this_length
-            page_number = page_number + 1
+    pass
