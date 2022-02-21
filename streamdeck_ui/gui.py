@@ -5,7 +5,7 @@ import sys
 import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 import pkg_resources
 from pynput.keyboard import Controller, Key
@@ -53,10 +53,10 @@ BUTTON_DRAG_STYLE = """
     border-style: outset;}
 """
 
-selected_button: QtWidgets.QToolButton = None
+selected_button: Optional[QtWidgets.QToolButton] = None
 "A reference to the currently selected button"
 
-text_update_timer: QTimer = None
+text_update_timer: Optional[QTimer] = None
 "Timer used to delay updates to the button text"
 
 dimmer_options = {
@@ -420,7 +420,7 @@ def change_page(ui, page: int) -> None:
 def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
+    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
     image_file = ""
     if not image:
         if not last_image_dir:
@@ -431,13 +431,13 @@ def select_image(window) -> None:
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)
+        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)  # type: ignore # Index property added
         redraw_buttons(window.ui)
 
 
 def remove_image(window) -> None:
     deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)
+    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
     if image:
         confirm = QMessageBox(window)
         confirm.setWindowTitle("Remove image")
@@ -446,7 +446,7 @@ def remove_image(window) -> None:
         confirm.setIcon(QMessageBox.Question)
         button = confirm.exec_()
         if button == QMessageBox.Yes:
-            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")
+            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
             redraw_buttons(window.ui)
 
 
@@ -488,8 +488,8 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         button.setChecked(False)
 
     deck_id = _deck_id(ui)
-    button_id = selected_button.index
-    if selected_button.isChecked():
+    button_id = selected_button.index  # type: ignore # Index property added
+    if selected_button.isChecked():  # type: ignore # False positive mypy
         enable_button_configuration(ui, True)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))

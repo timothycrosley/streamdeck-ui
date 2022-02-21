@@ -128,7 +128,7 @@ def export_config(output_file: str) -> None:
         os.replace(output_file + ".tmp", os.path.realpath(output_file))
 
 
-monitor: StreamDeckMonitor = None
+monitor: Optional[StreamDeckMonitor] = None
 
 
 def attached(streamdeck_id: str, streamdeck: StreamDeck):
@@ -420,7 +420,7 @@ def update_streamdeck_filters(serial_number: str):
 
         # FIXME: Debug this - linter says there should not be a length. Issue is the way
         # the type hinting is defined causes it to believe there *may* not be a list
-        pages = len(deck_state["buttons"])
+        pages = len(deck_state["buttons"])  # type: ignore
 
         display_handler = display_handlers.get(
             serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback)
@@ -428,7 +428,7 @@ def update_streamdeck_filters(serial_number: str):
         display_handler.set_page(get_page(deck_id))
         display_handlers[serial_number] = display_handler
 
-        for page, buttons in deck_state.get("buttons", {}).items():
+        for page, buttons in deck_state.get("buttons", {}).items():  # type: ignore
             for button in buttons:
                 update_button_filters(serial_number, page, button)
 
