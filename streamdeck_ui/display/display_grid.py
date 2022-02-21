@@ -1,17 +1,16 @@
 import threading
 from time import sleep, time
-from typing import Dict, Optional, List, Callable
-
-from StreamDeck.ImageHelpers import PILHelper
-from StreamDeck.Devices.StreamDeck import StreamDeck
-from StreamDeck.Transport.Transport import TransportError
-from streamdeck_ui.display.keypress_filter import KeypressFilter
-from streamdeck_ui.display.empty_filter import EmptyFilter
-
-from streamdeck_ui.display.pipeline import Pipeline
-from streamdeck_ui.display.filter import Filter
+from typing import Callable, Dict, List, Optional
 
 from PIL import Image
+from StreamDeck.Devices.StreamDeck import StreamDeck
+from StreamDeck.ImageHelpers import PILHelper
+from StreamDeck.Transport.Transport import TransportError
+
+from streamdeck_ui.display.empty_filter import EmptyFilter
+from streamdeck_ui.display.filter import Filter
+from streamdeck_ui.display.keypress_filter import KeypressFilter
+from streamdeck_ui.display.pipeline import Pipeline
 
 
 class DisplayGrid:
@@ -19,6 +18,7 @@ class DisplayGrid:
     A DisplayGrid is made up of a collection of pipelines, each processing
     filters for one individual button display.
     """
+
     _empty_filter: EmptyFilter = EmptyFilter()
     "Static instance of EmptyFilter shared by all pipelines"
 
@@ -96,7 +96,7 @@ class DisplayGrid:
         # Wait until the next cycle is complete.
         # To *guarantee* that you have one complete pass, two waits are needed.
         # The first gets you to the end of one cycle (you could have called it
-        # mid cycle). The second gets you one pass through. Worst case, you 
+        # mid cycle). The second gets you one pass through. Worst case, you
         # do two full cycles. Best case, you do 1 full and one partial.
         self.sync.wait()
         self.sync.wait()
@@ -189,7 +189,7 @@ class DisplayGrid:
             if time() - start > 1.0:
                 execution_time_ms = int(execution_time * 1000)
                 if self.cpu_callback:
-                    self.cpu_callback(self.serial_number, int(execution_time_ms/1000 * 100))
+                    self.cpu_callback(self.serial_number, int(execution_time_ms / 1000 * 100))
                 # execution_time_ms = int(execution_time * 1000)
                 # print(f"FPS: {frames} Execution time: {execution_time_ms} ms Execution %: {int(execution_time_ms/1000 * 100)}")
                 # print(f"Output cache size: {len(frame_cache)}")

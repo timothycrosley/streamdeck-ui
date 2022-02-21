@@ -1,21 +1,23 @@
-from threading import Event, Thread, Lock
+from threading import Event, Lock, Thread
 from time import sleep
+from typing import Callable, Dict, Optional
+
 from StreamDeck import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
-from typing import Dict, Optional, Callable
 
 
 class StreamDeckMonitor:
     """Periodically checks if Stream Decks are attached or
     removed and raises the corresponding events.
     """
-    streamdecks : Dict[str, StreamDeck]
+
+    streamdecks: Dict[str, StreamDeck]
     "A dictionary with the key as device id and value as StreamDeck"
 
-    monitor_thread : Optional[Thread]
+    monitor_thread: Optional[Thread]
     "The thread the monitors Stream Decks"
 
-    def __init__(self, lock: Lock,  attached : Callable[[str, StreamDeck], None], detatched : Callable[[str], None]):
+    def __init__(self, lock: Lock, attached: Callable[[str, StreamDeck], None], detatched: Callable[[str], None]):
         """Creates a new StreamDeckMonitor instance
 
         :param lock: A lock object that will be used to get exclusive access while enumerating

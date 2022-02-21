@@ -1,6 +1,6 @@
+import itertools
 from fractions import Fraction
 from io import BytesIO
-import itertools
 from typing import Callable, Tuple
 
 import cairosvg
@@ -41,7 +41,7 @@ class ImageFilter(Filter):
                 frame_number = 1
                 while True:
                     try:
-                        frame_duration.append(image.info['duration'])
+                        frame_duration.append(image.info["duration"])
                         # Create tuple and hash it, to combine the image and frame hashcodes
                         frame_hash.append(hash((image_hash, frame_number)))
                         image.seek(image.tell() + 1)
@@ -83,7 +83,7 @@ class ImageFilter(Filter):
         # Unpack tuple to make code a bit easier to understand
         frame, duration, hashcode = self.current_frame
 
-        if duration >= 0 and time - self.frame_time > duration/1000:
+        if duration >= 0 and time - self.frame_time > duration / 1000:
             self.frame_time = time
             self.current_frame = next(self.frame_cycle)
 

@@ -21,6 +21,7 @@ class StreamDeckMock(StreamDeck.StreamDeck):
     IMAGE_REPORT_LENGTH = 8191
     IMAGE_REPORT_HEADER_LENGTH = 16
 
+    # fmt: off
     # 72 x 72 black BMP
     BLANK_KEY_IMAGE = [
         0x42, 0x4d, 0xf6, 0x3c, 0x00, 0x00, 0x00, 0x00,
@@ -31,6 +32,7 @@ class StreamDeckMock(StreamDeck.StreamDeck):
         0x00, 0x00, 0xc4, 0x0e, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     ] + [0] * (KEY_PIXEL_WIDTH * KEY_PIXEL_HEIGHT * 3)
+    # fmt: on
 
     def _convert_key_id_origin(self, key):
         """

@@ -10,19 +10,9 @@ from typing import Callable, Dict, Optional
 import pkg_resources
 from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSize, Qt, QTimer, QUrl, QSignalBlocker
+from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
-from PySide2.QtWidgets import (
-    QAction,
-    QApplication,
-    QDialog,
-    QFileDialog,
-    QMainWindow,
-    QMenu,
-    QMessageBox,
-    QSizePolicy,
-    QSystemTrayIcon,
-)
+from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui import api
 from streamdeck_ui.config import LOGO
@@ -59,18 +49,7 @@ selected_button: Optional[QtWidgets.QToolButton] = None
 text_update_timer: Optional[QTimer] = None
 "Timer used to delay updates to the button text"
 
-dimmer_options = {
-    "Never": 0,
-    "10 Seconds": 10,
-    "1 Minute": 60,
-    "5 Minutes": 300,
-    "10 Minutes": 600,
-    "15 Minutes": 900,
-    "30 Minutes": 1800,
-    "1 Hour": 3600,
-    "5 Hours": 7200,
-    "10 Hours": 36000,
-}
+dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900, "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
 last_image_dir = ""
 
 
@@ -83,13 +62,7 @@ class Dimmer:
     __timer = None
     __change_timer = None
 
-    def __init__(
-        self,
-        timeout: int,
-        brightness: int,
-        brightness_dimmed: int,
-        brightness_callback: Callable[[int], None],
-    ):
+    def __init__(self, timeout: int, brightness: int, brightness_dimmed: int, brightness_callback: Callable[[int], None]):
         """Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.
@@ -662,7 +635,7 @@ class MainWindow(QMainWindow):
     :type QMainWindow: [type]
     """
 
-    ui : Ui_MainWindow
+    ui: Ui_MainWindow
     "A reference to all the UI objects for the main window"
 
     def __init__(self):
@@ -739,12 +712,12 @@ def change_brightness(deck_id: str, brightness: int):
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        self.ui : Ui_SettingsDialog = Ui_SettingsDialog()
+        self.ui: Ui_SettingsDialog = Ui_SettingsDialog()
         self.ui.setupUi(self)
         self.show()
 
 
-def show_settings(window : MainWindow) -> None:
+def show_settings(window: MainWindow) -> None:
     """Shows the settings dialog and allows the user the change deck specific
     settings. Settings are not saved until OK is clicked."""
     ui = window.ui
@@ -860,7 +833,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
 
 
 def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
-    if (cpu > 100):
+    if cpu > 100:
         cpu == 100
     if _deck_id(ui) == serial_number:
         ui.cpu_usage.setValue(cpu)
@@ -877,12 +850,7 @@ def streamdeck_attached(ui, deck: Dict):
     finally:
         blocker.unblock()
         # REVIEW: Does dimmer belong in UI layer? Seems like API logic.
-    dimmers[serial_number] = Dimmer(
-        api.get_display_timeout(serial_number),
-        api.get_brightness(serial_number),
-        api.get_brightness_dimmed(serial_number),
-        partial(change_brightness, serial_number),
-    )
+    dimmers[serial_number] = Dimmer(api.get_display_timeout(serial_number), api.get_brightness(serial_number), api.get_brightness_dimmed(serial_number), partial(change_brightness, serial_number))
     dimmers[serial_number].reset()
     build_device(ui)
 

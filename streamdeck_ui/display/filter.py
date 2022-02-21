@@ -12,10 +12,11 @@ class Filter(ABC):
 
     :param str name: The name of the filter. The name is useful for debugging purposes.
     """
-    size : Tuple[int, int]
+
+    size: Tuple[int, int]
     "The image size (width, height) in pixels that this filter transforms."
 
-    is_complete : bool
+    is_complete: bool
     "Indicates if the filter is complete and should no longer be processed."
 
     def __init__(self):

@@ -3,7 +3,7 @@ import json
 import os
 import threading
 from functools import partial
-from typing import Dict, Optional, Tuple, Union, cast, List
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
@@ -89,18 +89,11 @@ def _open_config(config_file: str):
         config = json.loads(state_file.read())
         file_version = config.get("streamdeck_ui_version", 0)
         if file_version != CONFIG_FILE_VERSION:
-            raise ValueError(
-                "Incompatible version of config file found: "
-                f"{file_version} does not match required version "
-                f"{CONFIG_FILE_VERSION}."
-            )
+            raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
 
         state = {}
         for deck_id, deck in config["state"].items():
-            deck["buttons"] = {
-                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
-                for page_id, buttons in deck.get("buttons", {}).items()
-            }
+            deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
             state[deck_id] = deck
 
 
@@ -114,13 +107,7 @@ def import_config(config_file: str) -> None:
 def export_config(output_file: str) -> None:
     try:
         with open(output_file + ".tmp", "w") as state_file:
-            state_file.write(
-                json.dumps(
-                    {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state},
-                    indent=4,
-                    separators=(",", ": "),
-                )
-            )
+            state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": state}, indent=4, separators=(",", ": ")))
     except Exception as error:
         print(f"The configuration file '{output_file}' was not updated. Error: {error}")
         raise
@@ -142,14 +129,7 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     decks[serial_number] = streamdeck
     initialize_state(serial_number, streamdeck.key_count())
     streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
-    plugevents.attached.emit(
-        {
-            "id": streamdeck_id,
-            "serial_number": serial_number,
-            "type": streamdeck.deck_type(),
-            "layout": streamdeck.key_layout(),
-        }
-    )
+    plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
     update_streamdeck_filters(serial_number)
 
 
@@ -225,9 +205,7 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int) -> None:
     """Swaps the properties of the source and target buttons"""
     temp = cast(dict, state[deck_id]["buttons"])[page][source_button]
-    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(
-        dict, state[deck_id]["buttons"]
-    )[page][target_button]
+    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(dict, state[deck_id]["buttons"])[page][target_button]
     cast(dict, state[deck_id]["buttons"])[page][target_button] = temp
     _save_state()
 
@@ -422,9 +400,7 @@ def update_streamdeck_filters(serial_number: str):
         # the type hinting is defined causes it to believe there *may* not be a list
         pages = len(deck_state["buttons"])  # type: ignore
 
-        display_handler = display_handlers.get(
-            serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback)
-        )
+        display_handler = display_handlers.get(serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback))
         display_handler.set_page(get_page(deck_id))
         display_handlers[serial_number] = display_handler
 

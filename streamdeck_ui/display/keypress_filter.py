@@ -9,6 +9,7 @@ from streamdeck_ui.display.filter import Filter
 class KeypressFilter(Filter):
     """This filter is applied whenever a key is being pressed
     """
+
     def __init__(self):
         super(KeypressFilter, self).__init__()
         self.last_time: Fraction = Fraction()
@@ -36,7 +37,7 @@ class KeypressFilter(Filter):
             if self.active:
                 input = get_input()
                 background = self.blank_image.copy()
-                input.thumbnail((self.size[0]-10, self.size[1]-10), Image.ANTIALIAS)
+                input.thumbnail((self.size[0] - 10, self.size[1] - 10), Image.ANTIALIAS)
                 # Reduce the image by 10px
 
                 enhancer = ImageEnhance.Brightness(input)

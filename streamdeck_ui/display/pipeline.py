@@ -1,5 +1,5 @@
 from fractions import Fraction
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 from PIL.Image import Image
 
@@ -27,9 +27,7 @@ class Pipeline:
 
         for i, (current_filter, cached) in enumerate(self.filters):
 
-            (image, hashcode) = current_filter.transform(lambda: image.copy(),
-                                                         lambda output_hash: self.output_cache.get(hash((output_hash, pipeline_hash)), None),
-                                                         is_modified | self.first_run, time)
+            (image, hashcode) = current_filter.transform(lambda: image.copy(), lambda output_hash: self.output_cache.get(hash((output_hash, pipeline_hash)), None), is_modified | self.first_run, time)
 
             pipeline_hash = hash((hashcode, pipeline_hash))
 

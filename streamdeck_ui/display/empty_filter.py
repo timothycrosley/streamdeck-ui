@@ -33,5 +33,5 @@ class EmptyFilter(filter.Filter):
         the start of the pipeline.
         """
         if not input_changed:
-            return ((None, self.hashcode))
+            return (None, self.hashcode)
         return ((self.image), self.hashcode)
