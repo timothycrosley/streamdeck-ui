@@ -89,11 +89,18 @@ def _open_config(config_file: str):
         config = json.loads(state_file.read())
         file_version = config.get("streamdeck_ui_version", 0)
         if file_version != CONFIG_FILE_VERSION:
-            raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
+            raise ValueError(
+                "Incompatible version of config file found: "
+                f"{file_version} does not match required version "
+                f"{CONFIG_FILE_VERSION}."
+            )
 
         state = {}
         for deck_id, deck in config["state"].items():
-            deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
+            deck["buttons"] = {
+                int(page_id): {int(button_id): button for button_id, button in buttons.items()}
+                for page_id, buttons in deck.get("buttons", {}).items()
+            }
             state[deck_id] = deck
 
 
@@ -121,7 +128,7 @@ def export_config(output_file: str) -> None:
         os.replace(output_file + ".tmp", os.path.realpath(output_file))
 
 
-monitor : StreamDeckMonitor = None
+monitor: StreamDeckMonitor = None
 
 
 def attached(streamdeck_id: str, streamdeck: StreamDeck):
@@ -133,9 +140,31 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     # The detatched event only knows about the id that got detatched
     deck_ids[streamdeck_id] = serial_number
     decks[serial_number] = streamdeck
+    initialize_state(serial_number, streamdeck.key_count())
     streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
+    plugevents.attached.emit(
+        {
+            "id": streamdeck_id,
+            "serial_number": serial_number,
+            "type": streamdeck.deck_type(),
+            "layout": streamdeck.key_layout(),
+        }
+    )
     update_streamdeck_filters(serial_number)
-    plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
+
+
+def initialize_state(serial_number: str, buttons: int):
+    """Initializes the state for the given serial number. This allocates
+    buttons and pages based on the layout.
+
+    :param serial_number: The Stream Deck serial number
+    :type serial_number: str
+    :param layout: The button layout for this Stream Deck
+    :type layout: Tuple[int, int]
+    """
+    for page in range(10):
+        for button in range(buttons):
+            _button_state(serial_number, page, button)
 
 
 def detatched(id: str):
@@ -177,6 +206,8 @@ def stop():
 
 
 def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
+    # REVIEW: This seems to be overly complicated. Just return a tuple with
+    # the two properties may be OK
     return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
 
@@ -189,7 +220,9 @@ def _button_state(deck_id: str, page: int, button: int) -> dict:
 def swap_buttons(deck_id: str, page: int, source_button: int, target_button: int) -> None:
     """Swaps the properties of the source and target buttons"""
     temp = cast(dict, state[deck_id]["buttons"])[page][source_button]
-    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(dict, state[deck_id]["buttons"])[page][target_button]
+    cast(dict, state[deck_id]["buttons"])[page][source_button] = cast(
+        dict, state[deck_id]["buttons"]
+    )[page][target_button]
     cast(dict, state[deck_id]["buttons"])[page][target_button] = temp
     _save_state()
 
@@ -354,7 +387,7 @@ def set_page(deck_id: str, page: int) -> None:
         _save_state()
 
         display_handler = display_handlers[deck_id]
-        
+
         # Let the display know to process new set of pipelines
         display_handler.set_page(page)
         # Wait for at least one cycle
@@ -384,7 +417,9 @@ def update_streamdeck_filters(serial_number: str):
         # the type hinting is defined causes it to believe there *may* not be a list
         pages = len(deck_state["buttons"])
 
-        display_handler = display_handlers.get(serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback))
+        display_handler = display_handlers.get(
+            serial_number, DisplayGrid(lock, deck, pages, cpu_usage_callback)
+        )
         display_handler.set_page(get_page(deck_id))
         display_handlers[serial_number] = display_handler
 

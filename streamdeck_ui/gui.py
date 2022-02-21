@@ -455,9 +455,13 @@ def redraw_buttons(ui) -> None:
     current_tab = ui.pages.currentWidget()
     buttons = current_tab.findChildren(QtWidgets.QToolButton)
     for button in buttons:
-        icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
-        if icon:
-            button.setIcon(icon)
+        if not button.isHidden():
+            # When rebuilding the buttons, we hide the old ones
+            # and mark for deletion. They still hang around so
+            # ignore them here
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
+            if icon:
+                button.setIcon(icon)
 
 
 def set_brightness(ui, value: int) -> None:
@@ -535,6 +539,12 @@ def browse_github():
 
 def build_buttons(ui, tab) -> None:
     if hasattr(tab, "deck_buttons"):
+        buttons = tab.findChildren(QtWidgets.QToolButton)
+        for button in buttons:
+            button.hide()
+            # Mark them as hidden. They will be GC'd later
+            button.deleteLater()
+
         tab.deck_buttons.hide()
         tab.deck_buttons.deleteLater()
         # Remove the inner page
