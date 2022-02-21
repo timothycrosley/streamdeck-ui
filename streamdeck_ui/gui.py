@@ -538,6 +538,8 @@ def browse_github():
 
 
 def build_buttons(ui, tab) -> None:
+    global selected_button
+
     if hasattr(tab, "deck_buttons"):
         buttons = tab.findChildren(QtWidgets.QToolButton)
         for button in buttons:
@@ -551,6 +553,9 @@ def build_buttons(ui, tab) -> None:
         del tab.children()[0]
         # Remove the property
         del tab.deck_buttons
+
+    selected_button = None
+    # When rebuilding any selection is cleared
 
     deck_id = _deck_id(ui)
 

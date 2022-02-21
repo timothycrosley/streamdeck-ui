@@ -206,8 +206,13 @@ def stop():
 
 
 def get_deck(deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
-    # REVIEW: This seems to be overly complicated. Just return a tuple with
-    # the two properties may be OK
+    """Returns a dictionary with some Stream Deck properties
+
+    :param deck_id: The Stream Deck serial number
+    :type deck_id: str
+    :return: A dictionary with 'type' and 'layout' as keys
+    :rtype: Dict[str, Dict[str, Union[str, Tuple[int, int]]]]
+    """
     return {"type": decks[deck_id].deck_type(), "layout": decks[deck_id].key_layout()}
 
 
