@@ -391,12 +391,12 @@ def set_page(deck_id: str, page: int) -> None:
         state.setdefault(deck_id, {})["page"] = page
         _save_state()
 
-        display_handler = display_handlers[deck_id]
+    display_handler = display_handlers[deck_id]
 
-        # Let the display know to process new set of pipelines
-        display_handler.set_page(page)
-        # Wait for at least one cycle
-        display_handler.synchronize()
+    # Let the display know to process new set of pipelines
+    display_handler.set_page(page)
+    # Wait for at least one cycle
+    display_handler.synchronize()
 
 
 def update_streamdeck_filters(serial_number: str):
