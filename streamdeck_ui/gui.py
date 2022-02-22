@@ -380,6 +380,7 @@ def change_page(ui, page: int) -> None:
     """
     if selected_button:
         selected_button.setChecked(False)
+        selected_button = None
 
     deck_id = _deck_id(ui)
     if deck_id:
