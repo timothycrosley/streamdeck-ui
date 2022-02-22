@@ -129,8 +129,8 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     decks[serial_number] = streamdeck
     initialize_state(serial_number, streamdeck.key_count())
     streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
-    plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
     update_streamdeck_filters(serial_number)
+    plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
 
 
 def initialize_state(serial_number: str, buttons: int):
