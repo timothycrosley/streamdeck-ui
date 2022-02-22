@@ -19,6 +19,7 @@ Change log
 ## 2.0.0 - TBD
 
 ### Features
+- UI starts up even if no Stream Deck attached.
 - SVG file type support.
 - Keys widget now has examples built in.
 - Help menu with links to websites.
