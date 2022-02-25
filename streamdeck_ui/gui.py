@@ -14,10 +14,12 @@ from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
-from streamdeck_ui import api
-from streamdeck_ui.config import LOGO
+from streamdeck_ui.api import StreamDeckServer
+from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
+
+api : StreamDeckServer = None
 
 BUTTON_STYLE = """
     QToolButton {
@@ -56,18 +58,19 @@ last_image_dir = ""
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
-    def __init__(self, parent, ui):
+    def __init__(self, parent, ui, api: StreamDeckServer):
         super(DraggableButton, self).__init__(parent)
 
         self.setAcceptDrops(True)
         self.ui = ui
+        self.api = api
 
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
 
         if e.buttons() != Qt.LeftButton:
             return
 
-        api.reset_dimmer(_deck_id(self.ui))
+        self.api.reset_dimmer(_deck_id(self.ui))
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -86,7 +89,7 @@ class DraggableButton(QtWidgets.QToolButton):
             if e.source().index == self.index:
                 return
 
-            api.swap_buttons(serial_number, page, e.source().index, self.index)
+            self.api.swap_buttons(serial_number, page, e.source().index, self.index)
             # In the case that we've dragged the currently selected button, we have to
             # check the target button instead so it appears that it followed the drag/drop
             if e.source().isChecked():
@@ -97,13 +100,13 @@ class DraggableButton(QtWidgets.QToolButton):
             # Handle drag and drop from outside the application
             if e.mimeData().hasUrls:
                 file_name = e.mimeData().urls()[0].toLocalFile()
-                api.set_button_icon(serial_number, page, self.index, file_name)
+                self.api.set_button_icon(serial_number, page, self.index, file_name)
 
-        icon = api.get_button_icon_pixmap(serial_number, page, e.source().index)
+        icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
         if icon:
             e.source().setIcon(icon)
 
-        icon = api.get_button_icon_pixmap(serial_number, page, self.index)
+        icon = self.api.get_button_icon_pixmap(serial_number, page, self.index)
         if icon:
             self.setIcon(icon)
 
@@ -458,7 +461,7 @@ def build_buttons(ui, tab) -> None:
         row_layout.addLayout(column_layout)
 
         for _column in range(deck["layout"][1]):  # type: ignore
-            button = DraggableButton(base_widget, ui)
+            button = DraggableButton(base_widget, ui, api)
             button.setCheckable(True)
             button.index = index
             button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
@@ -763,6 +766,7 @@ def streamdeck_detatched(ui, serial_number):
 
 
 def start(_exit: bool = False) -> None:
+    global api
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")
@@ -777,6 +781,10 @@ def start(_exit: bool = False) -> None:
         version = pkg_resources.get_distribution("streamdeck_ui").version
     except pkg_resources.DistributionNotFound:
         version = "devel"
+
+    api = StreamDeckServer()
+    if os.path.isfile(STATE_FILE):
+        api.open_config(STATE_FILE)
 
     # The QApplication object holds the Qt event loop and you need one of these
     # for your application
@@ -797,6 +805,7 @@ def start(_exit: bool = False) -> None:
     api.plugevents.attached.connect(partial(streamdeck_attached, ui))
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+
     api.start()
 
     tray.show()
