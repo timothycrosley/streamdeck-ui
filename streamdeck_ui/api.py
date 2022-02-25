@@ -3,7 +3,7 @@ import json
 import os
 import threading
 from functools import partial
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast, Callable
 
 from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
@@ -31,6 +31,82 @@ display_handlers: Dict[str, DisplayGrid] = {}
 lock: threading.Lock = threading.Lock()
 
 
+class Dimmer:
+    def __init__(self, timeout: int = 0, brightness: int = -1, brightness_dimmed: int = -1, brightness_callback: Callable[[int], None] = None):
+        """Constructs a new Dimmer instance
+
+        :param int timeout: The time in seconds before the dimmer starts.
+        :param int brightness: The normal brightness level.
+        :param Callable[[int], None] brightness_callback: Callback that receives the current
+                                                          brightness level.
+        """
+        self.timeout = timeout
+        self.brightness = brightness
+        self.brightness_dimmed = brightness_dimmed
+        self.brightness_callback = brightness_callback
+        self.__stopped = False
+        self.__dimmed = False
+        self.__timer = None
+
+    def stop(self) -> None:
+        """Stops the dimmer and sets the brightness back to normal. Call
+        reset to start normal dimming operation."""
+        if self.__timer:
+            self.__timer.cancel()
+            self.__timer = None
+
+        try:
+            self.brightness_callback(self.brightness)
+        except KeyError:
+            # During detach cleanup, this is likely to happen
+            pass
+        self.__stopped = True
+
+    def reset(self) -> bool:
+        """Reset the dimmer and start counting down again. If it was busy dimming, it will
+        immediately stop dimming. Callback fires to set brightness back to normal."""
+
+        self.__stopped = False
+        if self.__timer:
+            self.__timer.cancel()
+            self.__timer = None
+
+        if self.timeout:
+            self.__timer = threading.Timer(self.timeout, self.dim)
+            self.__timer.start()
+
+        if self.__dimmed:
+            self.brightness_callback(self.brightness)
+            self.__dimmed = False
+            if self.brightness_dimmed < 20:
+                # The screen was "too dark" so reset and let caller know
+                return True
+
+        return False
+        # Returning false means "I didn't have to reset it"
+
+    def dim(self, toggle: bool = False):
+        """Manually initiate a dim event.
+        If the dimmer is stopped, this has no effect."""
+
+        if self.__stopped:
+            return
+
+        if toggle and self.__dimmed:
+            # Don't dim
+            self.reset()
+        elif self.__timer:
+            # No need for the timer anymore, stop it
+            self.__timer.cancel()
+            self.__timer = None
+
+            self.brightness_callback(self.brightness_dimmed)
+            self.__dimmed = True
+
+
+dimmers: Dict[str, Dimmer] = {}
+
+
 class KeySignalEmitter(QObject):
     key_pressed = Signal(str, int, bool)
 
@@ -47,6 +123,39 @@ class StreamDeckSignalEmitter(QObject):
 
 
 plugevents = StreamDeckSignalEmitter()
+
+
+def stop_dimmer(serial_number: str) -> None:
+    dimmers[serial_number].stop()
+
+
+def reset_dimmer(serial_number: str) -> bool:
+    """Resets the dimmer for the given Stream Deck. This means the display
+    will not be dimmed and the timer starts.
+
+    Args:
+        serial_number (str): The Stream Deck serial number
+    Returns:
+        bool: Returns True if the dimmer had to be reset (i.e. woken up), False otherwise.
+    """
+    return dimmers[serial_number].reset()
+
+
+def toggle_dimmers():
+    """If at least one Deck is still "on", all will be dimmed off. Otherwise
+    toggles displays on.
+    """
+    at_least_one: bool = False
+    for _serial_number, dimmer in dimmers.items():
+        if dimmer.brightness != dimmer.brightness_dimmed:
+            at_least_one = True
+            break
+
+    for _serial_number, dimmer in dimmers.items():
+        if at_least_one:
+            dimmer.dim()
+        else:
+            dimmer.dim(True)
 
 
 def cpu_usage_callback(serial_number: str, cpu_usage: int):
@@ -75,6 +184,7 @@ def get_display_timeout(deck_id: str) -> int:
 def set_display_timeout(deck_id: str, timeout: int) -> None:
     """Sets the amount of time in seconds before the display gets dimmed."""
     state.setdefault(deck_id, {})["display_timeout"] = timeout
+    dimmers[deck_id].timeout = timeout
     _save_state()
 
 
@@ -130,6 +240,10 @@ def attached(streamdeck_id: str, streamdeck: StreamDeck):
     initialize_state(serial_number, streamdeck.key_count())
     streamdeck.set_key_callback(partial(_key_change_callback, serial_number))
     update_streamdeck_filters(serial_number)
+
+    dimmers[serial_number] = Dimmer(get_display_timeout(serial_number), get_brightness(serial_number), get_brightness_dimmed(serial_number), lambda brightness: decks[serial_number].set_brightness(brightness))
+    dimmers[serial_number].reset()
+
     plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
 
 
@@ -158,6 +272,10 @@ def cleanup(id: str, serial_number: str):
     display_grid = display_handlers[serial_number]
     display_grid.stop()
     del display_handlers[serial_number]
+
+    dimmer = dimmers[serial_number]
+    dimmer.stop()
+    del dimmers[serial_number]
 
     streamdeck = decks[serial_number]
     try:
@@ -355,7 +473,10 @@ def set_brightness_dimmed(deck_id: str, brightness_dimmed: int) -> None:
 
 def change_brightness(deck_id: str, amount: int = 1) -> None:
     """Change the brightness of the deck by the specified amount"""
-    set_brightness(deck_id, max(min(get_brightness(deck_id) + amount, 100), 0))
+    brightness = max(min(get_brightness(deck_id) + amount, 100), 0)
+    set_brightness(deck_id, brightness)
+    dimmers[deck_id].brightness = brightness
+    dimmers[deck_id].reset()
 
 
 def get_page(deck_id: str) -> int:

@@ -5,7 +5,7 @@ import sys
 import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Callable, Dict, Optional
+from typing import Dict, Optional
 
 import pkg_resources
 from pynput.keyboard import Controller, Key
@@ -53,105 +53,6 @@ dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300
 last_image_dir = ""
 
 
-class Dimmer:
-    timeout = 0
-    brightness = -1
-    brightness_dimmed = -1
-    __stopped = False
-    __dimmer_brightness = -1
-    __timer = None
-    __change_timer = None
-
-    def __init__(self, timeout: int, brightness: int, brightness_dimmed: int, brightness_callback: Callable[[int], None]):
-        """Constructs a new Dimmer instance
-
-        :param int timeout: The time in seconds before the dimmer starts.
-        :param int brightness: The normal brightness level.
-        :param Callable[[int], None] brightness_callback: Callback that receives the current
-                                                          brightness level.
-        """
-        self.timeout = timeout
-        self.brightness = brightness
-        self.brightness_dimmed = brightness_dimmed
-        self.brightness_callback = brightness_callback
-
-    def stop(self) -> None:
-        """Stops the dimmer and sets the brightness back to normal. Call
-        reset to start normal dimming operation."""
-        if self.__timer:
-            self.__timer.stop()
-
-        if self.__change_timer:
-            self.__change_timer.stop()
-
-        self.__dimmer_brightness = self.brightness
-        try:
-            self.brightness_callback(self.brightness)
-        except KeyError:
-            # During detach cleanup, this is likely to happen
-            pass
-        self.__stopped = True
-
-    def reset(self) -> bool:
-        """Reset the dimmer and start counting down again. If it was busy dimming, it will
-        immediately stop dimming. Callback fires to set brightness back to normal."""
-
-        self.__stopped = False
-        if self.__timer:
-            self.__timer.stop()
-
-        if self.__change_timer:
-            self.__change_timer.stop()
-
-        if self.timeout:
-            self.__timer = QTimer()
-            self.__timer.setSingleShot(True)
-            self.__timer.timeout.connect(partial(self.change_brightness))
-            self.__timer.start(self.timeout * 1000)
-
-        if self.__dimmer_brightness != self.brightness:
-            previous_dimmer_brightness = self.__dimmer_brightness
-            self.brightness_callback(self.brightness)
-            self.__dimmer_brightness = self.brightness
-            if previous_dimmer_brightness < 10:
-                return True
-
-        return False
-
-    def dim(self, toggle: bool = False):
-        """Manually initiate a dim event.
-        If the dimmer is stopped, this has no effect."""
-
-        if self.__stopped:
-            return
-
-        if toggle and self.__dimmer_brightness <= self.brightness_dimmed:
-            self.reset()
-        elif self.__timer and self.__timer.isActive():
-            # No need for the timer anymore, stop it
-            self.__timer.stop()
-
-            # Verify that we're not already at the target brightness nor
-            # busy with dimming already
-            if self.__change_timer is None and self.__dimmer_brightness:
-                self.change_brightness()
-
-    def change_brightness(self):
-        """Move the brightness level down by one and schedule another change_brightness event."""
-        if self.__dimmer_brightness and self.__dimmer_brightness >= self.brightness_dimmed:
-            self.__dimmer_brightness = self.__dimmer_brightness - 1
-            self.brightness_callback(self.__dimmer_brightness)
-            self.__change_timer = QTimer()
-            self.__change_timer.setSingleShot(True)
-            self.__change_timer.timeout.connect(partial(self.change_brightness))
-            self.__change_timer.start(10)
-        else:
-            self.__change_timer = None
-
-
-dimmers: Dict[str, Dimmer] = {}
-
-
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
@@ -166,7 +67,7 @@ class DraggableButton(QtWidgets.QToolButton):
         if e.buttons() != Qt.LeftButton:
             return
 
-        dimmers[_deck_id(self.ui)].reset()
+        api.reset_dimmer(_deck_id(self.ui))
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -233,7 +134,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
     # TODO: Handle both key down and key up events in future.
     if state:
 
-        if dimmers[deck_id].reset():
+        if api.reset_dimmer(deck_id):
             return
 
         keyboard = Controller()
@@ -299,8 +200,8 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         if brightness_change:
             try:
                 api.change_brightness(deck_id, brightness_change)
-                dimmers[deck_id].brightness = api.get_brightness(deck_id)
-                dimmers[deck_id].reset()
+                # dimmers[deck_id].brightness = api.get_brightness(deck_id)
+                # api.reset_dimmer(deck_id)
             except Exception as error:
                 print(f"Could not change brightness: {error}")
 
@@ -386,7 +287,7 @@ def change_page(ui, page: int) -> None:
     if deck_id:
         api.set_page(deck_id, page)
         redraw_buttons(ui)
-        dimmers[deck_id].reset()
+        api.reset_dimmer(deck_id)
 
     reset_button_configuration(ui)
 
@@ -441,15 +342,16 @@ def redraw_buttons(ui) -> None:
 def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
-    dimmers[deck_id].brightness = value
-    dimmers[deck_id].reset()
+    # dimmers[deck_id].brightness = value
+    # api.reset_dimmer(deck_id)
 
 
 def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
     deck_id = _deck_id(ui)
-    api.set_brightness_dimmed(deck_id, value)
-    dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
-    dimmers[deck_id].reset()
+    # TODO: Verify this is correct. Looks like it was a bug in the MR
+    api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
+    # dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
+    api.reset_dimmer(deck_id)
 
 
 def button_clicked(ui, clicked_button, buttons) -> None:
@@ -471,7 +373,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
         ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
-        dimmers[deck_id].reset()
+        api.reset_dimmer(deck_id)
     else:
         selected_button = None
         reset_button_configuration(ui)
@@ -724,7 +626,7 @@ def show_settings(window: MainWindow) -> None:
     ui = window.ui
     deck_id = _deck_id(ui)
     settings = SettingsDialog(window)
-    dimmers[deck_id].stop()
+    api.stop_dimmer(deck_id)
 
     for label, value in dimmer_options.items():
         settings.ui.dim.addItem(f"{label}", userData=value)
@@ -749,7 +651,7 @@ def show_settings(window: MainWindow) -> None:
     if settings.exec_():
         # Commit changes
         if existing_index != settings.ui.dim.currentIndex():
-            dimmers[deck_id].timeout = settings.ui.dim.currentData()
+            # dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
         set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
@@ -757,7 +659,7 @@ def show_settings(window: MainWindow) -> None:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
 
-    dimmers[deck_id].reset()
+    api.reset_dimmer(deck_id)
 
 
 def disable_dim_settings(settings: SettingsDialog, _index: int) -> None:
@@ -766,9 +668,8 @@ def disable_dim_settings(settings: SettingsDialog, _index: int) -> None:
     settings.ui.label_brightness_dimmed.setDisabled(disable)
 
 
-def dim_all_displays() -> None:
-    for _deck_id, dimmer in dimmers.items():
-        dimmer.dim(True)
+def toggle_dim_all() -> None:
+    api.toggle_dimmers()
 
 
 def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
@@ -820,7 +721,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
 
     menu = QMenu()
     action_dim = QAction("Dim display (toggle)", main_window)
-    action_dim.triggered.connect(dim_all_displays)
+    action_dim.triggered.connect(toggle_dim_all())
     action_configure = QAction("Configure...", main_window)
     action_configure.triggered.connect(main_window.bring_to_top)
     menu.addAction(action_dim)
@@ -850,9 +751,6 @@ def streamdeck_attached(ui, deck: Dict):
         ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
     finally:
         blocker.unblock()
-        # REVIEW: Does dimmer belong in UI layer? Seems like API logic.
-    dimmers[serial_number] = Dimmer(api.get_display_timeout(serial_number), api.get_brightness(serial_number), api.get_brightness_dimmed(serial_number), partial(change_brightness, serial_number))
-    dimmers[serial_number].reset()
     build_device(ui)
 
 
@@ -861,9 +759,6 @@ def streamdeck_detatched(ui, serial_number):
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
         # Check anyways
-        dimmer = dimmers[serial_number]
-        dimmer.stop()
-        del dimmers[serial_number]
         ui.device_list.removeItem(index)
 
 
