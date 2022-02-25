@@ -33,29 +33,52 @@ class StreamDeckSignalEmitter(QObject):
 
 
 class StreamDeckServer:
+    """A StreamDeckServer represents the core server logic for interacting and
+    managing multiple Stream Decks.
+    """
+
     def __init__(self) -> None:
 
         self.decks: Dict[str, StreamDeck.StreamDeck] = {}
+        "Lookup with serial number -> StreamDeck"
 
         self.deck_ids: Dict[str, str] = {}
-        # Keep track of device.id -> Serial Number
+        "Lookup with device.id -> serial number"
 
         self.state: Dict[str, Dict[str, Union[int, str, Dict[int, Dict[int, Dict[str, str]]]]]] = {}
+        "The data structure holding configuration for all Stream Decks"
+
+        # REVIEW: Should we use the same lock as the display? What exactly
+        # are we protecting? The UI is signaled via message passing.
         self.key_event_lock = threading.Lock()
+        "Lock to serialize key press events"
 
         self.display_handlers: Dict[str, DisplayGrid] = {}
+        "Lookup with a display handler for each Stream Deck"
 
         self.lock: threading.Lock = threading.Lock()
+        "Lock to coordinate polling, updates etc to Stream Decks"
 
         self.dimmers: Dict[str, Dimmer] = {}
+        "Lookup with the dimmer for each Stream Deck"
 
+        # REVIEW: Should we just create one signal emitter for
+        # plug events and key signals?
         self.streamdeck_keys = KeySignalEmitter()
+        "Use the connect method on the key_pressed signal to subscribe"
 
         self.plugevents = StreamDeckSignalEmitter()
+        "Use the connect method on the attached and detatched methods to subscribe"
 
         self.monitor: Optional[StreamDeckMonitor] = None
+        "Monitors for Stream Deck(s) attached to the computer"
 
     def stop_dimmer(self, serial_number: str) -> None:
+        """Stops the dimmer for the given Stream Deck
+
+        :param serial_number: The Stream Deck serial number.
+        :type serial_number: str
+        """
         self.dimmers[serial_number].stop()
 
     def reset_dimmer(self, serial_number: str) -> bool:
@@ -86,6 +109,13 @@ class StreamDeckServer:
                 dimmer.dim(True)
 
     def cpu_usage_callback(self, serial_number: str, cpu_usage: int):
+        """An internal method that takes emits a signal on a QObject.
+
+        :param serial_number: The Stream Deck serial number
+        :type serial_number: str
+        :param cpu_usage: The current CPU usage
+        :type cpu_usage: int
+        """
         self.plugevents.cpu_changed.emit(serial_number, cpu_usage)
 
     def _key_change_callback(self, deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
