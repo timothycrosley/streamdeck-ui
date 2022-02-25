@@ -9,6 +9,7 @@ from typing import Dict, Optional
 
 import pkg_resources
 from pynput.keyboard import Controller, Key
+from pynput import keyboard
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
@@ -140,7 +141,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         if api.reset_dimmer(deck_id):
             return
 
-        keyboard = Controller()
+        kb = Controller()
         page = api.get_page(deck_id)
 
         command = api.get_button_command(deck_id, page, key)
@@ -181,21 +182,28 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                                 print(f"Could not sleep with provided sleep time '{sleep_time}'")
                     else:
                         try:
-                            keyboard.press(key_name)
+                            if isinstance(key_name, str) and key_name.startswith("0x"):
+                                kb.press(keyboard.KeyCode(int(key_name, 16)))
+                            else:
+                                kb.press(key_name)
+
                         except Exception:
                             print(f"Could not press key '{key_name}'")
 
                 for key_name in section_keys:
                     if not (isinstance(key_name, str) and key_name.startswith("delay")):
                         try:
-                            keyboard.release(key_name)
+                            if isinstance(key_name, str) and key_name.startswith("0x"):
+                                kb.release(keyboard.KeyCode(int(key_name, 16)))
+                            else:
+                                kb.release(key_name)
                         except Exception:
                             print(f"Could not release key '{key_name}'")
 
         write = api.get_button_write(deck_id, page, key)
         if write:
             try:
-                keyboard.type(write)
+                kb.type(write)
             except Exception as error:
                 print(f"Could not complete the write command: {error}")
 
