@@ -203,8 +203,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         if brightness_change:
             try:
                 api.change_brightness(deck_id, brightness_change)
-                # dimmers[deck_id].brightness = api.get_brightness(deck_id)
-                # api.reset_dimmer(deck_id)
             except Exception as error:
                 print(f"Could not change brightness: {error}")
 
@@ -345,8 +343,6 @@ def redraw_buttons(ui) -> None:
 def set_brightness(ui, value: int) -> None:
     deck_id = _deck_id(ui)
     api.set_brightness(deck_id, value)
-    # dimmers[deck_id].brightness = value
-    # api.reset_dimmer(deck_id)
 
 
 def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
@@ -407,7 +403,7 @@ def reset_button_configuration(ui):
 
 
 def browse_documentation():
-    url = QUrl("https://timothycrosley.github.io/streamdeck-ui")
+    url = QUrl("https://github.com/timothycrosley/streamdeck-ui#readme")
     QDesktopServices.openUrl(url)
 
 
