@@ -16,7 +16,8 @@ class Dimmer:
         self.brightness_dimmed = brightness_dimmed
         self.brightness_callback = brightness_callback
         self.__stopped = False
-        self.__dimmed = False
+        self.dimmed = False
+        "True if the Stream Deck is dimmed, False otherwise"
         self.__timer = None
 
     def stop(self) -> None:
@@ -46,9 +47,9 @@ class Dimmer:
             self.__timer = threading.Timer(self.timeout, self.dim)
             self.__timer.start()
 
-        if self.__dimmed:
+        if self.dimmed:
             self.brightness_callback(self.brightness)
-            self.__dimmed = False
+            self.dimmed = False
             if self.brightness_dimmed < 20:
                 # The screen was "too dark" so reset and let caller know
                 return True
@@ -63,7 +64,7 @@ class Dimmer:
         if self.__stopped:
             return
 
-        if toggle and self.__dimmed:
+        if toggle and self.dimmed:
             # Don't dim
             self.reset()
         elif self.__timer:
@@ -72,4 +73,4 @@ class Dimmer:
             self.__timer = None
 
             self.brightness_callback(self.brightness_dimmed)
-            self.__dimmed = True
+            self.dimmed = True

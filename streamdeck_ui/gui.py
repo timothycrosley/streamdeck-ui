@@ -720,7 +720,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
 
     menu = QMenu()
     action_dim = QAction("Dim display (toggle)", main_window)
-    action_dim.triggered.connect(toggle_dim_all())
+    action_dim.triggered.connect(toggle_dim_all)
     action_configure = QAction("Configure...", main_window)
     action_configure.triggered.connect(main_window.bring_to_top)
     menu.addAction(action_dim)

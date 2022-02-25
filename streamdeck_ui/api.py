@@ -98,7 +98,7 @@ class StreamDeckServer:
         """
         at_least_one: bool = False
         for _serial_number, dimmer in self.dimmers.items():
-            if dimmer.brightness != dimmer.brightness_dimmed:
+            if not dimmer.dimmed:
                 at_least_one = True
                 break
 
