@@ -24,7 +24,7 @@ Change log
 - Keys widget now has examples built in.
 - Help menu with links to websites.
 - About dialog shows application version and primary dependency versions.
-- Support hex key codes in Key Press
+- Support hex key codes in Key Press. For example, 0x74.
 - New display system:
     - User interface shows same image as Stream Deck.
     - Text overlay on top of image, with automatic font outline.
