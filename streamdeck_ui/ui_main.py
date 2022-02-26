@@ -71,16 +71,30 @@ class Ui_MainWindow(object):
 
         self.deviceSettings_horizontalLayout.addWidget(self.settingsButton)
 
+        self.cpu_usage = QProgressBar(self.centralwidget)
+        self.cpu_usage.setObjectName(u"cpu_usage")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.cpu_usage.sizePolicy().hasHeightForWidth())
+        self.cpu_usage.setSizePolicy(sizePolicy1)
+        self.cpu_usage.setMaximumSize(QSize(25, 25))
+        self.cpu_usage.setMaximum(130)
+        self.cpu_usage.setValue(0)
+        self.cpu_usage.setOrientation(Qt.Vertical)
+
+        self.deviceSettings_horizontalLayout.addWidget(self.cpu_usage)
+
 
         self.left_verticalLayout.addLayout(self.deviceSettings_horizontalLayout)
 
         self.pages = QTabWidget(self.centralwidget)
         self.pages.setObjectName(u"pages")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.pages.sizePolicy().hasHeightForWidth())
-        self.pages.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.pages.sizePolicy().hasHeightForWidth())
+        self.pages.setSizePolicy(sizePolicy2)
         self.pages.setAutoFillBackground(False)
         self.pages.setStyleSheet(u"b")
         self.page_1 = QWidget()
@@ -164,11 +178,11 @@ class Ui_MainWindow(object):
 
         self.removeButton = QPushButton(self.groupBox)
         self.removeButton.setObjectName(u"removeButton")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
-        self.removeButton.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
+        self.removeButton.setSizePolicy(sizePolicy3)
         self.removeButton.setMaximumSize(QSize(30, 16777215))
         icon1 = QIcon()
         icon1.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -183,11 +197,6 @@ class Ui_MainWindow(object):
         self.label_2.setObjectName(u"label_2")
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
-
-        self.text = QLineEdit(self.groupBox)
-        self.text.setObjectName(u"text")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.text)
 
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
@@ -260,6 +269,26 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
 
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.text = QLineEdit(self.groupBox)
+        self.text.setObjectName(u"text")
+
+        self.horizontalLayout_3.addWidget(self.text)
+
+        self.textButton = QPushButton(self.groupBox)
+        self.textButton.setObjectName(u"textButton")
+        self.textButton.setMinimumSize(QSize(30, 0))
+        self.textButton.setMaximumSize(QSize(30, 16777215))
+        icon2 = QIcon()
+        icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.textButton.setIcon(icon2)
+
+        self.horizontalLayout_3.addWidget(self.textButton)
+
+
+        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
+
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
@@ -275,7 +304,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 940, 29))
+        self.menubar.setGeometry(QRect(0, 0, 940, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menubar)
@@ -284,6 +313,17 @@ class Ui_MainWindow(object):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        QWidget.setTabOrder(self.device_list, self.settingsButton)
+        QWidget.setTabOrder(self.settingsButton, self.pages)
+        QWidget.setTabOrder(self.pages, self.imageButton)
+        QWidget.setTabOrder(self.imageButton, self.removeButton)
+        QWidget.setTabOrder(self.removeButton, self.text)
+        QWidget.setTabOrder(self.text, self.textButton)
+        QWidget.setTabOrder(self.textButton, self.command)
+        QWidget.setTabOrder(self.command, self.keys)
+        QWidget.setTabOrder(self.keys, self.switch_page)
+        QWidget.setTabOrder(self.switch_page, self.change_brightness)
+        QWidget.setTabOrder(self.change_brightness, self.write)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -313,6 +353,7 @@ class Ui_MainWindow(object):
         self.actionGithub.setText(QCoreApplication.translate("MainWindow", u"Github", None))
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About...", None))
         self.settingsButton.setText("")
+        self.cpu_usage.setFormat("")
         self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"Page 1", None))
         self.pages.setTabText(self.pages.indexOf(self.page_2), QCoreApplication.translate("MainWindow", u"2", None))
         self.pages.setTabText(self.pages.indexOf(self.page_3), QCoreApplication.translate("MainWindow", u"3", None))
@@ -337,6 +378,10 @@ class Ui_MainWindow(object):
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
+#if QT_CONFIG(tooltip)
+        self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
+#endif // QT_CONFIG(tooltip)
+        self.textButton.setText("")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi

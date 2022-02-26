@@ -16,13 +16,22 @@ OR
 
 Change log
 ==========
-## 1.1.4 - TBD
+## 2.0.3 - TBD
 
 ### Features
+- UI starts up even if no Stream Deck attached.
 - SVG file type support.
 - Keys widget now has examples built in.
 - Help menu with links to websites.
 - About dialog shows application version and primary dependency versions.
+- Support hex key codes in Key Press. For example, 0x74.
+- Support vertical text alignment.
+- New display system:
+    - User interface shows same image as Stream Deck.
+    - Text overlay on top of image, with automatic font outline.
+    - Buttons image change when pressed (visual feedback).
+    - Animated GIF support.
+    - CPU indicator for display processing.
 
 ### Fixes
 - Tray context menu not interrupted by window activation.
