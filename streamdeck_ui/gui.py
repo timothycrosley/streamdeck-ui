@@ -304,9 +304,8 @@ def change_page(ui, page: int) -> None:
 def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
-    image_file = ""
-    if not image:
+    image_file = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
+    if not image_file:
         if not last_image_dir:
             image_file = os.path.expanduser("~")
         else:

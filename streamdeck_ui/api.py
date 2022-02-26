@@ -348,7 +348,7 @@ class StreamDeckServer:
             return QPixmap(qt_image)
         return None
 
-    def get_button_icon(self, deck_id: str, page: int, button: int) -> Optional[QPixmap]:
+    def get_button_icon(self, deck_id: str, page: int, button: int) -> str:
         """Returns the icon path for the specified button"""
         return self._button_state(deck_id, page, button).get("icon", "")
 
