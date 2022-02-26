@@ -1,6 +1,8 @@
 import threading
 from typing import Callable, Optional
 
+from StreamDeck.Transport.Transport import TransportError
+
 
 class Dimmer:
     def __init__(self, timeout: int, brightness: int, brightness_dimmed: int, brightness_callback: Callable[[int], None]):
@@ -29,8 +31,10 @@ class Dimmer:
 
         try:
             self.brightness_callback(self.brightness)
-        except Exception:
+        except KeyError:
             # During detach cleanup, this is likely to happen
+            pass
+        except TransportError:
             pass
         self.__stopped = True
 
