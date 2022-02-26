@@ -20,7 +20,7 @@ from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
-api : StreamDeckServer = None
+api : StreamDeckServer
 
 BUTTON_STYLE = """
     QToolButton {
@@ -320,7 +320,7 @@ def select_image(window) -> None:
 
 def align_text_vertical(window) -> None:
     serial_number = _deck_id(window.ui)
-    position = api.get_text_vertical_align(serial_number, _page(window.ui), selected_button.index)
+    position = api.get_text_vertical_align(serial_number, _page(window.ui), selected_button.index)  # type: ignore # Index property added
     if position == "bottom" or position == "":
         position = "middle-bottom"
     elif position == "middle-bottom":
@@ -332,7 +332,7 @@ def align_text_vertical(window) -> None:
     else:
         position = ""
 
-    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index, position)
+    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index, position)  # type: ignore # Index property added
     redraw_buttons(window.ui)
 
 

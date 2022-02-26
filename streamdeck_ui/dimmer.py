@@ -1,9 +1,9 @@
 import threading
-from typing import Callable
+from typing import Callable, Optional
 
 
 class Dimmer:
-    def __init__(self, timeout: int = 0, brightness: int = -1, brightness_dimmed: int = -1, brightness_callback: Callable[[int], None] = None):
+    def __init__(self, timeout: int, brightness: int , brightness_dimmed: int, brightness_callback: Callable[[int], None]):
         """Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.
@@ -18,7 +18,7 @@ class Dimmer:
         self.__stopped = False
         self.dimmed = False
         "True if the Stream Deck is dimmed, False otherwise"
-        self.__timer = None
+        self.__timer: Optional[threading.Timer] = None
 
     def stop(self) -> None:
         """Stops the dimmer and sets the brightness back to normal. Call
