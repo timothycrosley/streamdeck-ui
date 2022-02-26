@@ -182,7 +182,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                                 print(f"Could not sleep with provided sleep time '{sleep_time}'")
                     else:
                         try:
-                            if isinstance(key_name, str) and key_name.startswith("0x"):
+                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
                                 kb.press(keyboard.KeyCode(int(key_name, 16)))
                             else:
                                 kb.press(key_name)
@@ -193,7 +193,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 for key_name in section_keys:
                     if not (isinstance(key_name, str) and key_name.startswith("delay")):
                         try:
-                            if isinstance(key_name, str) and key_name.startswith("0x"):
+                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
                                 kb.release(keyboard.KeyCode(int(key_name, 16)))
                             else:
                                 kb.release(key_name)
