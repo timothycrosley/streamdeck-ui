@@ -29,7 +29,7 @@ class Dimmer:
 
         try:
             self.brightness_callback(self.brightness)
-        except KeyError:
+        except Exception:
             # During detach cleanup, this is likely to happen
             pass
         self.__stopped = True
