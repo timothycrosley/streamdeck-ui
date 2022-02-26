@@ -135,6 +135,11 @@ bash -c "wmctrl -a firefox  && xdotool key alt+1"
 ### Press Keys
 Simulates key press combinations (hot keys). The basic format is a group of keys, separated by a `+` sign to press simultaneously. Separate key combination groups with a `,` if additional key combinations are needed. For example, `alt+F4,f` means press and hold `alt`, followed by `F4` and then release both. Next, press and release `f`. 
 
+You can also specify a KeyCode in hex format, for example, `0x74` is the KeyCode for `t`. This is also sometimes called the keysym value.
+
+> You can use the `xev` tool and capture the key you are looking for.
+> In the output, look for the **keysym hex value**, for example `(keysym 0x74, t)`
+>
 > Use `comma` or `plus` if you want to actually *output* `,` or `+` respectively.
 > 
 > Use `delay <n>` to add a delay, where `<n>` is the number (float or integer) of seconds to delay. If `<n>` is not specified, 0.5 second default is used. If `<n>` fails to parse as a valid number, it will result in no delay.
@@ -150,6 +155,9 @@ Simulates key press combinations (hot keys). The basic format is a group of keys
 - `1,delay,delay,2,delay,delay,3` - Type 123 with a 1-second delay between key presses (using default delay).
 - `1,delay 1,2,delay 1,3` - Type 123 with a 1-second delay between key presses (using custom delay).
 - `e,c,h,o,space,",t,e,s,t,",enter` - Type `echo "test"` and press enter.
+- `ctrl+alt+0x74` - Opens a new terminal window. `0x74` is the KeyCode for `t`. TIP: If the character doesn't work, try using the KeyCode instead.
+- `0xffe5` - Toggle Caps Lock.
+- `0xffaf` - The `/` key on the numeric key pad.
 
 The standard list of keys can be found [at the source](https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key).
 
@@ -177,8 +185,6 @@ Confirm you are running the latest release with `pip3 show streamdeck-ui`. Compa
 
 - Streamdeck uses [pynput](https://github.com/moses-palmer/pynput) for simulating **Key Presses** but it lacks proper [support for Wayland](https://github.com/moses-palmer/pynput/issues/189). Generally your results will be good when using X (Ubuntu/Linux Mint). [This thread](https://github.com/timothycrosley/streamdeck-ui/issues/47) may be useful.
 - **Key Press** or **Write Text** does not work on Fedora (outside of the streamdeck itself), which is not particularly useful. However, still do a lot with the **Command** feature.
-- On Ubuntu, the **Key Press** `ctrl+alt+t` [doesn't work](https://github.com/moses-palmer/pynput/issues/333
-). However using the **Command** `gnome-terminal` achieves the same result.
 - Version [1.0.2](https://pypi.org/project/streamdeck-ui/) lacks error handling when executing **Command** and **Key Press** actions. As a result, you have to be careful - an invalid command or key press makes everything else also stop working.  Please upgrade to the latest version.
 - Some users have reported that the Stream Deck device does not work on all on specific USB ports, as it draws quite a bit of power and/or has [strict bandwidth requirements](https://github.com/timothycrosley/streamdeck-ui/issues/69#issuecomment-715887397). Try a different port.
 - If you are executing a shell script from the Command feature - remember to add the shebang at the top of your file, for the language in question. `#!/bin/bash` or `#!/usr/bin/python3` etc. The streamdeck may appear to lock up if you don't under some distros.
