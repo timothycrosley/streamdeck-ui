@@ -8,8 +8,8 @@ from subprocess import Popen  # nosec - Need to allow users to specify arbitrary
 from typing import Dict, Optional
 
 import pkg_resources
-from pynput.keyboard import Controller, Key
 from pynput import keyboard
+from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
@@ -20,7 +20,7 @@ from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
-api : StreamDeckServer
+api: StreamDeckServer
 
 BUTTON_STYLE = """
     QToolButton {

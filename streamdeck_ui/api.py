@@ -187,10 +187,11 @@ class StreamDeckServer:
         self.update_streamdeck_filters(serial_number)
 
         self.dimmers[serial_number] = Dimmer(
-                                    self.get_display_timeout(serial_number),
-                                    self.get_brightness(serial_number),
-                                    self.get_brightness_dimmed(serial_number),
-                                    lambda brightness: self.decks[serial_number].set_brightness(brightness))
+            self.get_display_timeout(serial_number),
+            self.get_brightness(serial_number),
+            self.get_brightness_dimmed(serial_number),
+            lambda brightness: self.decks[serial_number].set_brightness(brightness),
+        )
         self.dimmers[serial_number].reset()
 
         self.plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
