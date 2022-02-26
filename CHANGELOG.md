@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 2.0.0 - TBD
+## 2.0.3 - TBD
 
 ### Features
 - UI starts up even if no Stream Deck attached.
@@ -25,6 +25,7 @@ Change log
 - Help menu with links to websites.
 - About dialog shows application version and primary dependency versions.
 - Support hex key codes in Key Press. For example, 0x74.
+- Support vertical text alignment.
 - New display system:
     - User interface shows same image as Stream Deck.
     - Text overlay on top of image, with automatic font outline.
