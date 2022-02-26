@@ -198,11 +198,6 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
-        self.text = QLineEdit(self.groupBox)
-        self.text.setObjectName(u"text")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.text)
-
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
 
@@ -274,6 +269,26 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
 
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.text = QLineEdit(self.groupBox)
+        self.text.setObjectName(u"text")
+
+        self.horizontalLayout_3.addWidget(self.text)
+
+        self.textButton = QPushButton(self.groupBox)
+        self.textButton.setObjectName(u"textButton")
+        self.textButton.setMinimumSize(QSize(30, 0))
+        self.textButton.setMaximumSize(QSize(30, 16777215))
+        icon2 = QIcon()
+        icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.textButton.setIcon(icon2)
+
+        self.horizontalLayout_3.addWidget(self.textButton)
+
+
+        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
+
 
         self.verticalLayout_3.addLayout(self.formLayout)
 
@@ -298,6 +313,17 @@ class Ui_MainWindow(object):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        QWidget.setTabOrder(self.device_list, self.settingsButton)
+        QWidget.setTabOrder(self.settingsButton, self.pages)
+        QWidget.setTabOrder(self.pages, self.imageButton)
+        QWidget.setTabOrder(self.imageButton, self.removeButton)
+        QWidget.setTabOrder(self.removeButton, self.text)
+        QWidget.setTabOrder(self.text, self.textButton)
+        QWidget.setTabOrder(self.textButton, self.command)
+        QWidget.setTabOrder(self.command, self.keys)
+        QWidget.setTabOrder(self.keys, self.switch_page)
+        QWidget.setTabOrder(self.switch_page, self.change_brightness)
+        QWidget.setTabOrder(self.change_brightness, self.write)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -352,6 +378,10 @@ class Ui_MainWindow(object):
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
+#if QT_CONFIG(tooltip)
+        self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
+#endif // QT_CONFIG(tooltip)
+        self.textButton.setText("")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi

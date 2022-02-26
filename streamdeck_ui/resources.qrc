@@ -1,6 +1,7 @@
 <RCC>
-  <qresource prefix="icons">
-    <file>icons/cross.png</file>
-    <file>icons/gear.png</file>
-  </qresource>
+    <qresource prefix="/icons">
+        <file>icons/cross.png</file>
+        <file>icons/gear.png</file>
+        <file>icons/vertical-align.png</file>
+    </qresource>
 </RCC>

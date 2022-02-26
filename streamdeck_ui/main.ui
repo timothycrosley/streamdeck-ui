@@ -289,9 +289,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="text"/>
-             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
@@ -440,6 +437,39 @@
              <item row="6" column="1">
               <widget class="QPlainTextEdit" name="write"/>
              </item>
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLineEdit" name="text"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="textButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Text vertical alignment</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/icons/icons/vertical-align.png</normaloff>:/icons/icons/vertical-align.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </item>
           </layout>
@@ -513,6 +543,20 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>device_list</tabstop>
+  <tabstop>settingsButton</tabstop>
+  <tabstop>pages</tabstop>
+  <tabstop>imageButton</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>text</tabstop>
+  <tabstop>textButton</tabstop>
+  <tabstop>command</tabstop>
+  <tabstop>keys</tabstop>
+  <tabstop>switch_page</tabstop>
+  <tabstop>change_brightness</tabstop>
+  <tabstop>write</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

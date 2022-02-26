@@ -295,6 +295,39 @@ class StreamDeckServer:
             display_handler = self.display_handlers[deck_id]
             display_handler.synchronize()
 
+    def get_text_vertical_align(self, serial_number: str, page: int, button: int) -> str:
+        """Gets the vertical text alignment. Values are bottom, middle-bottom, middle, middle-top, top
+
+        :param serial_number: The Stream Deck serial number.
+        :type serial_number: str
+        :param page: The page the button is on
+        :type page: int
+        :param button: The button index
+        :type button: int
+        :return: The vertical alignment setting
+        :rtype: str
+        """
+        return self._button_state(serial_number, page, button).get("text_vertical_align", "")
+
+    def set_text_vertical_align(self, serial_number: str, page: int, button: int, alignment: str) -> None:
+        """Gets the vertical text alignment. Values are top, middle, bottom
+
+        :param serial_number: The Stream Deck serial number.
+        :type serial_number: str
+        :param page: The page the button is on
+        :type page: int
+        :param button: The button index
+        :type button: int
+        :return: The vertical alignment setting
+        :rtype: str
+        """
+        if self.get_text_vertical_align(serial_number, page, button) != alignment:
+            self._button_state(serial_number, page, button)["text_vertical_align"] = alignment
+            self._save_state()
+            self.update_button_filters(serial_number, page, button)
+            display_handler = self.display_handlers[serial_number]
+            display_handler.synchronize()
+
     def get_button_icon_pixmap(self, deck_id: str, page: int, button: int) -> Optional[QPixmap]:
         """Returns the QPixmap value for the given button (streamdeck, page, button)
 
@@ -473,8 +506,9 @@ class StreamDeckServer:
 
         text = button_settings.get("text")
         font = button_settings.get("font", DEFAULT_FONT)
+        vertical_align = button_settings.get("text_vertical_align", "")
 
         if text:
-            filters.append(TextFilter(text, font))
+            filters.append(TextFilter(text, font, vertical_align))
 
         display_handler.replace(page, button, filters)
