@@ -516,12 +516,14 @@ def build_device(ui, _device_index=None) -> None:
         build_buttons(ui, page)
 
     if ui.device_list.count() > 0:
+        ui.settingsButton.setEnabled(True)
         # Set the active page for this device
         ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
         # Draw the buttons for the active page
         redraw_buttons(ui)
     else:
+        ui.settingsButton.setEnabled(False)
         reset_button_configuration(ui)
 
 
@@ -698,6 +700,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.actionAbout.triggered.connect(main_window.about_dialog)
     ui.actionDocs.triggered.connect(browse_documentation)
     ui.actionGithub.triggered.connect(browse_github)
+    ui.settingsButton.setEnabled(False)
     enable_button_configuration(ui, False)
     return main_window
 
