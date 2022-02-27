@@ -234,241 +234,173 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Image:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <property name="spacing">
-                <number>6</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="imageButton">
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <property name="leftMargin">
+              <number>6</number>
+             </property>
+             <property name="topMargin">
+              <number>6</number>
+             </property>
+             <property name="rightMargin">
+              <number>6</number>
+             </property>
+             <property name="bottomMargin">
+              <number>6</number>
+             </property>
+             <item>
+              <layout class="QFormLayout" name="formLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Image...</string>
+                  <string>Image:</string>
                  </property>
                 </widget>
                </item>
-               <item>
-                <widget class="QPushButton" name="removeButton">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item row="0" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <property name="spacing">
+                  <number>6</number>
                  </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Remove the image from the button</string>
-                 </property>
+                 <item>
+                  <widget class="QPushButton" name="imageButton">
+                   <property name="text">
+                    <string>Image...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="removeButton">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Remove the image from the button</string>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/icons/icons/cross.png</normaloff>:/icons/icons/cross.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="resources.qrc">
-                   <normaloff>:/icons/icons/cross.png</normaloff>:/icons/icons/cross.png</iconset>
+                  <string>Label:</string>
                  </property>
                 </widget>
+               </item>
+               <item row="1" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                 <item>
+                  <widget class="QLineEdit" name="text"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="textButton">
+                   <property name="minimumSize">
+                    <size>
+                     <width>30</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Text vertical alignment</string>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/icons/icons/vertical-align.png</normaloff>:/icons/icons/vertical-align.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Actions:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout">
+                 <item>
+                  <widget class="QPushButton" name="pushButton_2">
+                   <property name="text">
+                    <string>Add action...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_3">
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/icons/icons/cross.png</normaloff>:/icons/icons/cross.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>Text:</string>
+             <item>
+              <widget class="QTreeWidget" name="actions">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
                </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Command:</string>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
                </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="command"/>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Press Keys:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QComboBox" name="keys">
-               <property name="editable">
+               <property name="headerHidden">
                 <bool>true</bool>
                </property>
-               <item>
+               <column>
                 <property name="text">
-                 <string notr="true"/>
+                 <string>New Column</string>
                 </property>
-               </item>
-               <item>
+               </column>
+               <column>
                 <property name="text">
-                 <string notr="true">F11</string>
+                 <string>New Column</string>
                 </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">alt+F4</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">ctrl+w</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">cmd+left</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">alt+plus</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">alt+delay+F3</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">backspace</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">right</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">page_up</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_volume_up</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_volume_down</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_volume_mute</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_previous</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_next</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string notr="true">media_play_pause</string>
-                </property>
-               </item>
+               </column>
               </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Switch Page:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="switch_page">
-               <property name="minimum">
-                <number>0</number>
-               </property>
-               <property name="maximum">
-                <number>10</number>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>Brightness +/-:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1">
-              <widget class="QSpinBox" name="change_brightness">
-               <property name="minimum">
-                <number>-99</number>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Write Text:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QPlainTextEdit" name="write"/>
-             </item>
-             <item row="1" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <item>
-                <widget class="QLineEdit" name="text"/>
-               </item>
-               <item>
-                <widget class="QPushButton" name="textButton">
-                 <property name="minimumSize">
-                  <size>
-                   <width>30</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Text vertical alignment</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="resources.qrc">
-                   <normaloff>:/icons/icons/vertical-align.png</normaloff>:/icons/icons/vertical-align.png</iconset>
-                 </property>
-                </widget>
-               </item>
-              </layout>
              </item>
             </layout>
            </item>
@@ -551,11 +483,6 @@
   <tabstop>removeButton</tabstop>
   <tabstop>text</tabstop>
   <tabstop>textButton</tabstop>
-  <tabstop>command</tabstop>
-  <tabstop>keys</tabstop>
-  <tabstop>switch_page</tabstop>
-  <tabstop>change_brightness</tabstop>
-  <tabstop>write</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

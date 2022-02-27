@@ -13,7 +13,7 @@ from pynput.keyboard import Controller, Key
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
-from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -372,9 +372,7 @@ def set_brightness(ui, value: int) -> None:
 
 def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
     deck_id = _deck_id(ui)
-    # TODO: Verify this is correct. Looks like it was a bug in the MR
     api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
-    # dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
     api.reset_dimmer(deck_id)
 
 
@@ -391,12 +389,10 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     button_id = selected_button.index  # type: ignore # Index property added
     if selected_button.isChecked():  # type: ignore # False positive mypy
         enable_button_configuration(ui, True)
+
+        # Populate tree view with actions
+        build_actions(ui, deck_id, _page(ui), button_id)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
-        ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
-        ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
-        ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
-        ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
-        ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         api.reset_dimmer(deck_id)
     else:
         selected_button = None
@@ -405,11 +401,6 @@ def button_clicked(ui, clicked_button, buttons) -> None:
 
 def enable_button_configuration(ui, enabled: bool):
     ui.text.setEnabled(enabled)
-    ui.command.setEnabled(enabled)
-    ui.keys.setEnabled(enabled)
-    ui.write.setEnabled(enabled)
-    ui.change_brightness.setEnabled(enabled)
-    ui.switch_page.setEnabled(enabled)
     ui.imageButton.setEnabled(enabled)
     ui.removeButton.setEnabled(enabled)
     ui.textButton.setEnabled(enabled)
@@ -420,11 +411,7 @@ def reset_button_configuration(ui):
     there is no key selected or if there are no devices connected.
     """
     ui.text.clear()
-    ui.command.clear()
-    ui.keys.clearEditText()
-    ui.write.clear()
-    ui.change_brightness.setValue(0)
-    ui.switch_page.setValue(0)
+    ui.actions.clear()
     enable_button_configuration(ui, False)
 
 
@@ -712,11 +699,11 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     main_window = MainWindow()
     ui = main_window.ui
     ui.text.textChanged.connect(partial(queue_update_button_text, ui))
-    ui.command.textChanged.connect(partial(update_button_command, ui))
-    ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
-    ui.write.textChanged.connect(partial(update_button_write, ui))
-    ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
-    ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
+    # ui.command.textChanged.connect(partial(update_button_command, ui))
+    # ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
+    # ui.write.textChanged.connect(partial(update_button_write, ui))
+    # ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
+    # ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.textButton.clicked.connect(partial(align_text_vertical, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
@@ -789,6 +776,52 @@ def streamdeck_detatched(ui, serial_number):
         # Should not be (how can you remove a device that was never attached?)
         # Check anyways
         ui.device_list.removeItem(index)
+
+
+def build_actions(ui, serial_number: str, page: int, button_id: int):
+    ui.actions.clear()
+    key_pressed = QTreeWidgetItem(["When key pressed:"])
+
+    icon = QIcon()
+    icon.addFile(u":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
+    key_pressed.setIcon(0, icon)
+    key_pressed.setExpanded(True)
+
+    # tree_item = QTreeWidgetItem([command])
+    # tree_item.setIcon(0, action.get_icon())
+    # key_pressed.addChild(tree_item)
+    # tree_item.setData(0, Qt.UserRole, action)
+
+    command = api.get_button_command(serial_number, page, button_id)
+    if command:
+        tree_item = QTreeWidgetItem(["Command", command])
+        key_pressed.addChild(tree_item)
+
+    keys = api.get_button_keys(serial_number, page, button_id)
+    if keys:
+        tree_item = QTreeWidgetItem(["Press keys", keys])
+        key_pressed.addChild(tree_item)
+
+    write = api.get_button_write(serial_number, page, button_id)
+    if write:
+        tree_item = QTreeWidgetItem(["Write", write])
+        key_pressed.addChild(tree_item)
+
+    brightness = api.get_button_change_brightness(serial_number, page, button_id)
+    if brightness:
+        tree_item = QTreeWidgetItem(["Change brightness", str(brightness)])
+        key_pressed.addChild(tree_item)
+
+    switch = api.get_button_switch_page(serial_number, page, button_id)
+    if switch:
+        tree_item = QTreeWidgetItem(["Switch to page", str(switch)])
+        key_pressed.addChild(tree_item)
+
+    # ui.tree.itemClicked.connect(self.load_plugin_ui)
+    ui.actions.addTopLevelItem(key_pressed)
+    ui.actions.expandAll()
+    ui.actions.resizeColumnToContents(0)
+    ui.actions.resizeColumnToContents(1)
 
 
 def start(_exit: bool = False) -> None:

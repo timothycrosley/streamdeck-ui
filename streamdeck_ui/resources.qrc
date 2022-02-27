@@ -3,5 +3,6 @@
         <file>icons/cross.png</file>
         <file>icons/gear.png</file>
         <file>icons/vertical-align.png</file>
+        <file>icons/keyboard-enter.png</file>
     </qresource>
 </RCC>

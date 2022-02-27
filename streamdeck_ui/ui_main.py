@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from  . import resources_rc
 
@@ -161,6 +161,9 @@ class Ui_MainWindow(object):
         self.groupBox.setMinimumSize(QSize(250, 0))
         self.verticalLayout_3 = QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(6, 6, 6, 6)
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.label = QLabel(self.groupBox)
@@ -198,77 +201,6 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
-        self.label_3 = QLabel(self.groupBox)
-        self.label_3.setObjectName(u"label_3")
-
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
-
-        self.command = QLineEdit(self.groupBox)
-        self.command.setObjectName(u"command")
-
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.command)
-
-        self.label_5 = QLabel(self.groupBox)
-        self.label_5.setObjectName(u"label_5")
-
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_5)
-
-        self.keys = QComboBox(self.groupBox)
-        self.keys.addItem(u"")
-        self.keys.addItem(u"F11")
-        self.keys.addItem(u"alt+F4")
-        self.keys.addItem(u"ctrl+w")
-        self.keys.addItem(u"cmd+left")
-        self.keys.addItem(u"alt+plus")
-        self.keys.addItem(u"alt+delay+F3")
-        self.keys.addItem(u"backspace")
-        self.keys.addItem(u"right")
-        self.keys.addItem(u"page_up")
-        self.keys.addItem(u"media_volume_up")
-        self.keys.addItem(u"media_volume_down")
-        self.keys.addItem(u"media_volume_mute")
-        self.keys.addItem(u"media_previous")
-        self.keys.addItem(u"media_next")
-        self.keys.addItem(u"media_play_pause")
-        self.keys.setObjectName(u"keys")
-        self.keys.setEditable(True)
-
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
-
-        self.label_8 = QLabel(self.groupBox)
-        self.label_8.setObjectName(u"label_8")
-
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_8)
-
-        self.switch_page = QSpinBox(self.groupBox)
-        self.switch_page.setObjectName(u"switch_page")
-        self.switch_page.setMinimum(0)
-        self.switch_page.setMaximum(10)
-        self.switch_page.setValue(0)
-
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.switch_page)
-
-        self.label_7 = QLabel(self.groupBox)
-        self.label_7.setObjectName(u"label_7")
-
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_7)
-
-        self.change_brightness = QSpinBox(self.groupBox)
-        self.change_brightness.setObjectName(u"change_brightness")
-        self.change_brightness.setMinimum(-99)
-
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.change_brightness)
-
-        self.label_6 = QLabel(self.groupBox)
-        self.label_6.setObjectName(u"label_6")
-
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
-
-        self.write = QPlainTextEdit(self.groupBox)
-        self.write.setObjectName(u"write")
-
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
-
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.text = QLineEdit(self.groupBox)
@@ -289,8 +221,41 @@ class Ui_MainWindow(object):
 
         self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
 
+        self.label_3 = QLabel(self.groupBox)
+        self.label_3.setObjectName(u"label_3")
 
-        self.verticalLayout_3.addLayout(self.formLayout)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.pushButton_2 = QPushButton(self.groupBox)
+        self.pushButton_2.setObjectName(u"pushButton_2")
+
+        self.horizontalLayout.addWidget(self.pushButton_2)
+
+        self.pushButton_3 = QPushButton(self.groupBox)
+        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.pushButton_3.setMaximumSize(QSize(30, 16777215))
+        self.pushButton_3.setIcon(icon1)
+
+        self.horizontalLayout.addWidget(self.pushButton_3)
+
+
+        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout)
+
+
+        self.verticalLayout_4.addLayout(self.formLayout)
+
+        self.actions = QTreeWidget(self.groupBox)
+        self.actions.setObjectName(u"actions")
+        self.actions.setMinimumSize(QSize(0, 0))
+        self.actions.setIconSize(QSize(24, 24))
+        self.actions.setHeaderHidden(True)
+
+        self.verticalLayout_4.addWidget(self.actions)
+
+
+        self.verticalLayout_3.addLayout(self.verticalLayout_4)
 
 
         self.right_horizontalLayout.addWidget(self.groupBox)
@@ -319,11 +284,6 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.imageButton, self.removeButton)
         QWidget.setTabOrder(self.removeButton, self.text)
         QWidget.setTabOrder(self.text, self.textButton)
-        QWidget.setTabOrder(self.textButton, self.command)
-        QWidget.setTabOrder(self.command, self.keys)
-        QWidget.setTabOrder(self.keys, self.switch_page)
-        QWidget.setTabOrder(self.switch_page, self.change_brightness)
-        QWidget.setTabOrder(self.change_brightness, self.write)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -372,16 +332,16 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.removeButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
-
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
 #if QT_CONFIG(tooltip)
         self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
 #endif // QT_CONFIG(tooltip)
         self.textButton.setText("")
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Actions:", None))
+        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Add action...", None))
+        self.pushButton_3.setText("")
+        ___qtreewidgetitem = self.actions.headerItem()
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"New Column", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"New Column", None));
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
