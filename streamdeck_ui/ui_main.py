@@ -331,7 +331,7 @@ class Ui_MainWindow(object):
         self.removeButton.setToolTip(QCoreApplication.translate("MainWindow", u"Remove the image from the button", None))
 #endif // QT_CONFIG(tooltip)
         self.removeButton.setText("")
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Label:", None))
 #if QT_CONFIG(tooltip)
         self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
 #endif // QT_CONFIG(tooltip)

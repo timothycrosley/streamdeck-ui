@@ -1,4 +1,6 @@
 """Defines the QT powered interface for configuring Stream Decks"""
+import importlib
+import inspect
 import os
 import shlex
 import sys
@@ -14,6 +16,7 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem
+from streamdeck_ui.actions.stream_deck_action import StreamDeckAction
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -55,6 +58,7 @@ text_update_timer: Optional[QTimer] = None
 dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900, "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
 last_image_dir = ""
 
+plugins = []
 
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
@@ -824,8 +828,32 @@ def build_actions(ui, serial_number: str, page: int, button_id: int):
     ui.actions.resizeColumnToContents(1)
 
 
+def load_plugins():
+    # __file__ is the path the the current module (including file name)
+    plugins = []
+    current_path = os.path.dirname(os.path.realpath(__file__))
+    plugin_path = os.path.join(current_path, "actions")
+
+    for sub_folder_root, _folder_in_folder, files in os.walk(plugin_path):
+        for file in files:
+            if os.path.basename(file).endswith("py"):
+                # Import the relevant module (note: a module does not end with .py)
+                module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
+                module_name = module_path.replace(os.path.sep, '.')
+                module_name = module_name[module_name.find("streamdeck_ui"):]
+                module = importlib.import_module(module_name)
+
+                # Look for classes that implements Plugin class
+                for name in dir(module):
+                    obj = getattr(module, name)
+                    if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
+                        plugins.append(obj())
+    return plugins
+
+
 def start(_exit: bool = False) -> None:
     global api
+    global plugins
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")
@@ -844,6 +872,8 @@ def start(_exit: bool = False) -> None:
     api = StreamDeckServer()
     if os.path.isfile(STATE_FILE):
         api.open_config(STATE_FILE)
+
+    plugins = load_plugins()
 
     # The QApplication object holds the Qt event loop and you need one of these
     # for your application
