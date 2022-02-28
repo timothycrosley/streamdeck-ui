@@ -4,5 +4,8 @@
         <file>icons/gear.png</file>
         <file>icons/vertical-align.png</file>
         <file>icons/keyboard-enter.png</file>
+        <file>icons/up.png</file>
+        <file>icons/down.png</file>
+        <file>icons/plus.png</file>
     </qresource>
 </RCC>
