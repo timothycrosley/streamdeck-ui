@@ -27,13 +27,13 @@ api: StreamDeckServer
 
 BUTTON_STYLE = """
     QToolButton {
-    margin: 0px;
+    margin: 2px;
     border: 2px solid #444444;
     border-radius: 8px;
     background-color: #000000;
     border-style: outset;}
     QToolButton:checked {
-    margin: 0px;
+    margin: 2px;
     border: 2px solid #cccccc;
     border-radius: 8px;
     background-color: #000000;
@@ -42,7 +42,7 @@ BUTTON_STYLE = """
 
 BUTTON_DRAG_STYLE = """
     QToolButton {
-    margin: 0px;
+    margin: 2px;
     border: 2px solid #999999;
     border-radius: 8px;
     background-color: #000000;
