@@ -27,13 +27,13 @@ api: StreamDeckServer
 
 BUTTON_STYLE = """
     QToolButton {
-    margin: 2px;
+    margin: 0px;
     border: 2px solid #444444;
     border-radius: 8px;
     background-color: #000000;
     border-style: outset;}
     QToolButton:checked {
-    margin: 2px;
+    margin: 0px;
     border: 2px solid #cccccc;
     border-radius: 8px;
     background-color: #000000;
@@ -42,7 +42,7 @@ BUTTON_STYLE = """
 
 BUTTON_DRAG_STYLE = """
     QToolButton {
-    margin: 2px;
+    margin: 0px;
     border: 2px solid #999999;
     border-radius: 8px;
     background-color: #000000;
@@ -397,7 +397,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
 
         # Populate tree view with actions
         build_actions(ui, deck_id, _page(ui), button_id)
-        ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
+        ui.text.setPlainText(api.get_button_text(deck_id, _page(ui), button_id))
         api.reset_dimmer(deck_id)
     else:
         selected_button = None
@@ -406,9 +406,14 @@ def button_clicked(ui, clicked_button, buttons) -> None:
 
 def enable_button_configuration(ui, enabled: bool):
     ui.text.setEnabled(enabled)
-    ui.imageButton.setEnabled(enabled)
-    ui.removeButton.setEnabled(enabled)
-    ui.textButton.setEnabled(enabled)
+    ui.select_image_button.setEnabled(enabled)
+    ui.remove_image_button.setEnabled(enabled)
+    ui.vertical_text_button.setEnabled(enabled)
+    ui.up_action_button.setEnabled(enabled)
+    ui.down_action_button.setEnabled(enabled)
+    ui.add_action_button.setEnabled(enabled)
+    ui.action_tree.setEnabled(enabled)
+    ui.select_action_tree.setEnabled(enabled)
 
 
 def reset_button_configuration(ui):
@@ -416,7 +421,8 @@ def reset_button_configuration(ui):
     there is no key selected or if there are no devices connected.
     """
     ui.text.clear()
-    ui.actions.clear()
+    ui.action_tree.clear()
+    ui.select_action_tree.clear()
     enable_button_configuration(ui, False)
 
 
@@ -602,7 +608,12 @@ class MainWindow(QMainWindow):
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
 
-def queue_update_button_text(ui, text: str) -> None:
+# TODO: This should be done in the API so that all saves
+# are delayed. This will allow for a more responsive
+# UI and solves the problem for all control, not just
+# this one. A parameter should be added that allows
+# a forced save (for example, on shutdown)
+def queue_update_button_text(ui) -> None:
     """Instead of directly updating the text (label) associated with
     the button, add a small delay. If this is called before the
     timer fires, delay it again. Effectively this creates an update
@@ -621,7 +632,7 @@ def queue_update_button_text(ui, text: str) -> None:
 
     text_update_timer = QTimer()
     text_update_timer.setSingleShot(True)
-    text_update_timer.timeout.connect(partial(update_button_text, ui, text))
+    text_update_timer.timeout.connect(partial(update_button_text, ui, ui.text.toPlainText()))
     text_update_timer.start(500)
 
 
@@ -709,9 +720,9 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     # ui.write.textChanged.connect(partial(update_button_write, ui))
     # ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     # ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
-    ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.textButton.clicked.connect(partial(align_text_vertical, main_window))
-    ui.removeButton.clicked.connect(partial(remove_image, main_window))
+    ui.select_image_button.clicked.connect(partial(select_image, main_window))
+    ui.vertical_text_button.clicked.connect(partial(align_text_vertical, main_window))
+    ui.remove_image_button.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
@@ -784,7 +795,7 @@ def streamdeck_detatched(ui, serial_number):
 
 
 def build_actions(ui, serial_number: str, page: int, button_id: int):
-    ui.actions.clear()
+    ui.action_tree.clear()
     key_pressed = QTreeWidgetItem(["When key pressed:"])
 
     icon = QIcon()
@@ -823,10 +834,10 @@ def build_actions(ui, serial_number: str, page: int, button_id: int):
         key_pressed.addChild(tree_item)
 
     # ui.tree.itemClicked.connect(self.load_plugin_ui)
-    ui.actions.addTopLevelItem(key_pressed)
-    ui.actions.expandAll()
-    ui.actions.resizeColumnToContents(0)
-    ui.actions.resizeColumnToContents(1)
+    ui.action_tree.addTopLevelItem(key_pressed)
+    ui.action_tree.expandAll()
+    ui.action_tree.resizeColumnToContents(0)
+    ui.action_tree.resizeColumnToContents(1)
 
 
 def load_plugins():
