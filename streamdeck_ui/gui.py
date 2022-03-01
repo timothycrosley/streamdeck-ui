@@ -398,6 +398,11 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         # Populate tree view with actions
         build_actions(ui, deck_id, _page(ui), button_id)
         ui.text.setPlainText(api.get_button_text(deck_id, _page(ui), button_id))
+
+        image_path = api.get_button_icon(deck_id, _page(ui), button_id)
+        if image_path:
+            image_path = os.path.basename(image_path)
+        ui.image_label.setText(image_path)
         api.reset_dimmer(deck_id)
     else:
         selected_button = None
@@ -421,6 +426,7 @@ def reset_button_configuration(ui):
     there is no key selected or if there are no devices connected.
     """
     ui.text.clear()
+    ui.image_label.clear()
     ui.action_tree.clear()
     ui.select_action_tree.clear()
     enable_button_configuration(ui, False)
