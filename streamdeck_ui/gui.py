@@ -60,6 +60,7 @@ last_image_dir = ""
 
 plugins = []
 
+
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
