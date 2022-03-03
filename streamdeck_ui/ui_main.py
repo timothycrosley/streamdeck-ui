@@ -326,8 +326,11 @@ class Ui_MainWindow(object):
 
         self.action_tree = QTreeWidget(self.topleftwidget)
         self.action_tree.setObjectName(u"action_tree")
+        self.action_tree.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.action_tree.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.action_tree.setIndentation(0)
         self.action_tree.header().setVisible(True)
+        self.action_tree.header().setHighlightSections(False)
 
         self.verticalLayout_8.addWidget(self.action_tree)
 
@@ -366,11 +369,14 @@ class Ui_MainWindow(object):
         self.select_action_tree.setObjectName(u"select_action_tree")
         self.select_action_tree.setEnabled(True)
         self.select_action_tree.setAlternatingRowColors(False)
+        self.select_action_tree.setSelectionMode(QAbstractItemView.SingleSelection)
         self.select_action_tree.setIconSize(QSize(32, 32))
         self.select_action_tree.setTextElideMode(Qt.ElideLeft)
         self.select_action_tree.setIndentation(40)
         self.select_action_tree.setRootIsDecorated(False)
         self.select_action_tree.setUniformRowHeights(False)
+        self.select_action_tree.setItemsExpandable(False)
+        self.select_action_tree.setExpandsOnDoubleClick(False)
         self.select_action_tree.header().setVisible(False)
 
         self.verticalLayout_9.addWidget(self.select_action_tree)
@@ -397,21 +403,24 @@ class Ui_MainWindow(object):
 
         self.actionwidget = QWidget(self.bottomwidget)
         self.actionwidget.setObjectName(u"actionwidget")
-        self.verticalLayout_6 = QVBoxLayout(self.actionwidget)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.helpwidget = QWidget(self.actionwidget)
-        self.helpwidget.setObjectName(u"helpwidget")
-        self.verticalLayout_10 = QVBoxLayout(self.helpwidget)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.label_3 = QLabel(self.helpwidget)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
-        self.label_3.setWordWrap(True)
+        self.verticalLayout_11 = QVBoxLayout(self.actionwidget)
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
+        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.actionlayout = QVBoxLayout()
+        self.actionlayout.setObjectName(u"actionlayout")
+        self.actionlayout.setContentsMargins(-1, 0, -1, -1)
+        self.widget = QWidget(self.actionwidget)
+        self.widget.setObjectName(u"widget")
+        self.widget.setMinimumSize(QSize(0, 100))
 
-        self.verticalLayout_10.addWidget(self.label_3)
+        self.actionlayout.addWidget(self.widget)
 
 
-        self.verticalLayout_6.addWidget(self.helpwidget)
+        self.verticalLayout_11.addLayout(self.actionlayout)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_11.addItem(self.verticalSpacer)
 
 
         self.verticalLayout_7.addWidget(self.actionwidget)
@@ -499,13 +508,6 @@ class Ui_MainWindow(object):
         ___qtreewidgetitem1 = self.select_action_tree.headerItem()
         ___qtreewidgetitem1.setText(0, QCoreApplication.translate("MainWindow", u"1", None));
         self.actionlabel.setText(QCoreApplication.translate("MainWindow", u"Configure action:", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Ubuntu'; font-weight:600;\">Help<br /></span><span style=\" font-family:'Ubuntu';\"><br />1. Select the Stream Deck button to configure<br />2. Select an action from the list of available actions</span><span style=\" font-family:'Ubuntu'; font-weight:600;\"><br /></span><span style=\" font-family:'Ubuntu';\">3. Configure the action here<br />4. Click the </span><span style=\" font-family:'Ubuntu'; font-weight:600;\">+</span><span style=\" font-family:'Ubuntu';\"> sign next to Add new action</span></p>\n"
-"<p style=\"-qt-paragraph-type"
-                        ":empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-weight:600;\"><br /></p></body></html>", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi

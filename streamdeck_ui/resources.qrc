@@ -7,5 +7,8 @@
         <file>icons/down.png</file>
         <file>icons/plus.png</file>
         <file>icons/edit-alignment-center.png</file>
+        <file>icons/microphone.png</file>
+        <file>icons/terminal.png</file>
+        <file>icons/webcam.png</file>
     </qresource>
 </RCC>

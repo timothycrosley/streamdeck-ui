@@ -282,6 +282,37 @@ class StreamDeckServer:
             display_handler = self.display_handlers[deck_id]
             display_handler.synchronize()
 
+    # REVIEW: is this flexible enough? One list of actions. There is nothing that defines
+    # the event that triggers this action
+    def set_action(self, serial_number: str, page: int, button: int, index: int, settings: dict) -> None:
+        """Sets the action settings (dictionary) at the given position in the action list
+
+        :param serial_number: The Stream Deck serial number
+        :type serial_number: str
+        :param page: The page number
+        :type page: int
+        :param button: The button index
+        :type button: int
+        :param index: The action list index
+        :type index: int
+        :param settings: The key value pair with the action settings
+        :type settings: dict
+        """
+        self._button_state(serial_number, page, button)["actions"][index] = settings
+        self._save_state()
+
+    def get_action(self, serial_number: str, page: int, button: int, index: int) -> dict:
+        """Gets the settings associated with a button and a given plugin"""
+        return self._button_state(serial_number, page, button)["actions"][index]
+
+    def get_actions(self, serial_number: str, page: int, button: int) -> dict:
+        """Gets the settings associated with a button and a given plugin"""
+        return self._button_state(serial_number, page, button).setdefault("actions", [])
+
+    def add_action(self, serial_number: str, page: int, button: int, settings: dict):
+        self._button_state(serial_number, page, button).setdefault("actions", []).append(settings)
+        self._save_state()
+
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""
         return self._button_state(deck_id, page, button).get("text", "")

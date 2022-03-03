@@ -428,7 +428,6 @@ def reset_button_configuration(ui):
     ui.text.clear()
     ui.image_label.clear()
     ui.action_tree.clear()
-    ui.select_action_tree.clear()
     enable_button_configuration(ui, False)
 
 
@@ -612,6 +611,79 @@ class MainWindow(QMainWindow):
             except pkg_resources.DistributionNotFound:
                 pass
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
+
+    def update_plugins(self, plugins):
+        # TODO: Auto categorise based on dynamic module properties
+        system_widget = QTreeWidgetItem(["System"])
+
+        icon1 = QIcon()
+        icon1.addFile(u":/icons/icons/terminal.png", QSize(), QIcon.Normal, QIcon.Off)
+        system_widget.setIcon(0, icon1)
+        system_widget.setExpanded(True)
+
+        for action in plugins:
+            tree_item = QTreeWidgetItem([action.get_name()])
+            tree_item.setIcon(0, action.get_icon())
+            system_widget.addChild(tree_item)
+            # Use the UserRole to associate the action object with the QTreeWidgetItem.
+            # This can be used to retrieve a reference to the action in the event handler.
+            tree_item.setData(0, Qt.UserRole, action)
+
+        self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
+        self.ui.select_action_tree.addTopLevelItem(system_widget)
+        self.ui.select_action_tree.expandAll()
+
+    def load_plugin_ui(self, item, column):
+        global current_action
+        global selected_button
+
+        action = item.data(0, Qt.UserRole)
+
+        if not action:
+            print("No action")
+            return
+
+        print("Children Before")
+        for index, widget in enumerate(self.ui.actionlayout.children()):
+            print(f"{index}. {widget.objectName()}")
+        print("")
+
+        old = self.ui.actionlayout.takeAt(0)
+        if old:
+            old.widget().deleteLater()
+
+        # Remove the old widget
+        # if len(self.ui.actionlayout.children()) :
+        #     old = self.ui.actionlayout.children()[0]
+        #     print(f"Removing {old.objectName()}")
+        #     if old:
+        #         old.hide()
+        #         old.deleteLater()
+        #         old.setParent(None)
+
+        print("Children after removal")
+        for index, widget in enumerate(self.ui.actionlayout.children()):
+            print(f"{index}. {widget.objectName()}")
+        print("")
+
+        action = item.data(0, Qt.UserRole)
+        if action:
+            # FIXME: correctly bind settings to UI
+
+            # Find the selected deck
+            deck_id = _deck_id(self.ui)
+            button_id = selected_button.index
+
+            # Construct a settings binding for the current combination of device, page, button and action
+            # This is recreated if anything changes
+            # settings_api = Settings(deck_id, _page(self.ui), button_id, action.get_name())
+            self.ui.actionlayout.addWidget(action.get_ui(self, None))
+            current_action = action
+
+            print("Children Adding")
+            for index, widget in enumerate(self.ui.actionlayout.children()):
+                print(f"{index}. {widget.objectName()}")
+            print("")
 
 
 # TODO: This should be done in the API so that all saves
@@ -801,7 +873,12 @@ def streamdeck_detatched(ui, serial_number):
 
 
 def build_actions(ui, serial_number: str, page: int, button_id: int):
+
     ui.action_tree.clear()
+    actions = api.get_actions(serial_number, page, button_id)
+
+    # This must be fixed - it's just a hack. We want to automatically
+    # group actions by the even they're bound to
     key_pressed = QTreeWidgetItem(["When key pressed:"])
 
     icon = QIcon()
@@ -809,6 +886,20 @@ def build_actions(ui, serial_number: str, page: int, button_id: int):
     key_pressed.setIcon(0, icon)
     key_pressed.setExpanded(True)
 
+    # What needs to happen here:
+    # For a given button, iterate over the actions
+    # Look at the setting - match it to an available plugin
+    # Initialize the action (or should they already be initialized, since they
+    # need to be ready to run when you press the button?)
+    # Ask it for the category and summary
+
+    for action in actions:
+        # Verify that plugin exists
+        if action["action"] == "command":
+            tree_item = QTreeWidgetItem(["Command", action["command"]])
+            key_pressed.addChild(tree_item)
+
+    
     # tree_item = QTreeWidgetItem([command])
     # tree_item.setIcon(0, action.get_icon())
     # key_pressed.addChild(tree_item)
@@ -904,6 +995,7 @@ def start(_exit: bool = False) -> None:
     ui = main_window.ui
     tray = create_tray(logo, app, main_window)
 
+    main_window.update_plugins(plugins)
     api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
