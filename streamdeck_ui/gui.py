@@ -793,11 +793,6 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     main_window = MainWindow()
     ui = main_window.ui
     ui.text.textChanged.connect(partial(queue_update_button_text, ui))
-    # ui.command.textChanged.connect(partial(update_button_command, ui))
-    # ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
-    # ui.write.textChanged.connect(partial(update_button_write, ui))
-    # ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
-    # ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.select_image_button.clicked.connect(partial(select_image, main_window))
     ui.vertical_text_button.clicked.connect(partial(align_text_vertical, main_window))
     ui.remove_image_button.clicked.connect(partial(remove_image, main_window))
@@ -952,7 +947,7 @@ def load_plugins():
                 module_name = module_name[module_name.find("streamdeck_ui"):]
                 module = importlib.import_module(module_name)
 
-                # Look for classes that implements Plugin class
+                # Look for classes that derives from StreamDeckAction class
                 for name in dir(module):
                     obj = getattr(module, name)
                     if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):

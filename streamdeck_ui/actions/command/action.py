@@ -11,7 +11,8 @@ class Action(StreamDeckAction):
         return CommandWidget(parent, self.settings)
 
     def execute(self):
-        pass
+        command = self.settings.get_setting("command")
+        print(command)
 
 
 class CommandWidget(QWidget):

@@ -1,4 +1,6 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
+import importlib
+import inspect
 import json
 import os
 import threading
@@ -9,6 +11,7 @@ from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
+from streamdeck_ui.actions.stream_deck_action import StreamDeckAction, ActionSettings
 
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
@@ -127,9 +130,52 @@ class StreamDeckServer:
         shared state with a lock
         """
         with self.key_event_lock:
+            # Visually change key on deck
             displayhandler = self.display_handlers[deck_id]
             displayhandler.set_keypress(key, state)
+
+            page = self.get_page(deck_id)
+
+            action_settings = self.get_action_list(deck_id, page, key, "keydown")
+            plugins = self.load_plugins()
+
+            for index, action_setting in enumerate(action_settings):
+                action = plugins.get(action_setting["action"])
+                if action:
+                    action.initialize(ActionSettings(lambda k: self.get_action_settings(deck_id, page, key, "keydown", index).get(k), self.set_action_settings))
+                    action.execute()
+
+
+            # Emit so UI could react on key press
             self.streamdeck_keys.key_pressed.emit(deck_id, key, state)
+
+
+    def load_plugins(self):
+        # __file__ is the path of the current module (including file name)
+        plugins = {}
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        plugin_path = os.path.join(current_path, "actions")
+
+        for sub_folder_root, _folder_in_folder, files in os.walk(plugin_path):
+            for file in files:
+                if os.path.basename(file).endswith("py"):
+                    # Import the relevant module (note: a module does not end with .py)
+                    module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
+                    module_name = module_path.replace(os.path.sep, '.')
+                    module_name = module_name[module_name.find("streamdeck_ui"):]
+
+                    # Review - does importing "twice" cause problems
+                    module = importlib.import_module(module_name)
+
+                    # Look for classes that derives from StreamDeckAction class
+                    for name in dir(module):
+                        obj = getattr(module, name)
+                        if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
+                            plugins[self.fully_qualified_name(obj)] = obj()
+        return plugins
+
+    def fully_qualified_name(self, obj):
+        return f"{obj.__module__}.{obj.__name__}"
 
     def get_display_timeout(self, deck_id: str) -> int:
         """Returns the amount of time in seconds before the display gets dimmed."""
@@ -284,7 +330,7 @@ class StreamDeckServer:
 
     # REVIEW: is this flexible enough? One list of actions. There is nothing that defines
     # the event that triggers this action
-    def set_action(self, serial_number: str, page: int, button: int, index: int, settings: dict) -> None:
+    def set_action_settings(self, serial_number: str, page: int, button: int, index: int, event: str, settings: dict) -> None:
         """Sets the action settings (dictionary) at the given position in the action list
 
         :param serial_number: The Stream Deck serial number
@@ -298,20 +344,20 @@ class StreamDeckServer:
         :param settings: The key value pair with the action settings
         :type settings: dict
         """
-        self._button_state(serial_number, page, button)["actions"][index] = settings
+        self._button_state(serial_number, page, button)[event][index] = settings
         self._save_state()
 
-    def get_action(self, serial_number: str, page: int, button: int, index: int) -> dict:
+    def get_action_settings(self, serial_number: str, page: int, button: int, event: str, index: int) -> dict:
         """Gets the settings associated with a button and a given plugin"""
-        return self._button_state(serial_number, page, button)["actions"][index]
+        return self._button_state(serial_number, page, button)[event][index]
 
-    def get_actions(self, serial_number: str, page: int, button: int) -> dict:
+    def get_action_list(self, serial_number: str, page: int, button: int, event: str) -> List[dict]:
         """Gets the settings associated with a button and a given plugin"""
-        return self._button_state(serial_number, page, button).setdefault("actions", [])
+        return self._button_state(serial_number, page, button).setdefault(event, [])
 
-    def add_action(self, serial_number: str, page: int, button: int, settings: dict):
-        self._button_state(serial_number, page, button).setdefault("actions", []).append(settings)
-        self._save_state()
+    # def add_action(self, serial_number: str, page: int, button: int, event: str, settings: dict):
+    #    self._button_state(serial_number, page, button).setdefault(event, []).append(settings)
+    #    self._save_state()
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""
