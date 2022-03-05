@@ -180,6 +180,7 @@ class StreamDeckServer:
                     # Look for classes that derives from StreamDeckAction class
                     for name in dir(module):
                         obj = getattr(module, name)
+                        print(obj)
                         if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
                             action = obj()
                             plugins[action.id()] = action
