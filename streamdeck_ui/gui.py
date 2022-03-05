@@ -381,8 +381,10 @@ def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
     api.reset_dimmer(deck_id)
 
 
-def button_clicked(ui, clicked_button, buttons) -> None:
+def button_clicked(main_window, clicked_button, buttons) -> None:
     global selected_button
+
+    ui = main_window.ui
     selected_button = clicked_button
     for button in buttons:
         if button == clicked_button:
@@ -396,7 +398,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         enable_button_configuration(ui, True)
 
         # Populate tree view with actions
-        build_actions(ui, deck_id, _page(ui), button_id)
+        build_actions(main_window, deck_id, _page(ui), button_id)
         ui.text.setPlainText(api.get_button_text(deck_id, _page(ui), button_id))
 
         image_path = api.get_button_icon(deck_id, _page(ui), button_id)
@@ -441,8 +443,10 @@ def browse_github():
     QDesktopServices.openUrl(url)
 
 
-def build_buttons(ui, tab) -> None:
+def build_buttons(main_window, tab) -> None:
     global selected_button
+
+    ui = main_window.ui
 
     if hasattr(tab, "deck_buttons"):
         buttons = tab.findChildren(QtWidgets.QToolButton)
@@ -503,7 +507,7 @@ def build_buttons(ui, tab) -> None:
     # Note that the button click event captures the ui variable, the current button
     #  and all the other buttons
     for button in buttons:
-        button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(ui, button, buttons))
+        button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(main_window, button, buttons))
 
 
 def export_config(window) -> None:
@@ -523,7 +527,7 @@ def import_config(window) -> None:
     redraw_buttons(window.ui)
 
 
-def build_device(ui, _device_index=None) -> None:
+def build_device(main_window, _device_index=None) -> None:
     """This method builds the device configuration user interface.
     It is called if you switch to a different Stream Deck,
     a Stream Deck is added or when the last one is removed.
@@ -536,13 +540,14 @@ def build_device(ui, _device_index=None) -> None:
     :type _device_index: _type_, optional
     """
     style = ""
+    ui = main_window.ui
     if ui.device_list.count() > 0:
         style = "background-color: black"
 
     for page_id in range(ui.pages.count()):
         page = ui.pages.widget(page_id)
         page.setStyleSheet(style)
-        build_buttons(ui, page)
+        build_buttons(main_window, page)
 
     if ui.device_list.count() > 0:
         ui.settingsButton.setEnabled(True)
@@ -550,7 +555,7 @@ def build_device(ui, _device_index=None) -> None:
         ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
 
         # Draw the buttons for the active page
-        redraw_buttons(ui)
+        redraw_buttons(main_window.ui)
     else:
         ui.settingsButton.setEnabled(False)
         reset_button_configuration(ui)
@@ -621,7 +626,7 @@ class MainWindow(QMainWindow):
         system_widget.setIcon(0, icon1)
         system_widget.setExpanded(True)
 
-        for action in plugins:
+        for _key, action in plugins.items():
             tree_item = QTreeWidgetItem([action.get_name()])
             tree_item.setIcon(0, action.get_icon())
             system_widget.addChild(tree_item)
@@ -629,7 +634,8 @@ class MainWindow(QMainWindow):
             # This can be used to retrieve a reference to the action in the event handler.
             tree_item.setData(0, Qt.UserRole, action)
 
-        self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
+        # TODO: This must happen only when you click "+"
+        # self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
         self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
 
@@ -639,14 +645,10 @@ class MainWindow(QMainWindow):
 
         action = item.data(0, Qt.UserRole)
 
-        if not action:
-            print("No action")
-            return
-
-        print("Children Before")
-        for index, widget in enumerate(self.ui.actionlayout.children()):
-            print(f"{index}. {widget.objectName()}")
-        print("")
+        # print("Children Before")
+        # for index, widget in enumerate(self.ui.actionlayout.children()):
+        #     print(f"{index}. {widget.objectName()}")
+        # print("")
 
         old = self.ui.actionlayout.takeAt(0)
         if old:
@@ -677,7 +679,7 @@ class MainWindow(QMainWindow):
             # Construct a settings binding for the current combination of device, page, button and action
             # This is recreated if anything changes
             # settings_api = Settings(deck_id, _page(self.ui), button_id, action.get_name())
-            self.ui.actionlayout.addWidget(action.get_ui(self, None))
+            self.ui.actionlayout.addWidget(action.get_ui(self))
             current_action = action
 
             print("Children Adding")
@@ -848,15 +850,15 @@ def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
         ui.cpu_usage.update()
 
 
-def streamdeck_attached(ui, deck: Dict):
+def streamdeck_attached(main_window, deck: Dict):
 
     serial_number = deck["serial_number"]
-    blocker = QSignalBlocker(ui.device_list)
+    blocker = QSignalBlocker(main_window.ui.device_list)
     try:
-        ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
+        main_window.ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
     finally:
         blocker.unblock()
-    build_device(ui)
+    build_device(main_window)
 
 
 def streamdeck_detatched(ui, serial_number):
@@ -867,10 +869,11 @@ def streamdeck_detatched(ui, serial_number):
         ui.device_list.removeItem(index)
 
 
-def build_actions(ui, serial_number: str, page: int, button_id: int):
+def build_actions(main_window, serial_number: str, page: int, button_id: int):
 
+    ui = main_window.ui
     ui.action_tree.clear()
-    actions = api.get_actions(serial_number, page, button_id)
+    actions = api.get_action_list(serial_number, page, button_id, "keydown")
 
     # This must be fixed - it's just a hack. We want to automatically
     # group actions by the even they're bound to
@@ -880,6 +883,7 @@ def build_actions(ui, serial_number: str, page: int, button_id: int):
     icon.addFile(u":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
     key_pressed.setIcon(0, icon)
     key_pressed.setExpanded(True)
+    key_pressed.setData(0, Qt.UserRole, None)
 
     # What needs to happen here:
     # For a given button, iterate over the actions
@@ -890,69 +894,69 @@ def build_actions(ui, serial_number: str, page: int, button_id: int):
 
     for action in actions:
         # Verify that plugin exists
-        if action["action"] == "command":
-            tree_item = QTreeWidgetItem(["Command", action["command"]])
+        if action.id() == "streamdeck_ui.actions.command.action.Action":
+            tree_item = QTreeWidgetItem(["Command", action.get_summary()])
             key_pressed.addChild(tree_item)
+            tree_item.setData(0, Qt.UserRole, action)
 
-    
     # tree_item = QTreeWidgetItem([command])
     # tree_item.setIcon(0, action.get_icon())
     # key_pressed.addChild(tree_item)
     # tree_item.setData(0, Qt.UserRole, action)
 
-    command = api.get_button_command(serial_number, page, button_id)
-    if command:
-        tree_item = QTreeWidgetItem(["Command", command])
-        key_pressed.addChild(tree_item)
+    # command = api.get_button_command(serial_number, page, button_id)
+    # if command:
+    #     tree_item = QTreeWidgetItem(["Command", command])
+    #     key_pressed.addChild(tree_item)
 
-    keys = api.get_button_keys(serial_number, page, button_id)
-    if keys:
-        tree_item = QTreeWidgetItem(["Press keys", keys])
-        key_pressed.addChild(tree_item)
+    # keys = api.get_button_keys(serial_number, page, button_id)
+    # if keys:
+    #     tree_item = QTreeWidgetItem(["Press keys", keys])
+    #     key_pressed.addChild(tree_item)
 
-    write = api.get_button_write(serial_number, page, button_id)
-    if write:
-        tree_item = QTreeWidgetItem(["Write", write])
-        key_pressed.addChild(tree_item)
+    # write = api.get_button_write(serial_number, page, button_id)
+    # if write:
+    #     tree_item = QTreeWidgetItem(["Write", write])
+    #     key_pressed.addChild(tree_item)
 
-    brightness = api.get_button_change_brightness(serial_number, page, button_id)
-    if brightness:
-        tree_item = QTreeWidgetItem(["Change brightness", str(brightness)])
-        key_pressed.addChild(tree_item)
+    # brightness = api.get_button_change_brightness(serial_number, page, button_id)
+    # if brightness:
+    #     tree_item = QTreeWidgetItem(["Change brightness", str(brightness)])
+    #     key_pressed.addChild(tree_item)
 
-    switch = api.get_button_switch_page(serial_number, page, button_id)
-    if switch:
-        tree_item = QTreeWidgetItem(["Switch to page", str(switch)])
-        key_pressed.addChild(tree_item)
+    # switch = api.get_button_switch_page(serial_number, page, button_id)
+    # if switch:
+    #     tree_item = QTreeWidgetItem(["Switch to page", str(switch)])
+    #     key_pressed.addChild(tree_item)
 
-    # ui.tree.itemClicked.connect(self.load_plugin_ui)
+    ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
     ui.action_tree.addTopLevelItem(key_pressed)
     ui.action_tree.expandAll()
     ui.action_tree.resizeColumnToContents(0)
     ui.action_tree.resizeColumnToContents(1)
 
 
-def load_plugins():
-    # __file__ is the path the the current module (including file name)
-    plugins = []
-    current_path = os.path.dirname(os.path.realpath(__file__))
-    plugin_path = os.path.join(current_path, "actions")
+# def load_plugins():
+#     # __file__ is the path the the current module (including file name)
+#     plugins = []
+#     current_path = os.path.dirname(os.path.realpath(__file__))
+#     plugin_path = os.path.join(current_path, "actions")
 
-    for sub_folder_root, _folder_in_folder, files in os.walk(plugin_path):
-        for file in files:
-            if os.path.basename(file).endswith("py"):
-                # Import the relevant module (note: a module does not end with .py)
-                module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
-                module_name = module_path.replace(os.path.sep, '.')
-                module_name = module_name[module_name.find("streamdeck_ui"):]
-                module = importlib.import_module(module_name)
+#     for sub_folder_root, _folder_in_folder, files in os.walk(plugin_path):
+#         for file in files:
+#             if os.path.basename(file).endswith("py"):
+#                 # Import the relevant module (note: a module does not end with .py)
+#                 module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
+#                 module_name = module_path.replace(os.path.sep, '.')
+#                 module_name = module_name[module_name.find("streamdeck_ui"):]
+#                 module = importlib.import_module(module_name)
 
-                # Look for classes that derives from StreamDeckAction class
-                for name in dir(module):
-                    obj = getattr(module, name)
-                    if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
-                        plugins.append(obj())
-    return plugins
+#                 # Look for classes that derives from StreamDeckAction class
+#                 for name in dir(module):
+#                     obj = getattr(module, name)
+#                     if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
+#                         plugins.append(obj())
+#     return plugins
 
 
 def start(_exit: bool = False) -> None:
@@ -977,7 +981,7 @@ def start(_exit: bool = False) -> None:
     if os.path.isfile(STATE_FILE):
         api.open_config(STATE_FILE)
 
-    plugins = load_plugins()
+    plugins = api.load_plugins()
 
     # The QApplication object holds the Qt event loop and you need one of these
     # for your application
@@ -993,10 +997,10 @@ def start(_exit: bool = False) -> None:
     main_window.update_plugins(plugins)
     api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
-    ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
+    ui.device_list.currentIndexChanged.connect(partial(build_device, main_window))
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
-    api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+    api.plugevents.attached.connect(partial(streamdeck_attached, main_window))
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 

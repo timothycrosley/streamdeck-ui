@@ -76,6 +76,8 @@ class StreamDeckServer:
         self.monitor: Optional[StreamDeckMonitor] = None
         "Monitors for Stream Deck(s) attached to the computer"
 
+        self.plugins = self.load_plugins()
+
     def stop_dimmer(self, serial_number: str) -> None:
         """Stops the dimmer for the given Stream Deck
 
@@ -136,19 +138,27 @@ class StreamDeckServer:
 
             page = self.get_page(deck_id)
 
-            action_settings = self.get_action_list(deck_id, page, key, "keydown")
-            plugins = self.load_plugins()
+            if state:
+                action_settings = self.get_action_settings_list(deck_id, page, key, "keydown")
 
-            for index, action_setting in enumerate(action_settings):
-                action = plugins.get(action_setting["action"])
-                if action:
-                    action.initialize(ActionSettings(lambda k: self.get_action_settings(deck_id, page, key, "keydown", index).get(k), self.set_action_settings))
-                    action.execute()
+                for index, action_setting in enumerate(action_settings):
+                    action = self.plugins.get(action_setting["action"])
 
+                    if action:
+                        def update(key, value):
+                            new_values = self.get_action_settings(deck_id, page, key, "keydown", index)
+                            new_values[key] = value
+                            self.set_action_settings(deck_id, page, key, "keydown", index, new_values)
+
+                        action.initialize(ActionSettings(
+                            lambda k:  self.get_action_settings(deck_id, page, key, "keydown", index).get(k),
+                            lambda k, v:  update(k, v)
+                        ))
+
+                        action.execute()
 
             # Emit so UI could react on key press
             self.streamdeck_keys.key_pressed.emit(deck_id, key, state)
-
 
     def load_plugins(self):
         # __file__ is the path of the current module (including file name)
@@ -171,7 +181,8 @@ class StreamDeckServer:
                     for name in dir(module):
                         obj = getattr(module, name)
                         if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
-                            plugins[self.fully_qualified_name(obj)] = obj()
+                            action = obj()
+                            plugins[action.id()] = action
         return plugins
 
     def fully_qualified_name(self, obj):
@@ -330,7 +341,7 @@ class StreamDeckServer:
 
     # REVIEW: is this flexible enough? One list of actions. There is nothing that defines
     # the event that triggers this action
-    def set_action_settings(self, serial_number: str, page: int, button: int, index: int, event: str, settings: dict) -> None:
+    def set_action_settings(self, serial_number: str, page: int, button: int, event: str, index: int, settings: dict) -> None:
         """Sets the action settings (dictionary) at the given position in the action list
 
         :param serial_number: The Stream Deck serial number
@@ -351,13 +362,53 @@ class StreamDeckServer:
         """Gets the settings associated with a button and a given plugin"""
         return self._button_state(serial_number, page, button)[event][index]
 
-    def get_action_list(self, serial_number: str, page: int, button: int, event: str) -> List[dict]:
+    def get_action_settings_list(self, serial_number: str, page: int, button: int, event: str) -> List[dict]:
         """Gets the settings associated with a button and a given plugin"""
         return self._button_state(serial_number, page, button).setdefault(event, [])
 
-    # def add_action(self, serial_number: str, page: int, button: int, event: str, settings: dict):
-    #    self._button_state(serial_number, page, button).setdefault(event, []).append(settings)
-    #    self._save_state()
+    def get_action_list(self, serial_number: str, page: int, button: int, event: str) -> List[StreamDeckAction]:
+        action_settings = self.get_action_settings_list(serial_number, page, button, event)
+        actions: List[StreamDeckAction] = []
+
+        # Enumerate action settings and initialize the StreamDeckAction
+        for index, action_setting in enumerate(action_settings):
+            action = self.plugins.get(action_setting["action"])
+            if action:
+
+                def update(key, value):
+                    new_values = self.get_action_settings(serial_number, page, button, event, index)
+                    new_values[key] = value
+                    self.set_action_settings(serial_number, page, button, event, index, new_values)
+
+                action.initialize(ActionSettings(
+                    lambda k: self.get_action_settings(serial_number, page, button, event, index).get(k),
+                    lambda k, v:  update(k, v)
+                ))
+                actions.append(action)
+
+        return actions
+
+    # TODO: Change this to ActionType? I.e. these are not the actual actions
+    # Actions should be the actual object, bound to settings
+    def get_actions(self) -> List[StreamDeckAction]:
+        """Returns the list of available actions.
+
+        :return: _description_
+        :rtype: _type_
+        """
+        return self.actions
+
+    def add_action(self, serial_number: str, page: int, button: int, event: str, action:str) -> StreamDeckAction:
+        """Adds a new entry """
+        self._button_state(serial_number, page, button).setdefault(event, []).append({})
+        index = len(self.get_action_list(serial_number, page, button, event))
+        self._save_state()
+
+        action = self.plugins.get(action)
+        action.initialize(ActionSettings(
+                                lambda k: self.get_action_settings(serial_number, page, button, "keydown", index).get(k),
+                                lambda k, v: self.set_action_settings(serial_number, page, button, "keydown", index).set(k, v)))
+        return action
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""

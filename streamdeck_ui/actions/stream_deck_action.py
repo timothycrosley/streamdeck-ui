@@ -29,8 +29,18 @@ class StreamDeckAction(ABC):
         path = os.path.dirname(os.path.abspath(self.file_path))
         return QIcon(os.path.join(path, "icon.png"))
 
+    def id(self):
+        return f"{self.__module__}.{self.__class__.__name__}"
+
     @abstractmethod
     def get_ui(self, parent):
+        pass
+
+    @abstractmethod
+    def get_summary(self) -> str:
+        """Returns a text summary of this action. This will be displayed to the user in a list
+        of various actions. Will typically include configuration or other key behaviour.
+        """
         pass
 
     @abstractmethod
