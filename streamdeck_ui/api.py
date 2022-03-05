@@ -180,9 +180,9 @@ class StreamDeckServer:
                     # Look for classes that derives from StreamDeckAction class
                     for name in dir(module):
                         obj = getattr(module, name)
-                        print(obj)
                         if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
                             action = obj()
+                            print(action.id())
                             plugins[action.id()] = action
         return plugins
 
@@ -381,8 +381,12 @@ class StreamDeckServer:
                     new_values[key] = value
                     self.set_action_settings(serial_number, page, button, event, index, new_values)
 
+                # TODO: Fix me - we need to capture this value - otherwise we are always running
+                # against the last value of index, not the current one in the loop
+                list_index = index
+
                 action.initialize(ActionSettings(
-                    lambda k: self.get_action_settings(serial_number, page, button, event, index).get(k),
+                    lambda k: self.get_action_settings(serial_number, page, button, event, list_index).get(k),
                     lambda k, v:  update(k, v)
                 ))
                 actions.append(action)

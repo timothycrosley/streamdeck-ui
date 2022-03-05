@@ -1,12 +1,8 @@
 """Defines the QT powered interface for configuring Stream Decks"""
-import importlib
-import inspect
 import os
-import shlex
 import sys
 import time
 from functools import partial
-from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Optional
 
 import pkg_resources
@@ -16,7 +12,6 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem
-from streamdeck_ui.actions.stream_deck_action import StreamDeckAction
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -149,12 +144,12 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         kb = Controller()
         page = api.get_page(deck_id)
 
-        command = api.get_button_command(deck_id, page, key)
-        if command:
-            try:
-                Popen(shlex.split(command))
-            except Exception as error:
-                print(f"The command '{command}' failed: {error}")
+        # command = api.get_button_command(deck_id, page, key)
+        # if command:
+        #     try:
+        #         Popen(shlex.split(command))
+        #     except Exception as error:
+        #         print(f"The command '{command}' failed: {error}")
 
         keys = api.get_button_keys(deck_id, page, key)
         if keys:
@@ -894,10 +889,9 @@ def build_actions(main_window, serial_number: str, page: int, button_id: int):
 
     for action in actions:
         # Verify that plugin exists
-        if action.id() == "streamdeck_ui.actions.command.action.Action":
-            tree_item = QTreeWidgetItem(["Command", action.get_summary()])
-            key_pressed.addChild(tree_item)
-            tree_item.setData(0, Qt.UserRole, action)
+        tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
+        key_pressed.addChild(tree_item)
+        tree_item.setData(0, Qt.UserRole, action)
 
     # tree_item = QTreeWidgetItem([command])
     # tree_item.setIcon(0, action.get_icon())

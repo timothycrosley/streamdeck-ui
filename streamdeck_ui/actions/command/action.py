@@ -1,6 +1,8 @@
+from subprocess import Popen
 from PySide2.QtWidgets import QWidget
 from streamdeck_ui.actions.command.ui_commandwidget import Ui_CommandWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
+import shlex
 
 
 class Action(StreamDeckAction):
@@ -12,7 +14,11 @@ class Action(StreamDeckAction):
 
     def execute(self):
         command = self.settings.get_setting("command")
-        print(command)
+        if command:
+            try:
+                Popen(shlex.split(command))
+            except Exception as error:
+                print(f"The command '{command}' failed: {error}")
 
     def get_summary(self) -> str:
         return self.settings.get_setting("command")
