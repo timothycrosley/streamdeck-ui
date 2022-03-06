@@ -50,7 +50,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Use the **shortcut keys** action to run a specific shortcut key sequence. For example **CTRL+ALT+T**</string>
+        <string>Use the **shortcut keys** action to run a specific shortcut key sequence. For example **ctrl+F2**</string>
        </property>
        <property name="textFormat">
         <enum>Qt::MarkdownText</enum>

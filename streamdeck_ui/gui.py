@@ -1,13 +1,11 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
 import sys
-import time
 from functools import partial
 from typing import Dict, Optional
 
 import pkg_resources
-from pynput import keyboard
-from pynput.keyboard import Controller, Key
+from pynput.keyboard import Controller
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
@@ -122,15 +120,7 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
-def _replace_special_keys(key):
-    """Replaces special keywords the user can use with their character equivalent."""
-    if key.lower() == "plus":
-        return "+"
-    if key.lower() == "comma":
-        return ","
-    if key.lower().startswith("delay"):
-        return key.lower()
-    return key
+
 
 
 def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
@@ -151,54 +141,54 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         #     except Exception as error:
         #         print(f"The command '{command}' failed: {error}")
 
-        keys = api.get_button_keys(deck_id, page, key)
-        if keys:
-            keys = keys.strip().replace(" ", "")
-            for section in keys.split(","):
-                # Since + and , are used to delimit our section and keys to press,
-                # they need to be substituted with keywords.
-                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+        # keys = api.get_button_keys(deck_id, page, key)
+        # if keys:
+        #     keys = keys.strip().replace(" ", "")
+        #     for section in keys.split(","):
+        #         # Since + and , are used to delimit our section and keys to press,
+        #         # they need to be substituted with keywords.
+        #         section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
 
-                # Translate string to enum, or just the string itself if not found
-                section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
+        #         # Translate string to enum, or just the string itself if not found
+        #         section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
 
-                for key_name in section_keys:
-                    if isinstance(key_name, str) and key_name.startswith("delay"):
-                        sleep_time_arg = key_name.split("delay", 1)[1]
-                        if sleep_time_arg:
-                            try:
-                                sleep_time = float(sleep_time_arg)
-                            except Exception:
-                                print(f"Could not convert sleep time to float '{sleep_time_arg}'")
-                                sleep_time = 0
-                        else:
-                            # default if not specified
-                            sleep_time = 0.5
+        #         for key_name in section_keys:
+        #             if isinstance(key_name, str) and key_name.startswith("delay"):
+        #                 sleep_time_arg = key_name.split("delay", 1)[1]
+        #                 if sleep_time_arg:
+        #                     try:
+        #                         sleep_time = float(sleep_time_arg)
+        #                     except Exception:
+        #                         print(f"Could not convert sleep time to float '{sleep_time_arg}'")
+        #                         sleep_time = 0
+        #                 else:
+        #                     # default if not specified
+        #                     sleep_time = 0.5
 
-                        if sleep_time:
-                            try:
-                                time.sleep(sleep_time)
-                            except Exception:
-                                print(f"Could not sleep with provided sleep time '{sleep_time}'")
-                    else:
-                        try:
-                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-                                kb.press(keyboard.KeyCode(int(key_name, 16)))
-                            else:
-                                kb.press(key_name)
+        #                 if sleep_time:
+        #                     try:
+        #                         time.sleep(sleep_time)
+        #                     except Exception:
+        #                         print(f"Could not sleep with provided sleep time '{sleep_time}'")
+        #             else:
+        #                 try:
+        #                     if isinstance(key_name, str) and key_name.lower().startswith("0x"):
+        #                         kb.press(keyboard.KeyCode(int(key_name, 16)))
+        #                     else:
+        #                         kb.press(key_name)
 
-                        except Exception:
-                            print(f"Could not press key '{key_name}'")
+        #                 except Exception:
+        #                     print(f"Could not press key '{key_name}'")
 
-                for key_name in section_keys:
-                    if not (isinstance(key_name, str) and key_name.startswith("delay")):
-                        try:
-                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-                                kb.release(keyboard.KeyCode(int(key_name, 16)))
-                            else:
-                                kb.release(key_name)
-                        except Exception:
-                            print(f"Could not release key '{key_name}'")
+        #         for key_name in section_keys:
+        #             if not (isinstance(key_name, str) and key_name.startswith("delay")):
+        #                 try:
+        #                     if isinstance(key_name, str) and key_name.lower().startswith("0x"):
+        #                         kb.release(keyboard.KeyCode(int(key_name, 16)))
+        #                     else:
+        #                         kb.release(key_name)
+        #                 except Exception:
+        #                     print(f"Could not release key '{key_name}'")
 
         write = api.get_button_write(deck_id, page, key)
         if write:
