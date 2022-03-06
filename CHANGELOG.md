@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 2.0.3 - TBD
+## 2.0.3 - 6 Mar 2022
 
 ### Features
 - UI starts up even if no Stream Deck attached.
