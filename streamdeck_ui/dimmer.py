@@ -18,7 +18,7 @@ class Dimmer:
         self.brightness_dimmed = brightness_dimmed
         self.brightness_callback = brightness_callback
         self.__stopped = False
-        self.dimmed = False
+        self.dimmed = True
         "True if the Stream Deck is dimmed, False otherwise"
         self.__timer: Optional[threading.Timer] = None
 
