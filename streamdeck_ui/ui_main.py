@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import * # type: ignore
-from PySide2.QtGui import * # type: ignore
-from PySide2.QtWidgets import * # type: ignore
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from  . import resources_rc
 
@@ -371,7 +371,7 @@ class Ui_MainWindow(object):
         self.removeButton.setToolTip(QCoreApplication.translate("MainWindow", u"Remove the image from the button", None))
 #endif // QT_CONFIG(tooltip)
         self.removeButton.setText("")
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Text:", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Label:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
 
