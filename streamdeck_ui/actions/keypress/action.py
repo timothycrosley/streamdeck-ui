@@ -1,7 +1,6 @@
 from PySide2.QtWidgets import QWidget
 from streamdeck_ui.actions.command.ui_commandwidget import Ui_CommandWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
-from pynput import Controller, Key
 from pynput import keyboard
 import time
 
@@ -24,7 +23,7 @@ class Action(StreamDeckAction):
         return key
 
     def execute(self):
-        kb = Controller()
+        kb = keyboard.Controller()
         keys = self.settings.get_setting("keys")
         if keys:
             keys = keys.strip().replace(" ", "")

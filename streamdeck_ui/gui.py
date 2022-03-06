@@ -612,6 +612,7 @@ class MainWindow(QMainWindow):
         system_widget.setExpanded(True)
 
         for _key, action in plugins.items():
+            action = action()
             tree_item = QTreeWidgetItem([action.get_name()])
             tree_item.setIcon(0, action.get_icon())
             system_widget.addChild(tree_item)

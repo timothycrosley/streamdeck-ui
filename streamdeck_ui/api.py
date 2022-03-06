@@ -123,6 +123,18 @@ class StreamDeckServer:
         """
         self.plugevents.cpu_changed.emit(serial_number, cpu_usage)
 
+    def bind_settings(self, serial_number: str, page: int, key: int, event: str, index: int) -> ActionSettings:
+        """Creates an ActionSettings instance for the given button. Effectively creates a get/set method
+        for the dictionary contained under the specific deck/page/button/action and action"""
+        def update(k, v):
+            new_values = self.get_action_settings(serial_number, page, key, event, index)
+            new_values[k] = v
+            self.set_action_settings(serial_number, page, key, event, index, new_values)
+
+        return ActionSettings(
+            lambda k:  self.get_action_settings(serial_number, page, key, event, index).get(k),
+            lambda k, v:  update(k, v))
+
     def _key_change_callback(self, deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
         """Callback whenever a key is pressed.
 
@@ -142,19 +154,12 @@ class StreamDeckServer:
                 action_settings = self.get_action_settings_list(deck_id, page, key, "keydown")
 
                 for index, action_setting in enumerate(action_settings):
+                    # TODO: For consistency and clarity - the key should probably be "id"
                     action = self.plugins.get(action_setting["action"])
 
                     if action:
-                        def update(key, value):
-                            new_values = self.get_action_settings(deck_id, page, key, "keydown", index)
-                            new_values[key] = value
-                            self.set_action_settings(deck_id, page, key, "keydown", index, new_values)
-
-                        action.initialize(ActionSettings(
-                            lambda k:  self.get_action_settings(deck_id, page, key, "keydown", index).get(k),
-                            lambda k, v:  update(k, v)
-                        ))
-
+                        action = action()
+                        action.initialize(self.bind_settings(deck_id, page, key, "keydown", index))
                         action.execute()
 
             # Emit so UI could react on key press
@@ -183,7 +188,7 @@ class StreamDeckServer:
                         if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
                             action = obj()
                             print(action.id())
-                            plugins[action.id()] = action
+                            plugins[action.id()] = obj
         return plugins
 
     def fully_qualified_name(self, obj):
@@ -373,22 +378,12 @@ class StreamDeckServer:
 
         # Enumerate action settings and initialize the StreamDeckAction
         for index, action_setting in enumerate(action_settings):
+            # FIXME: This is wrong - we need to create new *instances* of the
+            # action, not just lookup and modify the existing one
             action = self.plugins.get(action_setting["action"])
             if action:
-
-                def update(key, value):
-                    new_values = self.get_action_settings(serial_number, page, button, event, index)
-                    new_values[key] = value
-                    self.set_action_settings(serial_number, page, button, event, index, new_values)
-
-                # TODO: Fix me - we need to capture this value - otherwise we are always running
-                # against the last value of index, not the current one in the loop
-                list_index = index
-
-                action.initialize(ActionSettings(
-                    lambda k: self.get_action_settings(serial_number, page, button, event, list_index).get(k),
-                    lambda k, v:  update(k, v)
-                ))
+                action = action()
+                action.initialize(self.bind_settings(serial_number, page, button, event, index))
                 actions.append(action)
 
         return actions
