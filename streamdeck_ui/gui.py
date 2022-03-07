@@ -285,6 +285,9 @@ def change_page(ui, page: int) -> None:
         redraw_buttons(ui)
         api.reset_dimmer(deck_id)
 
+    # FIXME: Need to get reference to Window
+    # Probably makes more sense at this point to move all window related
+    # stuff into the window class so we don't have to pass it around everywhere
     reset_button_configuration(ui)
 
 
