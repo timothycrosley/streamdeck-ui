@@ -120,9 +120,6 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
-
-
-
 def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
 
     # TODO: Handle both key down and key up events in future.
@@ -326,6 +323,24 @@ def align_text_vertical(window) -> None:
     redraw_buttons(window.ui)
 
 
+def remove_action_button(window) -> None:
+    serial_number = _deck_id(window.ui)
+
+    items = window.ui.action_tree.selectedItems()
+    if items:
+        selected_item = items[0]
+        action, index, event = selected_item.data(0, Qt.UserRole)
+        api.remove_action_setting(serial_number, _page(window.ui), selected_button.index, event, index)
+
+    window.ui.action_tree.clear()
+
+    # Rebuild the action list
+    build_actions(window, serial_number, _page(window.ui), selected_button.index)
+
+    # Clear the configuration area
+    window.load_plugin_ui(None)
+
+
 def remove_image(window) -> None:
     deck_id = _deck_id(window.ui)
     image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
@@ -393,7 +408,7 @@ def button_clicked(main_window, clicked_button, buttons) -> None:
         api.reset_dimmer(deck_id)
     else:
         selected_button = None
-        reset_button_configuration(ui)
+        reset_button_configuration(main_window)
 
 
 def enable_button_configuration(ui, enabled: bool):
@@ -406,16 +421,18 @@ def enable_button_configuration(ui, enabled: bool):
     ui.add_action_button.setEnabled(enabled)
     ui.action_tree.setEnabled(enabled)
     ui.select_action_tree.setEnabled(enabled)
+    ui.remove_action_button.setEnabled(enabled)
 
 
-def reset_button_configuration(ui):
+def reset_button_configuration(window):
     """Clears the configuration for a button and disables editing of them. This is done when
     there is no key selected or if there are no devices connected.
     """
-    ui.text.clear()
-    ui.image_label.clear()
-    ui.action_tree.clear()
-    enable_button_configuration(ui, False)
+    window.ui.text.clear()
+    window.ui.image_label.clear()
+    window.ui.action_tree.clear()
+    window.load_plugin_ui(None)
+    enable_button_configuration(window.ui, False)
 
 
 def browse_documentation():
@@ -543,7 +560,7 @@ def build_device(main_window, _device_index=None) -> None:
         redraw_buttons(main_window.ui)
     else:
         ui.settingsButton.setEnabled(False)
-        reset_button_configuration(ui)
+        reset_button_configuration(main_window)
 
 
 class MainWindow(QMainWindow):
@@ -625,53 +642,17 @@ class MainWindow(QMainWindow):
         self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
 
-    def load_plugin_ui(self, item, column):
-        global current_action
-        global selected_button
-
-        action = item.data(0, Qt.UserRole)
-
-        # print("Children Before")
-        # for index, widget in enumerate(self.ui.actionlayout.children()):
-        #     print(f"{index}. {widget.objectName()}")
-        # print("")
+    def load_plugin_ui(self, item):
 
         old = self.ui.actionlayout.takeAt(0)
         if old:
             old.widget().deleteLater()
 
-        # Remove the old widget
-        # if len(self.ui.actionlayout.children()) :
-        #     old = self.ui.actionlayout.children()[0]
-        #     print(f"Removing {old.objectName()}")
-        #     if old:
-        #         old.hide()
-        #         old.deleteLater()
-        #         old.setParent(None)
-
-        print("Children after removal")
-        for index, widget in enumerate(self.ui.actionlayout.children()):
-            print(f"{index}. {widget.objectName()}")
-        print("")
-
-        action = item.data(0, Qt.UserRole)
-        if action:
-            # FIXME: correctly bind settings to UI
-
-            # Find the selected deck
-            deck_id = _deck_id(self.ui)
-            button_id = selected_button.index
-
-            # Construct a settings binding for the current combination of device, page, button and action
-            # This is recreated if anything changes
-            # settings_api = Settings(deck_id, _page(self.ui), button_id, action.get_name())
-            self.ui.actionlayout.addWidget(action.get_ui(self))
-            current_action = action
-
-            print("Children Adding")
-            for index, widget in enumerate(self.ui.actionlayout.children()):
-                print(f"{index}. {widget.objectName()}")
-            print("")
+        if item and item.data(0, Qt.UserRole):
+            action, _index, _event = item.data(0, Qt.UserRole)
+            if action:
+                self.ui.actionlayout.addWidget(action.get_ui(self))
+                current_action = action
 
 
 # TODO: This should be done in the API so that all saves
@@ -784,6 +765,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.select_image_button.clicked.connect(partial(select_image, main_window))
     ui.vertical_text_button.clicked.connect(partial(align_text_vertical, main_window))
     ui.remove_image_button.clicked.connect(partial(remove_image, main_window))
+    ui.remove_action_button.clicked.connect(partial(remove_action_button, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
@@ -878,11 +860,14 @@ def build_actions(main_window, serial_number: str, page: int, button_id: int):
     # need to be ready to run when you press the button?)
     # Ask it for the category and summary
 
-    for action in actions:
+    for index, action in enumerate(actions):
         # Verify that plugin exists
         tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
         key_pressed.addChild(tree_item)
-        tree_item.setData(0, Qt.UserRole, action)
+
+        # Store the action, it's index in the settings and event type in a tuple so 
+        # we can remove it or act on it later.
+        tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
 
     # tree_item = QTreeWidgetItem([command])
     # tree_item.setIcon(0, action.get_icon())

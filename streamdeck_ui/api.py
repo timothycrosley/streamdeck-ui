@@ -187,7 +187,6 @@ class StreamDeckServer:
                         obj = getattr(module, name)
                         if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
                             action = obj()
-                            print(action.id())
                             plugins[action.id()] = obj
         return plugins
 
@@ -398,12 +397,18 @@ class StreamDeckServer:
         """
         return self.actions
 
+    def remove_action_setting(self, serial_number: str, page: int, button: int, event: str, index: int):
+        del self._button_state(serial_number, page, button)[event][index]
+        self._save_state()
+
+
     def add_action(self, serial_number: str, page: int, button: int, event: str, action:str) -> StreamDeckAction:
         """Adds a new entry """
         self._button_state(serial_number, page, button).setdefault(event, []).append({})
         index = len(self.get_action_list(serial_number, page, button, event))
         self._save_state()
 
+        # FIXME: This is wrong - need to construction action and bind settings correctly
         action = self.plugins.get(action)
         action.initialize(ActionSettings(
                                 lambda k: self.get_action_settings(serial_number, page, button, "keydown", index).get(k),
