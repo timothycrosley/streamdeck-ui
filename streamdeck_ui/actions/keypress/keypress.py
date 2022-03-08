@@ -13,28 +13,28 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 
-class Ui_action_command(object):
-    def setupUi(self, keypress):
-        if not keypress.objectName():
-            keypress.setObjectName(u"keypress")
-        keypress.resize(414, 287)
-        self.verticalLayout = QVBoxLayout(keypress)
+class Ui_KeypressWidget(object):
+    def setupUi(self, KeypressWidget):
+        if not KeypressWidget.objectName():
+            KeypressWidget.setObjectName(u"KeypressWidget")
+        KeypressWidget.resize(414, 287)
+        self.verticalLayout = QVBoxLayout(KeypressWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setHorizontalSpacing(6)
-        self.label = QLabel(keypress)
+        self.label = QLabel(KeypressWidget)
         self.label.setObjectName(u"label")
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
 
-        self.command = QLineEdit(keypress)
+        self.command = QLineEdit(KeypressWidget)
         self.command.setObjectName(u"command")
 
         self.formLayout.setWidget(0, QFormLayout.FieldRole, self.command)
 
-        self.label_2 = QLabel(keypress)
+        self.label_2 = QLabel(KeypressWidget)
         self.label_2.setObjectName(u"label_2")
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -51,14 +51,14 @@ class Ui_action_command(object):
         self.verticalLayout.addLayout(self.formLayout)
 
 
-        self.retranslateUi(keypress)
+        self.retranslateUi(KeypressWidget)
 
-        QMetaObject.connectSlotsByName(keypress)
+        QMetaObject.connectSlotsByName(KeypressWidget)
     # setupUi
 
-    def retranslateUi(self, keypress):
-        keypress.setWindowTitle(QCoreApplication.translate("action_command", u"Form", None))
-        self.label.setText(QCoreApplication.translate("action_command", u"Shortcut key(s):", None))
-        self.label_2.setText(QCoreApplication.translate("action_command", u"Use the **shortcut keys** action to run a specific shortcut key sequence. For example **ctrl+F2**", None))
+    def retranslateUi(self, KeypressWidget):
+        KeypressWidget.setWindowTitle(QCoreApplication.translate("KeypressWidget", u"Form", None))
+        self.label.setText(QCoreApplication.translate("KeypressWidget", u"Shortcut key(s):", None))
+        self.label_2.setText(QCoreApplication.translate("KeypressWidget", u"Use the **shortcut keys** action to run a specific shortcut key sequence. For example **ctrl+F2**", None))
     # retranslateUi
 

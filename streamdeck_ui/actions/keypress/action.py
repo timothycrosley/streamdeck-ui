@@ -1,7 +1,8 @@
 from PySide2.QtWidgets import QWidget
-from streamdeck_ui.actions.command.ui_commandwidget import Ui_CommandWidget
+from streamdeck_ui.actions.keypress.keypress import Ui_KeypressWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
 from pynput import keyboard
+from pynput.keyboard import Key
 import time
 
 
@@ -10,7 +11,7 @@ class Action(StreamDeckAction):
         super().__init__("Press key(s)", "Keyboard", __file__)
 
     def get_ui(self, parent):
-        return CommandWidget(parent, self.settings)
+        return KeyPressWidget(parent, self.settings)
 
     def _replace_special_keys(self, key):
         """Replaces special keywords the user can use with their character equivalent."""
@@ -77,10 +78,10 @@ class Action(StreamDeckAction):
         return self.settings.get_setting("keys")
 
 
-class CommandWidget(QWidget):
+class KeyPressWidget(QWidget):
     def __init__(self, parent, settings: ActionSettings):
         super().__init__(parent)
-        self.ui = Ui_CommandWidget()
+        self.ui = Ui_KeypressWidget()
         self.ui.setupUi(self)
         self.ui.command.setText(settings.get_setting("keys"))
         self.ui.command.textChanged.connect(self.text_changed)
