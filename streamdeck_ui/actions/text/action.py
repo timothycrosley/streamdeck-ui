@@ -11,7 +11,11 @@ class Action(StreamDeckAction):
         return TextWidget(parent, self.settings)
 
     def get_summary(self) -> str:
-        return self.settings.get_setting("text")
+        text = self.settings.get_setting("text")
+        if text:
+            return text.replace("\n", " ")
+        else:
+            return "<empty>"
 
     def execute(self):
         pass
@@ -28,5 +32,5 @@ class TextWidget(QWidget):
         self.settings = settings
         self.show()
 
-    def text_changed(self, text: str) -> None:
+    def text_changed(self) -> None:
         self.settings.set_setting("text", self.ui.textEdit.toPlainText())
