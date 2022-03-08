@@ -2,7 +2,7 @@ from subprocess import Popen
 from PySide2.QtWidgets import QWidget
 from streamdeck_ui.actions.obs.obs import Ui_ObsWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
-import shlex
+from obswebsocket import obsws, requests
 
 
 class Action(StreamDeckAction):
@@ -13,12 +13,15 @@ class Action(StreamDeckAction):
         return ObsWidget(parent, self.settings)
 
     def execute(self):
-        command = self.settings.get_setting("scene")
-        if command:
+        scene = self.settings.get_setting("scene")
+        if scene:
             try:
-                pass
+                ws = obsws("localhost", 4444, "12345")
+                ws.connect()
+                ws.call(requests.SetCurrentScene(scene))
+                ws.disconnect()
             except Exception as error:
-                print(f"The command '{command}' failed: {error}")
+                print(f"Could not switch to scene '{scene}' failed: {error}")
 
     def get_summary(self) -> str:
         return self.settings.get_setting("command")

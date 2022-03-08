@@ -15,6 +15,7 @@ pyside2 = "^5.15"
 python3-xlib = "^0.15"
 CairoSVG = "^2.5.2"
 filetype = "^1.0.10"
+obs-websocket-py = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 vulture = "^1.0"
