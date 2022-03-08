@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>action_command</class>
- <widget class="QWidget" name="action_command">
+ <class>ObsWidget</class>
+ <widget class="QWidget" name="ObsWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -39,7 +39,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="command"/>
+      <widget class="QLineEdit" name="scene"/>
      </item>
      <item row="2" column="0" colspan="2">
       <widget class="QLabel" name="label_2">
