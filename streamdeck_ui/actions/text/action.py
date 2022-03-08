@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget
 from streamdeck_ui.actions.text.ui_text import Ui_TextWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
-
+from pynput import keyboard
 
 class Action(StreamDeckAction):
     def __init__(self):
@@ -18,7 +18,13 @@ class Action(StreamDeckAction):
             return "<empty>"
 
     def execute(self):
-        pass
+        write = self.settings.get_setting("text")
+        if write:
+            kb = keyboard.Controller()
+            try:
+                kb.type(write)
+            except Exception as error:
+                print(f"Could not complete the write command: {error}")
 
 
 class TextWidget(QWidget):
