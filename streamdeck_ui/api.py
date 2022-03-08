@@ -402,18 +402,20 @@ class StreamDeckServer:
         self._save_state()
 
 
-    def add_action(self, serial_number: str, page: int, button: int, event: str, action:str) -> StreamDeckAction:
+    def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id:str) -> StreamDeckAction:
         """Adds a new entry """
-        self._button_state(serial_number, page, button).setdefault(event, []).append({})
-        index = len(self.get_action_list(serial_number, page, button, event))
+        actions = self._button_state(serial_number, page, button).setdefault(event, [])
+        actions.append({"action" : id})
         self._save_state()
+        #index = len(self.get_action_list(serial_number, page, button, event))
+        #self._save_state()
 
         # FIXME: This is wrong - need to construction action and bind settings correctly
-        action = self.plugins.get(action)
-        action.initialize(ActionSettings(
-                                lambda k: self.get_action_settings(serial_number, page, button, "keydown", index).get(k),
-                                lambda k, v: self.set_action_settings(serial_number, page, button, "keydown", index).set(k, v)))
-        return action
+        # action = self.plugins.get(action)
+        # action.initialize(ActionSettings(
+        #                         lambda k: self.get_action_settings(serial_number, page, button, "keydown", index).get(k),
+        #                         lambda k, v: self.set_action_settings(serial_number, page, button, "keydown", index).set(k, v)))
+        # return action
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""

@@ -326,22 +326,46 @@ def align_text_vertical(window) -> None:
     redraw_buttons(window.ui)
 
 
+def add_action_button(window) -> None:
+    serial_number = _deck_id(window.ui)
+    page = _page(window.ui)
+    button = selected_button.index
+
+    # TODO: selected action_select_tree
+    items = window.ui.select_action_tree.selectedItems()
+    if items:
+        selected_item = items[0]
+        action = selected_item.data(0, Qt.UserRole)
+
+        api.add_action_setting(serial_number, page, button, "keydown", action().id())
+        
+    window.ui.action_tree.clear()
+    build_actions(window, serial_number, _page(window.ui), selected_button.index)
+    window.ui.action_tree.scrollToBottom()
+
+    keydown_item = window.ui.action_tree.topLevelItem(window.ui.action_tree.topLevelItemCount()-1)
+    
+    keydown_item.child(keydown_item.childCount()-1).setSelected(True)
+
 def remove_action_button(window) -> None:
     serial_number = _deck_id(window.ui)
 
     items = window.ui.action_tree.selectedItems()
     if items:
         selected_item = items[0]
-        action, index, event = selected_item.data(0, Qt.UserRole)
-        api.remove_action_setting(serial_number, _page(window.ui), selected_button.index, event, index)
 
-    window.ui.action_tree.clear()
+        # Parent items (events) don't have data
+        if selected_item.data(0, Qt.UserRole):
+            action, index, event = selected_item.data(0, Qt.UserRole)
+            api.remove_action_setting(serial_number, _page(window.ui), selected_button.index, event, index)
 
-    # Rebuild the action list
-    build_actions(window, serial_number, _page(window.ui), selected_button.index)
+            window.ui.action_tree.clear()
 
-    # Clear the configuration area
-    window.load_plugin_ui(None)
+            # Rebuild the action list
+            build_actions(window, serial_number, _page(window.ui), selected_button.index)
+
+            # Clear the configuration area
+            window.load_plugin_ui()
 
 
 def remove_image(window) -> None:
@@ -434,7 +458,7 @@ def reset_button_configuration(window):
     window.ui.text.clear()
     window.ui.image_label.clear()
     window.ui.action_tree.clear()
-    window.load_plugin_ui(None)
+    window.load_plugin_ui()
     enable_button_configuration(window.ui, False)
 
 
@@ -632,9 +656,9 @@ class MainWindow(QMainWindow):
         system_widget.setExpanded(True)
 
         for _key, action in plugins.items():
-            action = action()
-            tree_item = QTreeWidgetItem([action.get_name()])
-            tree_item.setIcon(0, action.get_icon())
+            obj = action()
+            tree_item = QTreeWidgetItem([obj.get_name()])
+            tree_item.setIcon(0, obj.get_icon())
             system_widget.addChild(tree_item)
             # Use the UserRole to associate the action object with the QTreeWidgetItem.
             # This can be used to retrieve a reference to the action in the event handler.
@@ -645,11 +669,17 @@ class MainWindow(QMainWindow):
         self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
 
-    def load_plugin_ui(self, item):
+    def load_plugin_ui(self):
 
         old = self.ui.actionlayout.takeAt(0)
         if old:
             old.widget().deleteLater()
+
+        item = None
+        items = self.ui.action_tree.selectedItems()
+        if items:
+            item = items[0]
+            action = item.data(0, Qt.UserRole)
 
         if item and item.data(0, Qt.UserRole):
             action, _index, _event = item.data(0, Qt.UserRole)
@@ -769,6 +799,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.vertical_text_button.clicked.connect(partial(align_text_vertical, main_window))
     ui.remove_image_button.clicked.connect(partial(remove_image, main_window))
     ui.remove_action_button.clicked.connect(partial(remove_action_button, main_window))
+    ui.add_action_button.clicked.connect(partial(add_action_button, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
@@ -902,7 +933,8 @@ def build_actions(main_window, serial_number: str, page: int, button_id: int):
     #     tree_item = QTreeWidgetItem(["Switch to page", str(switch)])
     #     key_pressed.addChild(tree_item)
 
-    ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
+    # ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
+    ui.action_tree.itemSelectionChanged.connect(main_window.load_plugin_ui)
     ui.action_tree.addTopLevelItem(key_pressed)
     ui.action_tree.expandAll()
     ui.action_tree.resizeColumnToContents(0)
