@@ -264,7 +264,7 @@ def update_switch_page(ui, page: int) -> None:
         api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
 
 
-def change_page(ui, page: int) -> None:
+def change_page(window, page: int) -> None:
     global selected_button
 
     """Change the Stream Deck to the desired page and update
@@ -279,16 +279,15 @@ def change_page(ui, page: int) -> None:
         selected_button.setChecked(False)
         selected_button = None
 
-    deck_id = _deck_id(ui)
+    deck_id = _deck_id(window.ui)
     if deck_id:
         api.set_page(deck_id, page)
-        redraw_buttons(ui)
+        redraw_buttons(window.ui)
         api.reset_dimmer(deck_id)
 
-    # FIXME: Need to get reference to Window
-    # Probably makes more sense at this point to move all window related
+    # FIXME: Probably makes more sense at this point to move all window related
     # stuff into the window class so we don't have to pass it around everywhere
-    reset_button_configuration(ui)
+    reset_button_configuration(window)
 
 
 def select_image(window) -> None:
@@ -1003,7 +1002,7 @@ def start(_exit: bool = False) -> None:
     api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
     ui.device_list.currentIndexChanged.connect(partial(build_device, main_window))
-    ui.pages.currentChanged.connect(partial(change_page, ui))
+    ui.pages.currentChanged.connect(partial(change_page, main_window))
 
     api.plugevents.attached.connect(partial(streamdeck_attached, main_window))
     api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
