@@ -154,8 +154,7 @@ class StreamDeckServer:
                 action_settings = self.get_action_settings_list(deck_id, page, key, "keydown")
 
                 for index, action_setting in enumerate(action_settings):
-                    # TODO: For consistency and clarity - the key should probably be "id"
-                    action = self.plugins.get(action_setting["action"])
+                    action = self.plugins.get(action_setting["id"])
 
                     if action:
                         action = action()
@@ -377,9 +376,7 @@ class StreamDeckServer:
 
         # Enumerate action settings and initialize the StreamDeckAction
         for index, action_setting in enumerate(action_settings):
-            # FIXME: This is wrong - we need to create new *instances* of the
-            # action, not just lookup and modify the existing one
-            action = self.plugins.get(action_setting["action"])
+            action = self.plugins.get(action_setting["id"])
             if action:
                 action = action()
                 action.initialize(self.bind_settings(serial_number, page, button, event, index))
@@ -405,17 +402,9 @@ class StreamDeckServer:
     def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id:str) -> StreamDeckAction:
         """Adds a new entry """
         actions = self._button_state(serial_number, page, button).setdefault(event, [])
-        actions.append({"action" : id})
+        actions.append({"id" : id})
         self._save_state()
-        #index = len(self.get_action_list(serial_number, page, button, event))
-        #self._save_state()
 
-        # FIXME: This is wrong - need to construction action and bind settings correctly
-        # action = self.plugins.get(action)
-        # action.initialize(ActionSettings(
-        #                         lambda k: self.get_action_settings(serial_number, page, button, "keydown", index).get(k),
-        #                         lambda k, v: self.set_action_settings(serial_number, page, button, "keydown", index).set(k, v)))
-        # return action
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""
