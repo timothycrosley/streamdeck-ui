@@ -24,7 +24,7 @@ class Action(StreamDeckAction):
                 print(f"Could not switch to scene '{scene}' failed: {error}")
 
     def get_summary(self) -> str:
-        return self.settings.get_setting("command")
+        return self.settings.get_setting("scene")
 
 
 class ObsWidget(QWidget):
