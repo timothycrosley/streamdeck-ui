@@ -43,6 +43,12 @@ class StreamDeckAction(ABC):
         """
         pass
 
+    # REVIEW: What would be a good way to allow for execution flow control?
+    # It could return True or False. False stops futher execution, true lets it continue
+    # It could return a numeric result.
+    # It could return return an arbitrary result and we pass it on the the next
+    # execute. 
+    # We could have a "conditional" action - all it does, is decides what to do next
     @abstractmethod
     def execute(self):
         pass
