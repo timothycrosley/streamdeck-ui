@@ -2,7 +2,7 @@
 import os
 import sys
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Tuple
 
 import pkg_resources
 from pynput.keyboard import Controller
@@ -646,26 +646,42 @@ class MainWindow(QMainWindow):
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
     def update_plugins(self, plugins):
-        # TODO: Auto categorise based on dynamic module properties
-        system_widget = QTreeWidgetItem(["System"])
 
-        icon1 = QIcon()
-        icon1.addFile(u":/icons/icons/terminal.png", QSize(), QIcon.Normal, QIcon.Off)
-        system_widget.setIcon(0, icon1)
-        system_widget.setExpanded(True)
+        # Create unique list of categories
+        categories: Dict[str, QTreeWidgetItem] = {}
 
         for _key, action in plugins.items():
             obj = action()
-            tree_item = QTreeWidgetItem([obj.get_name()])
-            tree_item.setIcon(0, obj.get_icon())
-            system_widget.addChild(tree_item)
+            category = obj.get_category()
+
+            if not category in categories:
+                widget = QTreeWidgetItem([category])
+                widget.setIcon(0, obj.get_icon())
+                widget.setExpanded(True)
+                categories[category] = widget
+
+        # Sort categories alphabetically
+        categories = {k: v for k, v in sorted(categories.items())}
+
+        # Add all parent nodes
+        for _, widget in categories.items():
+            self.ui.select_action_tree.addTopLevelItem(widget)
+
+        # All child items (note these are not currently sorted)
+        # TODO:  Set sorted on tree or sort
+        for _key, action in plugins.items():
+            obj = action()
+
+            parent = categories[obj.get_category()]
+            widget = QTreeWidgetItem([obj.get_name()])
+            parent.addChild(widget)
             # Use the UserRole to associate the action object with the QTreeWidgetItem.
             # This can be used to retrieve a reference to the action in the event handler.
-            tree_item.setData(0, Qt.UserRole, action)
+            widget.setData(0, Qt.UserRole, action)
 
         # TODO: This must happen only when you click "+"
         # self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
-        self.ui.select_action_tree.addTopLevelItem(system_widget)
+        # self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
 
     def load_plugin_ui(self):
