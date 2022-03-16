@@ -878,7 +878,7 @@ def streamdeck_attached(main_window, deck: Dict):
     build_device(main_window)
 
 
-def streamdeck_detatched(ui, serial_number):
+def streamdeck_detached(ui, serial_number):
     index = ui.device_list.findData(serial_number)
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
@@ -1021,7 +1021,7 @@ def start(_exit: bool = False) -> None:
     ui.pages.currentChanged.connect(partial(change_page, main_window))
 
     api.plugevents.attached.connect(partial(streamdeck_attached, main_window))
-    api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
+    api.plugevents.detached.connect(partial(streamdeck_detached, ui))
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 
     api.start()

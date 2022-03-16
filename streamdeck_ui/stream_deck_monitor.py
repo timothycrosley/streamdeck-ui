@@ -17,7 +17,7 @@ class StreamDeckMonitor:
     monitor_thread: Optional[Thread]
     "The thread the monitors Stream Decks"
 
-    def __init__(self, lock: Lock, attached: Callable[[str, StreamDeck], None], detatched: Callable[[str], None]):
+    def __init__(self, lock: Lock, attached: Callable[[str, StreamDeck], None], detached: Callable[[str], None]):
         """Creates a new StreamDeckMonitor instance
 
         :param lock: A lock object that will be used to get exclusive access while enumerating
@@ -27,16 +27,16 @@ class StreamDeckMonitor:
         :param attached: A callback function that is called when a new StreamDeck is attached. Note
         this runs on a background thread.
         :type attached: Callable[[StreamDeck], None]
-        :param detatched: A callback function that is called when a previously attached StreamDeck
-        is detatched. Note this runs on a background thread. The id of the device is passed as
+        :param detached: A callback function that is called when a previously attached StreamDeck
+        is detached. Note this runs on a background thread. The id of the device is passed as
         the only argument.
-        :type detatched: Callable[[str], None]
+        :type detached: Callable[[str], None]
         """
         self.quit = Event()
         self.streamdecks = {}
         self.monitor_thread = None
         self.attached = attached
-        self.detatched = detatched
+        self.detached = detached
         self.lock = lock
 
     def start(self):
@@ -68,7 +68,7 @@ class StreamDeckMonitor:
         self.pipelmonitor_thread = None
 
         for streamdeck_id in self.streamdecks:
-            self.detatched(streamdeck_id)
+            self.detached(streamdeck_id)
 
         self.streamdecks = {}
 
@@ -86,7 +86,7 @@ class StreamDeckMonitor:
             for streamdeck_id, streamdeck in dict(self.streamdecks).items():
                 if not streamdeck.is_open():
                     del self.streamdecks[streamdeck_id]
-                    self.detatched(streamdeck_id)
+                    self.detached(streamdeck_id)
 
             # New deck attached
             for streamdeck in attached_streamdecks:
@@ -100,6 +100,6 @@ class StreamDeckMonitor:
                 if streamdeck_id not in [deck.id() for deck in attached_streamdecks]:
                     streamdeck = self.streamdecks[streamdeck_id]
                     del self.streamdecks[streamdeck_id]
-                    self.detatched(streamdeck_id)
+                    self.detached(streamdeck_id)
 
             sleep(1)
