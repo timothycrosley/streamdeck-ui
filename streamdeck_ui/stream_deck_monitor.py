@@ -77,17 +77,29 @@ class StreamDeckMonitor:
         """
         while not self.quit.is_set():
 
+            # Enumerating devices while doing any other operation will cause corruption
+            # of images. Ensure nothing else is writing or reading
             with self.lock:
                 attached_streamdecks = DeviceManager.DeviceManager().enumerate()
+
+            # Suspend detection (surprise close)
+            for streamdeck_id, streamdeck in dict(self.streamdecks).items():
+                if not streamdeck.is_open():
+                    del self.streamdecks[streamdeck_id]
+                    self.detatched(streamdeck_id)
+
+            # New deck attached
             for streamdeck in attached_streamdecks:
                 streamdeck_id = streamdeck.id()
                 if streamdeck_id not in self.streamdecks:
                     self.streamdecks[streamdeck_id] = streamdeck
                     self.attached(streamdeck_id, streamdeck)
 
+            # Deck removed
             for streamdeck_id in list(self.streamdecks.keys()):
                 if streamdeck_id not in [deck.id() for deck in attached_streamdecks]:
                     streamdeck = self.streamdecks[streamdeck_id]
                     del self.streamdecks[streamdeck_id]
                     self.detatched(streamdeck_id)
+
             sleep(1)

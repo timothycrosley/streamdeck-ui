@@ -287,7 +287,7 @@ class StreamDeckServer:
 
         streamdeck = self.decks[serial_number]
         try:
-            if streamdeck.connected():
+            if streamdeck.connected() and streamdeck.is_open():
                 streamdeck.set_brightness(50)
                 streamdeck.reset()
                 streamdeck.close()
