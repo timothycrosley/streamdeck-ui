@@ -104,7 +104,7 @@ class DraggableButton(QtWidgets.QToolButton):
         if e.buttons() != Qt.LeftButton:
             return
 
-        self.api.reset_dimmer(_deck_id(self.window.ui))
+        self.api.reset_dimmer(self.window.serial_number())
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -115,8 +115,8 @@ class DraggableButton(QtWidgets.QToolButton):
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
-        serial_number = _deck_id(self.window.ui)
-        page = _page(self.window.ui)
+        serial_number = self.window.serial_number()
+        page = self.window.page()
 
         if e.source():
 
@@ -131,7 +131,7 @@ class DraggableButton(QtWidgets.QToolButton):
                     selected_button.setChecked(False)
                     self.setChecked(True)
                     selected_button = self
-                add_action(self.window, "keydown", action)
+                self.window.add_action("keydown", action)
 
                 return
             else:
@@ -172,474 +172,12 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
-def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
-
-    # TODO: Handle both key down and key up events in future.
-    if state:
-
-        if api.reset_dimmer(deck_id):
-            return
-
-        kb = Controller()
-        page = api.get_page(deck_id)
-
-        # command = api.get_button_command(deck_id, page, key)
-        # if command:
-        #     try:
-        #         Popen(shlex.split(command))
-        #     except Exception as error:
-        #         print(f"The command '{command}' failed: {error}")
-
-        # keys = api.get_button_keys(deck_id, page, key)
-        # if keys:
-        #     keys = keys.strip().replace(" ", "")
-        #     for section in keys.split(","):
-        #         # Since + and , are used to delimit our section and keys to press,
-        #         # they need to be substituted with keywords.
-        #         section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
-
-        #         # Translate string to enum, or just the string itself if not found
-        #         section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
-
-        #         for key_name in section_keys:
-        #             if isinstance(key_name, str) and key_name.startswith("delay"):
-        #                 sleep_time_arg = key_name.split("delay", 1)[1]
-        #                 if sleep_time_arg:
-        #                     try:
-        #                         sleep_time = float(sleep_time_arg)
-        #                     except Exception:
-        #                         print(f"Could not convert sleep time to float '{sleep_time_arg}'")
-        #                         sleep_time = 0
-        #                 else:
-        #                     # default if not specified
-        #                     sleep_time = 0.5
-
-        #                 if sleep_time:
-        #                     try:
-        #                         time.sleep(sleep_time)
-        #                     except Exception:
-        #                         print(f"Could not sleep with provided sleep time '{sleep_time}'")
-        #             else:
-        #                 try:
-        #                     if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-        #                         kb.press(keyboard.KeyCode(int(key_name, 16)))
-        #                     else:
-        #                         kb.press(key_name)
-
-        #                 except Exception:
-        #                     print(f"Could not press key '{key_name}'")
-
-        #         for key_name in section_keys:
-        #             if not (isinstance(key_name, str) and key_name.startswith("delay")):
-        #                 try:
-        #                     if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-        #                         kb.release(keyboard.KeyCode(int(key_name, 16)))
-        #                     else:
-        #                         kb.release(key_name)
-        #                 except Exception:
-        #                     print(f"Could not release key '{key_name}'")
-
-        write = api.get_button_write(deck_id, page, key)
-        if write:
-            try:
-                kb.type(write)
-            except Exception as error:
-                print(f"Could not complete the write command: {error}")
-
-        brightness_change = api.get_button_change_brightness(deck_id, page, key)
-        if brightness_change:
-            try:
-                api.change_brightness(deck_id, brightness_change)
-            except Exception as error:
-                print(f"Could not change brightness: {error}")
-
-        switch_page = api.get_button_switch_page(deck_id, page, key)
-        if switch_page:
-            api.set_page(deck_id, switch_page - 1)
-            if _deck_id(ui) == deck_id:
-                ui.pages.setCurrentIndex(switch_page - 1)
-
-
-def _deck_id(ui) -> str:
-    """Returns the currently selected Stream Deck serial number
-
-    :param ui: A reference to the ui object
-    :type ui: _type_
-    :return: The serial number
-    :rtype: str
-    """
-    return ui.device_list.itemData(ui.device_list.currentIndex())
-
-
-def _page(ui) -> int:
-    return ui.pages.currentIndex()
-
-
-def update_button_text(ui, text: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        if deck_id:
-            # There may be no decks attached
-            api.set_button_text(deck_id, _page(ui), selected_button.index, text)
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
-            if icon:
-                selected_button.setIcon(icon)
-
-
-def update_button_command(ui, command: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), selected_button.index, command)
-
-
-def update_button_keys(ui, keys: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
-
-
-def update_button_write(ui) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
-
-
-def update_change_brightness(ui, amount: int) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
-
-
-def update_switch_page(ui, page: int) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
-
-
-def change_page(window, page: int) -> None:
-    global selected_button
-
-    """Change the Stream Deck to the desired page and update
-    the on-screen buttons.
-
-    :param ui: Reference to the ui
-    :type ui: _type_
-    :param page: The page number to switch to
-    :type page: int
-    """
-    if selected_button:
-        selected_button.setChecked(False)
-        selected_button = None
-
-    deck_id = _deck_id(window.ui)
-    if deck_id:
-        api.set_page(deck_id, page)
-        redraw_buttons(window.ui)
-        api.reset_dimmer(deck_id)
-
-    # FIXME: Probably makes more sense at this point to move all window related
-    # stuff into the window class so we don't have to pass it around everywhere
-    reset_button_configuration(window)
-
-
-def select_image(window) -> None:
-    global last_image_dir
-    deck_id = _deck_id(window.ui)
-    image_file = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
-    if not image_file:
-        if not last_image_dir:
-            image_file = os.path.expanduser("~")
-        else:
-            image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
-    if file_name:
-        last_image_dir = os.path.dirname(file_name)
-        deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)  # type: ignore # Index property added
-        redraw_buttons(window.ui)
-
-
-def align_text_vertical(window) -> None:
-    serial_number = _deck_id(window.ui)
-    position = api.get_text_vertical_align(serial_number, _page(window.ui), selected_button.index)  # type: ignore # Index property added
-    if position == "bottom" or position == "":
-        position = "middle-bottom"
-    elif position == "middle-bottom":
-        position = "middle"
-    elif position == "middle":
-        position = "middle-top"
-    elif position == "middle-top":
-        position = "top"
-    else:
-        position = ""
-
-    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index, position)  # type: ignore # Index property added
-    redraw_buttons(window.ui)
-
-
-def add_action_button(window) -> None:
-    items = window.ui.select_action_tree.selectedItems()
-    if items:
-        selected_item = items[0]
-        action = selected_item.data(0, Qt.UserRole)
-        add_action(window, "keydown", action)
-
-
-def add_action(window, event: str, action):
-    serial_number = _deck_id(window.ui)
-    page = _page(window.ui)
-    button = selected_button.index
-
-    api.add_action_setting(serial_number, page, button, event, action().id())
-        
-    window.ui.action_tree.clear()
-    build_actions(window, serial_number, _page(window.ui), selected_button.index)
-    window.ui.action_tree.scrollToBottom()
-
-    keydown_item = window.ui.action_tree.topLevelItem(window.ui.action_tree.topLevelItemCount()-1)
-    keydown_item.child(keydown_item.childCount()-1).setSelected(True)
-
-def remove_action_button(window) -> None:
-    serial_number = _deck_id(window.ui)
-
-    items = window.ui.action_tree.selectedItems()
-    if items:
-        selected_item = items[0]
-
-        # Parent items (events) don't have data
-        if selected_item.data(0, Qt.UserRole):
-            action, index, event = selected_item.data(0, Qt.UserRole)
-            api.remove_action_setting(serial_number, _page(window.ui), selected_button.index, event, index)
-
-            window.ui.action_tree.clear()
-
-            # Rebuild the action list
-            build_actions(window, serial_number, _page(window.ui), selected_button.index)
-
-            # Clear the configuration area
-            window.load_plugin_ui()
-
-
-def remove_image(window) -> None:
-    deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
-    if image:
-        confirm = QMessageBox(window)
-        confirm.setWindowTitle("Remove image")
-        confirm.setText("Are you sure you want to remove the image for this button?")
-        confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        confirm.setIcon(QMessageBox.Question)
-        button = confirm.exec_()
-        if button == QMessageBox.Yes:
-            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
-            redraw_buttons(window.ui)
-
-
-def redraw_buttons(ui) -> None:
-    deck_id = _deck_id(ui)
-    current_tab = ui.pages.currentWidget()
-    buttons = current_tab.findChildren(QtWidgets.QToolButton)
-    for button in buttons:
-        if not button.isHidden():
-            # When rebuilding the buttons, we hide the old ones
-            # and mark for deletion. They still hang around so
-            # ignore them here
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
-            if icon:
-                button.setIcon(icon)
-
-
-def set_brightness(ui, value: int) -> None:
-    deck_id = _deck_id(ui)
-    api.set_brightness(deck_id, value)
-
-
-def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
-    deck_id = _deck_id(ui)
-    api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
-    api.reset_dimmer(deck_id)
-
-
-def button_clicked(main_window, clicked_button, buttons) -> None:
-    global selected_button
-
-    ui = main_window.ui
-    selected_button = clicked_button
-    for button in buttons:
-        if button == clicked_button:
-            continue
-
-        button.setChecked(False)
-
-    deck_id = _deck_id(ui)
-    button_id = selected_button.index  # type: ignore # Index property added
-    if selected_button.isChecked():  # type: ignore # False positive mypy
-        enable_button_configuration(ui, True)
-
-        # Populate tree view with actions
-        build_actions(main_window, deck_id, _page(ui), button_id)
-        ui.text.setPlainText(api.get_button_text(deck_id, _page(ui), button_id))
-
-        image_path = api.get_button_icon(deck_id, _page(ui), button_id)
-        if image_path:
-            image_path = os.path.basename(image_path)
-        ui.image_label.setText(image_path)
-        api.reset_dimmer(deck_id)
-    else:
-        selected_button = None
-        reset_button_configuration(main_window)
-
-
-def enable_button_configuration(ui, enabled: bool):
-    ui.text.setEnabled(enabled)
-    ui.select_image_button.setEnabled(enabled)
-    ui.remove_image_button.setEnabled(enabled)
-    ui.vertical_text_button.setEnabled(enabled)
-    ui.up_action_button.setEnabled(enabled)
-    ui.down_action_button.setEnabled(enabled)
-    ui.add_action_button.setEnabled(enabled)
-    ui.action_tree.setEnabled(enabled)
-    ui.select_action_tree.setEnabled(enabled)
-    ui.remove_action_button.setEnabled(enabled)
-
-
-def reset_button_configuration(window):
-    """Clears the configuration for a button and disables editing of them. This is done when
-    there is no key selected or if there are no devices connected.
-    """
-    window.ui.text.clear()
-    window.ui.image_label.clear()
-    window.ui.action_tree.clear()
-    window.load_plugin_ui()
-    enable_button_configuration(window.ui, False)
-
-
-def browse_documentation():
-    url = QUrl("https://github.com/timothycrosley/streamdeck-ui#readme")
-    QDesktopServices.openUrl(url)
-
-
-def browse_github():
-    url = QUrl("https://github.com/timothycrosley/streamdeck-ui")
-    QDesktopServices.openUrl(url)
-
-
-def build_buttons(main_window, tab) -> None:
-    global selected_button
-
-    ui = main_window.ui
-
-    if hasattr(tab, "deck_buttons"):
-        buttons = tab.findChildren(QtWidgets.QToolButton)
-        for button in buttons:
-            button.hide()
-            # Mark them as hidden. They will be GC'd later
-            button.deleteLater()
-
-        tab.deck_buttons.hide()
-        tab.deck_buttons.deleteLater()
-        # Remove the inner page
-        del tab.children()[0]
-        # Remove the property
-        del tab.deck_buttons
-
-    selected_button = None
-    # When rebuilding any selection is cleared
-
-    deck_id = _deck_id(ui)
-
-    if not deck_id:
-        return
-    deck = api.get_deck(deck_id)
-
-    # Create a new base_widget with tab as it's parent
-    # This is effectively a "blank tab"
-    base_widget = QtWidgets.QWidget(tab)
-
-    # Add an inner page (QtQidget) to the page
-    tab.children()[0].addWidget(base_widget)
-
-    # Set a property - this allows us to check later
-    # if we've already created the buttons
-    tab.deck_buttons = base_widget
-
-    row_layout = QtWidgets.QVBoxLayout(base_widget)
-    index = 0
-    buttons = []
-    for _row in range(deck["layout"][0]):  # type: ignore
-        column_layout = QtWidgets.QHBoxLayout()
-        row_layout.addLayout(column_layout)
-
-        for _column in range(deck["layout"][1]):  # type: ignore
-            button = DraggableButton(base_widget, main_window, api)
-            button.setCheckable(True)
-            button.index = index
-            button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-            button.setToolButtonStyle(Qt.ToolButtonIconOnly)
-            button.setIconSize(QSize(80, 80))
-            button.setStyleSheet(BUTTON_STYLE)
-            buttons.append(button)
-            column_layout.addWidget(button)
-            index += 1
-
-        column_layout.addStretch(1)
-    row_layout.addStretch(1)
-
-    # Note that the button click event captures the ui variable, the current button
-    #  and all the other buttons
-    for button in buttons:
-        button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(main_window, button, buttons))
-
-
-def export_config(window) -> None:
-    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
-    if not file_name:
-        return
-
-    api.export_config(file_name)
-
-
-def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
-    if not file_name:
-        return
-
-    api.import_config(file_name)
-    redraw_buttons(window.ui)
-
-
-def build_device(main_window, _device_index=None) -> None:
-    """This method builds the device configuration user interface.
-    It is called if you switch to a different Stream Deck,
-    a Stream Deck is added or when the last one is removed.
-    It must deal with the case where there is no Stream Deck as
-    a result.
-
-    :param ui: A reference to the ui
-    :type ui: _type_
-    :param _device_index: Not used, defaults to None
-    :type _device_index: _type_, optional
-    """
-    style = ""
-    ui = main_window.ui
-    if ui.device_list.count() > 0:
-        style = "background-color: black"
-
-    for page_id in range(ui.pages.count()):
-        page = ui.pages.widget(page_id)
-        page.setStyleSheet(style)
-        build_buttons(main_window, page)
-
-    if ui.device_list.count() > 0:
-        ui.settingsButton.setEnabled(True)
-        # Set the active page for this device
-        ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
-
-        # Draw the buttons for the active page
-        redraw_buttons(main_window.ui)
-    else:
-        ui.settingsButton.setEnabled(False)
-        reset_button_configuration(main_window)
+class SettingsDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ui: Ui_SettingsDialog = Ui_SettingsDialog()
+        self.ui.setupUi(self)
+        self.show()
 
 
 class MainWindow(QMainWindow):
@@ -657,14 +195,13 @@ class MainWindow(QMainWindow):
     ui: Ui_MainWindow
     "A reference to all the UI objects for the main window"
 
-    def __init__(self):
+    def __init__(self, app):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.window_shown: bool = True
 
         # TODO: Start --- Is there a better way then replacing?
-
         self.ui.select_action_tree.deleteLater()
         self.ui.select_action_tree = DraggableSourceTree(self.ui.toprightwidget, None, None)
         self.ui.select_action_tree.setObjectName(u"select_action_tree")
@@ -687,6 +224,554 @@ class MainWindow(QMainWindow):
         self.ui.select_action_tree.setDropIndicatorShown(False)
         self.ui.select_action_tree.setDragDropMode(QAbstractItemView.DragDrop)
 
+        self.ui.add_action_button.clicked.connect(self.add_action_button)
+
+        self.ui.select_image_button.clicked.connect(self.select_image)
+        self.ui.vertical_text_button.clicked.connect(self.align_text_vertical)
+        self.ui.remove_image_button.clicked.connect(self.remove_image)
+
+        self.ui.actionExport.triggered.connect(self.export_config)
+        self.ui.actionImport.triggered.connect(self.import_config)
+        self.ui.settingsButton.clicked.connect(self.show_settings)
+
+        self.ui.remove_action_button.clicked.connect(self.remove_action_button)
+        self.ui.actionDocs.triggered.connect(self.browse_documentation)
+        self.ui.actionGithub.triggered.connect(self.browse_github)
+        self.ui.settingsButton.setEnabled(False)
+        self.enable_button_configuration(False)
+
+        self.ui.text.textChanged.connect(self.queue_update_button_text)
+        self.ui.actionAbout.triggered.connect(self.about_dialog)
+
+        self.ui.actionExit.triggered.connect(app.exit)
+
+    # TODO: This will all be removed
+    def handle_keypress(self, deck_id: str, key: int, state: bool) -> None:
+
+        if state:
+            if api.reset_dimmer(deck_id):
+                return
+
+            page = api.get_page(deck_id)
+
+            brightness_change = api.get_button_change_brightness(deck_id, page, key)
+            if brightness_change:
+                try:
+                    api.change_brightness(deck_id, brightness_change)
+                except Exception as error:
+                    print(f"Could not change brightness: {error}")
+
+            switch_page = api.get_button_switch_page(deck_id, page, key)
+            if switch_page:
+                api.set_page(deck_id, switch_page - 1)
+                if self.serial_number() == deck_id:
+                    self.ui.pages.setCurrentIndex(switch_page - 1)
+
+    def serial_number(self) -> str:
+        """Returns the currently selected Stream Deck serial number
+
+        :return: The serial number
+        :rtype: str
+        """
+        return self.ui.device_list.itemData(self.ui.device_list.currentIndex())
+
+
+    def page(self) -> int:
+        """Returns the current page (tab) the user is on.
+
+        :return: The page index
+        :rtype: int
+        """
+        return self.ui.pages.currentIndex()
+
+    def streamdeck_cpu_changed(self, serial_number: str, cpu: int):
+        if cpu > 100:
+            cpu == 100
+        if self.serial_number()== serial_number:
+            self.ui.cpu_usage.setValue(cpu)
+            self.ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
+            self.ui.cpu_usage.update()
+
+
+    # TODO: This should be done in the API so that all saves
+    # are delayed. This will allow for a more responsive
+    # UI and solves the problem for all control, not just
+    # this one. A parameter should be added that allows
+    # a forced save (for example, on shutdown)
+    def queue_update_button_text(self) -> None:
+        """Instead of directly updating the text (label) associated with
+        the button, add a small delay. If this is called before the
+        timer fires, delay it again. Effectively this creates an update
+        queue. It makes the textbox more response, as rendering the button
+        and saving to the API each time can feel somewhat slow.
+
+        :param ui: Reference to the ui
+        :type ui: _type_
+        :param text: The new text value
+        :type text: str
+        """
+        global text_update_timer
+
+        if text_update_timer:
+            text_update_timer.stop()
+
+        text_update_timer = QTimer()
+        text_update_timer.setSingleShot(True)
+        text_update_timer.timeout.connect(partial(self.update_button_text, self.ui.text.toPlainText()))
+        text_update_timer.start(500)
+
+
+    def update_button_text(self, text: str) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            if deck_id:
+                # There may be no decks attached
+                api.set_button_text(deck_id, self.page(), selected_button.index, text)
+                icon = api.get_button_icon_pixmap(deck_id, self.page(), selected_button.index)
+                if icon:
+                    selected_button.setIcon(icon)
+
+    def update_button_command(self, command: str) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            api.set_button_command(deck_id, self.page(), selected_button.index, command)
+
+    def update_button_keys(self, keys: str) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            api.set_button_keys(deck_id, self.page(), selected_button.index, keys)
+
+    def update_button_write(self) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            api.set_button_write(deck_id, self.page(), selected_button.index, self.ui.write.toPlainText())
+
+    def update_change_brightness(self, amount: int) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            api.set_button_change_brightness(deck_id, self.page(), selected_button.index, amount)
+
+
+    def update_switch_page(self, page: int) -> None:
+        if selected_button:
+            deck_id = self.serial_number()
+            api.set_button_switch_page(deck_id, self.page(), selected_button.index, page)
+
+    def remove_action_button(self) -> None:
+        serial_number = self.serial_number()
+
+        items = self.ui.action_tree.selectedItems()
+        if items:
+            selected_item = items[0]
+
+            # Parent items (events) don't have data
+            if selected_item.data(0, Qt.UserRole):
+                action, index, event = selected_item.data(0, Qt.UserRole)
+                api.remove_action_setting(serial_number, self.page(), selected_button.index, event, index)
+
+                self.ui.action_tree.clear()
+
+                # Rebuild the action list
+                self.build_actions(serial_number, self.page(), selected_button.index)
+
+                # Clear the configuration area
+                self.load_plugin_ui()
+
+    def enable_button_configuration(self, enabled: bool):
+        self.ui.text.setEnabled(enabled)
+        self.ui.select_image_button.setEnabled(enabled)
+        self.ui.remove_image_button.setEnabled(enabled)
+        self.ui.vertical_text_button.setEnabled(enabled)
+        self.ui.up_action_button.setEnabled(enabled)
+        self.ui.down_action_button.setEnabled(enabled)
+        self.ui.add_action_button.setEnabled(enabled)
+        self.ui.action_tree.setEnabled(enabled)
+        self.ui.select_action_tree.setEnabled(enabled)
+        self.ui.remove_action_button.setEnabled(enabled)
+
+
+    def browse_documentation(self):
+        url = QUrl("https://github.com/timothycrosley/streamdeck-ui#readme")
+        QDesktopServices.openUrl(url)
+
+
+    def browse_github(self):
+        url = QUrl("https://github.com/timothycrosley/streamdeck-ui")
+        QDesktopServices.openUrl(url)
+
+    def disable_dim_settings(self, settings: SettingsDialog, _index: int) -> None:
+        disable = dimmer_options.get(settings.ui.dim.currentText()) == 0
+        settings.ui.brightness_dimmed.setDisabled(disable)
+        settings.ui.label_brightness_dimmed.setDisabled(disable)
+
+    def toggle_dim_all(self) -> None:
+        api.toggle_dimmers()
+
+    def set_brightness(self, value: int) -> None:
+        deck_id = self.serial_number()
+        api.set_brightness(deck_id, value)
+
+
+    def set_brightness_dimmed(self, value: int, full_brightness: int) -> None:
+        deck_id = self.serial_number()
+        api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
+        api.reset_dimmer(deck_id)
+
+    def show_settings(self) -> None:
+        """Shows the settings dialog and allows the user the change deck specific
+        settings. Settings are not saved until OK is clicked."""
+        ui = self.ui
+        deck_id = self.serial_number()
+        settings = SettingsDialog(self)
+        api.stop_dimmer(deck_id)
+
+        for label, value in dimmer_options.items():
+            settings.ui.dim.addItem(f"{label}", userData=value)
+
+        existing_timeout = api.get_display_timeout(deck_id)
+        existing_index = next((i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout), None)
+
+        if existing_index is None:
+            settings.ui.dim.addItem(f"Custom: {existing_timeout}s", userData=existing_timeout)
+            existing_index = settings.ui.dim.count() - 1
+            settings.ui.dim.setCurrentIndex(existing_index)
+        else:
+            settings.ui.dim.setCurrentIndex(existing_index)
+
+        existing_brightness_dimmed = api.get_brightness_dimmed(deck_id)
+        settings.ui.brightness_dimmed.setValue(existing_brightness_dimmed)
+
+        settings.ui.label_streamdeck.setText(deck_id)
+        settings.ui.brightness.setValue(api.get_brightness(deck_id))
+        settings.ui.brightness.valueChanged.connect(partial(self.change_brightness, deck_id))
+        settings.ui.dim.currentIndexChanged.connect(partial(self.disable_dim_settings, settings))
+        if settings.exec_():
+            # Commit changes
+            if existing_index != settings.ui.dim.currentIndex():
+                # dimmers[deck_id].timeout = settings.ui.dim.currentData()
+                api.set_display_timeout(deck_id, settings.ui.dim.currentData())
+            self.set_brightness(settings.ui.brightness.value())
+            self.set_brightness_dimmed(settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
+        else:
+            # User cancelled, reset to original brightness
+            self.change_brightness(deck_id, api.get_brightness(deck_id))
+
+        api.reset_dimmer(deck_id)
+
+    def export_config(self) -> None:
+        file_name = QFileDialog.getSaveFileName(self, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
+        if not file_name:
+            return
+        api.export_config(file_name)
+
+    def import_config(self) -> None:
+        file_name = QFileDialog.getOpenFileName(self, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
+        if not file_name:
+            return
+
+        api.import_config(file_name)
+        self.redraw_buttons()
+
+    def remove_image(self) -> None:
+        deck_id = self.serial_number()
+        image = api.get_button_icon(deck_id, self.page(), selected_button.index)  # type: ignore # Index property added
+        if image:
+            confirm = QMessageBox(self)
+            confirm.setWindowTitle("Remove image")
+            confirm.setText("Are you sure you want to remove the image for this button?")
+            confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            confirm.setIcon(QMessageBox.Question)
+            button = confirm.exec_()
+            if button == QMessageBox.Yes:
+                api.set_button_icon(deck_id, self.page(), selected_button.index, "")  # type: ignore # Index property added
+                self.redraw_buttons()
+
+    def align_text_vertical(self) -> None:
+        serial_number = self.serial_number()
+        position = api.get_text_vertical_align(serial_number, self.page(), selected_button.index)  # type: ignore # Index property added
+        if position == "bottom" or position == "":
+            position = "middle-bottom"
+        elif position == "middle-bottom":
+            position = "middle"
+        elif position == "middle":
+            position = "middle-top"
+        elif position == "middle-top":
+            position = "top"
+        else:
+            position = ""
+
+        api.set_text_vertical_align(serial_number, self.page(), selected_button.index, position)  # type: ignore # Index property added
+        self.redraw_buttons()
+
+    def select_image(self) -> None:
+        global last_image_dir
+        deck_id = self.serial_number()
+        image_file = api.get_button_icon(deck_id, self.page(), selected_button.index)  # type: ignore # Index property added
+        if not image_file:
+            if not last_image_dir:
+                image_file = os.path.expanduser("~")
+            else:
+                image_file = last_image_dir
+        file_name = QFileDialog.getOpenFileName(self, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
+        if file_name:
+            last_image_dir = os.path.dirname(file_name)
+            deck_id = self.serial_number()
+            api.set_button_icon(deck_id, self.page(), selected_button.index, file_name)  # type: ignore # Index property added
+            self.redraw_buttons()
+
+    def change_page(self, page: int) -> None:
+        global selected_button
+
+        """Change the Stream Deck to the desired page and update
+        the on-screen buttons.
+
+        :param ui: Reference to the ui
+        :type ui: _type_
+        :param page: The page number to switch to
+        :type page: int
+        """
+        if selected_button:
+            selected_button.setChecked(False)
+            selected_button = None
+
+        deck_id = self.serial_number()
+        if deck_id:
+            api.set_page(deck_id, page)
+            self.redraw_buttons()
+            api.reset_dimmer(deck_id)
+
+        self.reset_button_configuration()
+
+    def button_clicked(self, clicked_button, buttons) -> None:
+        global selected_button
+
+        ui = self.ui
+        selected_button = clicked_button
+        for button in buttons:
+            if button == clicked_button:
+                continue
+
+            button.setChecked(False)
+
+        deck_id = self.serial_number()
+        button_id = selected_button.index  # type: ignore # Index property added
+        if selected_button.isChecked():  # type: ignore # False positive mypy
+            self.enable_button_configuration(True)
+
+            # Populate tree view with actions
+            self.build_actions(deck_id, self.page(), button_id)
+            ui.text.setPlainText(api.get_button_text(deck_id, self.page(), button_id))
+
+            image_path = api.get_button_icon(deck_id, self.page(), button_id)
+            if image_path:
+                image_path = os.path.basename(image_path)
+            ui.image_label.setText(image_path)
+            api.reset_dimmer(deck_id)
+        else:
+            selected_button = None
+            self.reset_button_configuration()
+
+    def redraw_buttons(self) -> None:
+        deck_id = self.serial_number()
+        current_tab = self.ui.pages.currentWidget()
+        buttons = current_tab.findChildren(QtWidgets.QToolButton)
+        for button in buttons:
+            if not button.isHidden():
+                # When rebuilding the buttons, we hide the old ones
+                # and mark for deletion. They still hang around so
+                # ignore them here
+                icon = api.get_button_icon_pixmap(deck_id, self.page(), button.index)
+                if icon:
+                    button.setIcon(icon)        
+
+    def reset_button_configuration(self):
+        """Clears the configuration for a button and disables editing of them. This is done when
+        there is no key selected or if there are no devices connected.
+        """
+        self.ui.text.clear()
+        self.ui.image_label.clear()
+        self.ui.action_tree.clear()
+        self.load_plugin_ui()
+        self.enable_button_configuration(False)
+
+    def build_buttons(self, tab) -> None:
+        global selected_button
+
+        ui = self.ui
+
+        if hasattr(tab, "deck_buttons"):
+            buttons = tab.findChildren(QtWidgets.QToolButton)
+            for button in buttons:
+                button.hide()
+                # Mark them as hidden. They will be GC'd later
+                button.deleteLater()
+
+            tab.deck_buttons.hide()
+            tab.deck_buttons.deleteLater()
+            # Remove the inner page
+            del tab.children()[0]
+            # Remove the property
+            del tab.deck_buttons
+
+        selected_button = None
+        # When rebuilding any selection is cleared
+
+        deck_id = self.serial_number()
+
+        if not deck_id:
+            return
+        deck = api.get_deck(deck_id)
+
+        # Create a new base_widget with tab as it's parent
+        # This is effectively a "blank tab"
+        base_widget = QtWidgets.QWidget(tab)
+
+        # Add an inner page (QtQidget) to the page
+        tab.children()[0].addWidget(base_widget)
+
+        # Set a property - this allows us to check later
+        # if we've already created the buttons
+        tab.deck_buttons = base_widget
+
+        row_layout = QtWidgets.QVBoxLayout(base_widget)
+        index = 0
+        buttons = []
+        for _row in range(deck["layout"][0]):  # type: ignore
+            column_layout = QtWidgets.QHBoxLayout()
+            row_layout.addLayout(column_layout)
+
+            for _column in range(deck["layout"][1]):  # type: ignore
+                button = DraggableButton(base_widget, self, api)
+                button.setCheckable(True)
+                button.index = index
+                button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+                button.setToolButtonStyle(Qt.ToolButtonIconOnly)
+                button.setIconSize(QSize(80, 80))
+                button.setStyleSheet(BUTTON_STYLE)
+                buttons.append(button)
+                column_layout.addWidget(button)
+                index += 1
+
+            column_layout.addStretch(1)
+        row_layout.addStretch(1)
+
+        # Note that the button click event captures the ui variable, the current button
+        #  and all the other buttons
+        for button in buttons:
+            button.clicked.connect(lambda button=button, buttons=buttons: self.button_clicked(button, buttons))
+
+
+    def build_device(self, _device_index=None) -> None:
+        """This method builds the device configuration user interface.
+        It is called if you switch to a different Stream Deck,
+        a Stream Deck is added or when the last one is removed.
+        It must deal with the case where there is no Stream Deck as
+        a result.
+
+        :param ui: A reference to the ui
+        :type ui: _type_
+        :param _device_index: Not used, defaults to None
+        :type _device_index: _type_, optional
+        """
+        style = ""
+        ui = self.ui
+        if ui.device_list.count() > 0:
+            style = "background-color: black"
+
+        for page_id in range(ui.pages.count()):
+            page = ui.pages.widget(page_id)
+            page.setStyleSheet(style)
+            self.build_buttons(page)
+
+        if ui.device_list.count() > 0:
+            ui.settingsButton.setEnabled(True)
+            # Set the active page for this device
+            ui.pages.setCurrentIndex(api.get_page(self.serial_number()))
+
+            # Draw the buttons for the active page
+            self.redraw_buttons()
+        else:
+            ui.settingsButton.setEnabled(False)
+            self.reset_button_configuration()
+
+
+    def streamdeck_attached(self, deck: Dict):
+
+        serial_number = deck["serial_number"]
+        blocker = QSignalBlocker(self.ui.device_list)
+        try:
+            self.ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
+        finally:
+            blocker.unblock()
+        self.build_device(self)
+
+    def streamdeck_detached(self, serial_number):
+        index = self.ui.device_list.findData(serial_number)
+        if index != -1:
+            # Should not be (how can you remove a device that was never attached?)
+            # Check anyways
+            self.ui.device_list.removeItem(index)
+
+    def add_action_button(self) -> None:
+        items = self.ui.select_action_tree.selectedItems()
+        if items:
+            selected_item = items[0]
+            action = selected_item.data(0, Qt.UserRole)
+            self.add_action("keydown", action)
+
+
+    def add_action(self, event: str, action):
+        serial_number = self.serial_number()
+        page = self.page()
+        button = selected_button.index
+
+        api.add_action_setting(serial_number, page, button, event, action().id())
+            
+        self.ui.action_tree.clear()
+        self.build_actions(serial_number, self.page(), selected_button.index)
+        self.ui.action_tree.scrollToBottom()
+
+        keydown_item = self.ui.action_tree.topLevelItem(self.ui.action_tree.topLevelItemCount()-1)
+        keydown_item.child(keydown_item.childCount()-1).setSelected(True)
+
+    def build_actions(self, serial_number: str, page: int, button_id: int):
+
+        ui = self.ui
+        ui.action_tree.clear()
+        actions = api.get_action_list(serial_number, page, button_id, "keydown")
+
+        # This must be fixed - it's just a hack. We want to automatically
+        # group actions by the even they're bound to
+        key_pressed = QTreeWidgetItem(["When key pressed:"])
+
+        icon = QIcon()
+        icon.addFile(u":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
+        key_pressed.setIcon(0, icon)
+        key_pressed.setExpanded(True)
+        key_pressed.setData(0, Qt.UserRole, None)
+
+        # What needs to happen here:
+        # For a given button, iterate over the actions
+        # Look at the setting - match it to an available plugin
+        # Initialize the action (or should they already be initialized, since they
+        # need to be ready to run when you press the button?)
+        # Ask it for the category and summary
+
+        for index, action in enumerate(actions):
+            # Verify that plugin exists
+            tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
+            key_pressed.addChild(tree_item)
+
+            # Store the action, it's index in the settings and event type in a tuple so 
+            # we can remove it or act on it later.
+            tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
+
+        # ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
+        ui.action_tree.itemSelectionChanged.connect(self.load_plugin_ui)
+        ui.action_tree.addTopLevelItem(key_pressed)
+        ui.action_tree.expandAll()
+        ui.action_tree.resizeColumnToContents(0)
+        ui.action_tree.resizeColumnToContents(1)
 
     def closeEvent(self, event) -> None:  # noqa: N802 - Part of QT signature.
         self.window_shown = False
@@ -787,128 +872,10 @@ class MainWindow(QMainWindow):
                 current_action = action
 
 
-# TODO: This should be done in the API so that all saves
-# are delayed. This will allow for a more responsive
-# UI and solves the problem for all control, not just
-# this one. A parameter should be added that allows
-# a forced save (for example, on shutdown)
-def queue_update_button_text(ui) -> None:
-    """Instead of directly updating the text (label) associated with
-    the button, add a small delay. If this is called before the
-    timer fires, delay it again. Effectively this creates an update
-    queue. It makes the textbox more response, as rendering the button
-    and saving to the API each time can feel somewhat slow.
-
-    :param ui: Reference to the ui
-    :type ui: _type_
-    :param text: The new text value
-    :type text: str
-    """
-    global text_update_timer
-
-    if text_update_timer:
-        text_update_timer.stop()
-
-    text_update_timer = QTimer()
-    text_update_timer.setSingleShot(True)
-    text_update_timer.timeout.connect(partial(update_button_text, ui, ui.text.toPlainText()))
-    text_update_timer.start(500)
-
-
 def change_brightness(deck_id: str, brightness: int):
     """Changes the brightness of the given streamdeck, but does not save
     the state."""
     api.decks[deck_id].set_brightness(brightness)
-
-
-class SettingsDialog(QDialog):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.ui: Ui_SettingsDialog = Ui_SettingsDialog()
-        self.ui.setupUi(self)
-        self.show()
-
-
-def show_settings(window: MainWindow) -> None:
-    """Shows the settings dialog and allows the user the change deck specific
-    settings. Settings are not saved until OK is clicked."""
-    ui = window.ui
-    deck_id = _deck_id(ui)
-    settings = SettingsDialog(window)
-    api.stop_dimmer(deck_id)
-
-    for label, value in dimmer_options.items():
-        settings.ui.dim.addItem(f"{label}", userData=value)
-
-    existing_timeout = api.get_display_timeout(deck_id)
-    existing_index = next((i for i, (k, v) in enumerate(dimmer_options.items()) if v == existing_timeout), None)
-
-    if existing_index is None:
-        settings.ui.dim.addItem(f"Custom: {existing_timeout}s", userData=existing_timeout)
-        existing_index = settings.ui.dim.count() - 1
-        settings.ui.dim.setCurrentIndex(existing_index)
-    else:
-        settings.ui.dim.setCurrentIndex(existing_index)
-
-    existing_brightness_dimmed = api.get_brightness_dimmed(deck_id)
-    settings.ui.brightness_dimmed.setValue(existing_brightness_dimmed)
-
-    settings.ui.label_streamdeck.setText(deck_id)
-    settings.ui.brightness.setValue(api.get_brightness(deck_id))
-    settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
-    settings.ui.dim.currentIndexChanged.connect(partial(disable_dim_settings, settings))
-    if settings.exec_():
-        # Commit changes
-        if existing_index != settings.ui.dim.currentIndex():
-            # dimmers[deck_id].timeout = settings.ui.dim.currentData()
-            api.set_display_timeout(deck_id, settings.ui.dim.currentData())
-        set_brightness(window.ui, settings.ui.brightness.value())
-        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
-    else:
-        # User cancelled, reset to original brightness
-        change_brightness(deck_id, api.get_brightness(deck_id))
-
-    api.reset_dimmer(deck_id)
-
-
-def disable_dim_settings(settings: SettingsDialog, _index: int) -> None:
-    disable = dimmer_options.get(settings.ui.dim.currentText()) == 0
-    settings.ui.brightness_dimmed.setDisabled(disable)
-    settings.ui.label_brightness_dimmed.setDisabled(disable)
-
-
-def toggle_dim_all() -> None:
-    api.toggle_dimmers()
-
-
-def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
-    """Creates the main application window and configures slots and signals
-
-    :param logo: The icon displayed in the main application window
-    :type logo: QIcon
-    :param app: The QApplication that started it all
-    :type app: QApplication
-    :return: Returns the MainWindow instance
-    :rtype: MainWindow
-    """
-    main_window = MainWindow()
-    ui = main_window.ui
-    ui.text.textChanged.connect(partial(queue_update_button_text, ui))
-    ui.select_image_button.clicked.connect(partial(select_image, main_window))
-    ui.vertical_text_button.clicked.connect(partial(align_text_vertical, main_window))
-    ui.remove_image_button.clicked.connect(partial(remove_image, main_window))
-    ui.remove_action_button.clicked.connect(partial(remove_action_button, main_window))
-    ui.add_action_button.clicked.connect(partial(add_action_button, main_window))
-    ui.settingsButton.clicked.connect(partial(show_settings, main_window))
-    ui.actionExport.triggered.connect(partial(export_config, main_window))
-    ui.actionImport.triggered.connect(partial(import_config, main_window))
-    ui.actionExit.triggered.connect(app.exit)
-    ui.actionAbout.triggered.connect(main_window.about_dialog)
-    ui.actionDocs.triggered.connect(browse_documentation)
-    ui.actionGithub.triggered.connect(browse_github)
-    ui.settingsButton.setEnabled(False)
-    enable_button_configuration(ui, False)
-    return main_window
 
 
 def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSystemTrayIcon:
@@ -929,7 +896,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
 
     menu = QMenu()
     action_dim = QAction("Dim display (toggle)", main_window)
-    action_dim.triggered.connect(toggle_dim_all)
+    action_dim.triggered.connect(main_window.toggle_dim_all)
     action_configure = QAction("Configure...", main_window)
     action_configure.triggered.connect(main_window.bring_to_top)
     menu.addAction(action_dim)
@@ -940,127 +907,6 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     menu.addAction(action_exit)
     tray.setContextMenu(menu)
     return tray
-
-
-def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
-    if cpu > 100:
-        cpu == 100
-    if _deck_id(ui) == serial_number:
-        ui.cpu_usage.setValue(cpu)
-        ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
-        ui.cpu_usage.update()
-
-
-def streamdeck_attached(main_window, deck: Dict):
-
-    serial_number = deck["serial_number"]
-    blocker = QSignalBlocker(main_window.ui.device_list)
-    try:
-        main_window.ui.device_list.addItem(f"{deck['type']} - {serial_number}", userData=serial_number)
-    finally:
-        blocker.unblock()
-    build_device(main_window)
-
-
-def streamdeck_detached(ui, serial_number):
-    index = ui.device_list.findData(serial_number)
-    if index != -1:
-        # Should not be (how can you remove a device that was never attached?)
-        # Check anyways
-        ui.device_list.removeItem(index)
-
-
-def build_actions(main_window, serial_number: str, page: int, button_id: int):
-
-    ui = main_window.ui
-    ui.action_tree.clear()
-    actions = api.get_action_list(serial_number, page, button_id, "keydown")
-
-    # This must be fixed - it's just a hack. We want to automatically
-    # group actions by the even they're bound to
-    key_pressed = QTreeWidgetItem(["When key pressed:"])
-
-    icon = QIcon()
-    icon.addFile(u":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
-    key_pressed.setIcon(0, icon)
-    key_pressed.setExpanded(True)
-    key_pressed.setData(0, Qt.UserRole, None)
-
-    # What needs to happen here:
-    # For a given button, iterate over the actions
-    # Look at the setting - match it to an available plugin
-    # Initialize the action (or should they already be initialized, since they
-    # need to be ready to run when you press the button?)
-    # Ask it for the category and summary
-
-    for index, action in enumerate(actions):
-        # Verify that plugin exists
-        tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
-        key_pressed.addChild(tree_item)
-
-        # Store the action, it's index in the settings and event type in a tuple so 
-        # we can remove it or act on it later.
-        tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
-
-    # tree_item = QTreeWidgetItem([command])
-    # tree_item.setIcon(0, action.get_icon())
-    # key_pressed.addChild(tree_item)
-    # tree_item.setData(0, Qt.UserRole, action)
-
-    # command = api.get_button_command(serial_number, page, button_id)
-    # if command:
-    #     tree_item = QTreeWidgetItem(["Command", command])
-    #     key_pressed.addChild(tree_item)
-
-    # keys = api.get_button_keys(serial_number, page, button_id)
-    # if keys:
-    #     tree_item = QTreeWidgetItem(["Press keys", keys])
-    #     key_pressed.addChild(tree_item)
-
-    # write = api.get_button_write(serial_number, page, button_id)
-    # if write:
-    #     tree_item = QTreeWidgetItem(["Write", write])
-    #     key_pressed.addChild(tree_item)
-
-    # brightness = api.get_button_change_brightness(serial_number, page, button_id)
-    # if brightness:
-    #     tree_item = QTreeWidgetItem(["Change brightness", str(brightness)])
-    #     key_pressed.addChild(tree_item)
-
-    # switch = api.get_button_switch_page(serial_number, page, button_id)
-    # if switch:
-    #     tree_item = QTreeWidgetItem(["Switch to page", str(switch)])
-    #     key_pressed.addChild(tree_item)
-
-    # ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
-    ui.action_tree.itemSelectionChanged.connect(main_window.load_plugin_ui)
-    ui.action_tree.addTopLevelItem(key_pressed)
-    ui.action_tree.expandAll()
-    ui.action_tree.resizeColumnToContents(0)
-    ui.action_tree.resizeColumnToContents(1)
-
-
-# def load_plugins():
-#     # __file__ is the path the the current module (including file name)
-#     plugins = []
-#     current_path = os.path.dirname(os.path.realpath(__file__))
-#     plugin_path = os.path.join(current_path, "actions")
-
-#     for sub_folder_root, _folder_in_folder, files in os.walk(plugin_path):
-#         for file in files:
-#             if os.path.basename(file).endswith("py"):
-#                 # Import the relevant module (note: a module does not end with .py)
-#                 module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
-#                 module_name = module_path.replace(os.path.sep, '.')
-#                 module_name = module_name[module_name.find("streamdeck_ui"):]
-#                 module = importlib.import_module(module_name)
-
-#                 # Look for classes that derives from StreamDeckAction class
-#                 for name in dir(module):
-#                     obj = getattr(module, name)
-#                     if isinstance(obj, type) and issubclass(obj, StreamDeckAction) and not inspect.isabstract(obj):
-#                         plugins.append(obj())
-#     return plugins
 
 
 def start(_exit: bool = False) -> None:
@@ -1094,19 +940,19 @@ def start(_exit: bool = False) -> None:
     app.setApplicationVersion(version)
     logo = QIcon(LOGO)
     app.setWindowIcon(logo)
-    main_window = create_main_window(logo, app)
+    main_window = MainWindow(app)
     ui = main_window.ui
     tray = create_tray(logo, app, main_window)
 
     main_window.update_plugins(plugins)
-    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+    api.streamdeck_keys.key_pressed.connect(main_window.handle_keypress)
 
-    ui.device_list.currentIndexChanged.connect(partial(build_device, main_window))
-    ui.pages.currentChanged.connect(partial(change_page, main_window))
+    ui.device_list.currentIndexChanged.connect(main_window.build_device)
+    ui.pages.currentChanged.connect(main_window.change_page)
 
-    api.plugevents.attached.connect(partial(streamdeck_attached, main_window))
-    api.plugevents.detached.connect(partial(streamdeck_detached, ui))
-    api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+    api.plugevents.attached.connect(main_window.streamdeck_attached)
+    api.plugevents.detached.connect(main_window.streamdeck_detached)
+    api.plugevents.cpu_changed.connect(main_window.streamdeck_cpu_changed)
 
     api.start()
 
