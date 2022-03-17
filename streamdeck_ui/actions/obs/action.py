@@ -1,6 +1,6 @@
 from subprocess import Popen
 from PySide2.QtWidgets import QWidget
-from streamdeck_ui.actions.obs.obs import Ui_ObsWidget
+from streamdeck_ui.actions.obs.ui_obs import Ui_ObsWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
 from obswebsocket import obsws, requests
 

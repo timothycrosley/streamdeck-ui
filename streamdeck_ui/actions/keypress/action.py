@@ -1,5 +1,5 @@
 from PySide2.QtWidgets import QWidget
-from streamdeck_ui.actions.keypress.keypress import Ui_KeypressWidget
+from streamdeck_ui.actions.keypress.ui_keypress import Ui_KeypressWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
 from pynput import keyboard
 from pynput.keyboard import Key
