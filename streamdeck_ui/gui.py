@@ -251,6 +251,11 @@ class MainWindow(QMainWindow):
 
         self.ui.actionExit.triggered.connect(app.exit)
 
+    def change_brightness(self, deck_id: str, brightness: int):
+        """Changes the brightness of the given streamdeck, but does not save
+        the state."""
+        api.decks[deck_id].set_brightness(brightness)
+
     # TODO: This will all be removed
     def handle_keypress(self, deck_id: str, key: int, state: bool) -> None:
 
@@ -858,12 +863,6 @@ class MainWindow(QMainWindow):
             action, _index, _event = item.data(0, Qt.UserRole)
             if action:
                 self.ui.actionlayout.addWidget(action.get_ui(self))
-
-
-def change_brightness(deck_id: str, brightness: int):
-    """Changes the brightness of the given streamdeck, but does not save
-    the state."""
-    api.decks[deck_id].set_brightness(brightness)
 
 
 def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSystemTrayIcon:
