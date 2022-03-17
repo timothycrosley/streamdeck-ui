@@ -42,8 +42,6 @@ BUTTON_DRAG_STYLE = """
     border-style: outset;}
 """
 
-selected_button: Optional[QtWidgets.QToolButton] = None
-"A reference to the currently selected button"
 
 text_update_timer: Optional[QTimer] = None
 "Timer used to delay updates to the button text"
@@ -92,19 +90,21 @@ class DraggableSourceTree(QtWidgets.QTreeWidget):
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
-    def __init__(self, parent, window, api: StreamDeckServer):
+    def __init__(self, parent, parent_window, api: StreamDeckServer, index: int):
         super(DraggableButton, self).__init__(parent)
 
+        self.index = index
         self.setAcceptDrops(True)
-        self.window = window
+        self.parent_window = parent_window
         self.api = api
+        self.index
 
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
 
         if e.buttons() != Qt.LeftButton:
             return
 
-        self.api.reset_dimmer(self.window.serial_number())
+        self.api.reset_dimmer(self.parent_window.serial_number())
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -115,8 +115,8 @@ class DraggableButton(QtWidgets.QToolButton):
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
-        serial_number = self.window.serial_number()
-        page = self.window.page()
+        serial_number = self.parent_window.serial_number()
+        page = self.parent_window.page()
 
         if e.source():
 
@@ -131,7 +131,7 @@ class DraggableButton(QtWidgets.QToolButton):
                     selected_button.setChecked(False)
                     self.setChecked(True)
                     selected_button = self
-                self.window.add_action("keydown", action)
+                self.parent_window.add_action("keydown", action)
 
                 return
             else:
@@ -171,6 +171,9 @@ class DraggableButton(QtWidgets.QToolButton):
     def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
         self.setStyleSheet(BUTTON_STYLE)
 
+
+selected_button: Optional[DraggableButton] = None
+"A reference to the currently selected button"
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
@@ -341,16 +344,10 @@ class MainWindow(QMainWindow):
             deck_id = self.serial_number()
             api.set_button_keys(deck_id, self.page(), selected_button.index, keys)
 
-    def update_button_write(self) -> None:
-        if selected_button:
-            deck_id = self.serial_number()
-            api.set_button_write(deck_id, self.page(), selected_button.index, self.ui.write.toPlainText())
-
     def update_change_brightness(self, amount: int) -> None:
         if selected_button:
             deck_id = self.serial_number()
             api.set_button_change_brightness(deck_id, self.page(), selected_button.index, amount)
-
 
     def update_switch_page(self, page: int) -> None:
         if selected_button:
@@ -365,7 +362,7 @@ class MainWindow(QMainWindow):
             selected_item = items[0]
 
             # Parent items (events) don't have data
-            if selected_item.data(0, Qt.UserRole):
+            if selected_item.data(0, Qt.UserRole) and selected_button is not None:
                 action, index, event = selected_item.data(0, Qt.UserRole)
                 api.remove_action_setting(serial_number, self.page(), selected_button.index, event, index)
 
@@ -641,9 +638,8 @@ class MainWindow(QMainWindow):
             row_layout.addLayout(column_layout)
 
             for _column in range(deck["layout"][1]):  # type: ignore
-                button = DraggableButton(base_widget, self, api)
+                button = DraggableButton(base_widget, self, api, index)
                 button.setCheckable(True)
-                button.index = index
                 button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
                 button.setToolButtonStyle(Qt.ToolButtonIconOnly)
                 button.setIconSize(QSize(80, 80))
@@ -721,18 +717,20 @@ class MainWindow(QMainWindow):
 
 
     def add_action(self, event: str, action):
-        serial_number = self.serial_number()
-        page = self.page()
-        button = selected_button.index
 
-        api.add_action_setting(serial_number, page, button, event, action().id())
-            
-        self.ui.action_tree.clear()
-        self.build_actions(serial_number, self.page(), selected_button.index)
-        self.ui.action_tree.scrollToBottom()
+        if selected_button is not None:
+            serial_number = self.serial_number()
+            page = self.page()
+            button = selected_button.index
 
-        keydown_item = self.ui.action_tree.topLevelItem(self.ui.action_tree.topLevelItemCount()-1)
-        keydown_item.child(keydown_item.childCount()-1).setSelected(True)
+            api.add_action_setting(serial_number, page, button, event, action().id())
+                
+            self.ui.action_tree.clear()
+            self.build_actions(serial_number, self.page(), selected_button.index)
+            self.ui.action_tree.scrollToBottom()
+
+            keydown_item = self.ui.action_tree.topLevelItem(self.ui.action_tree.topLevelItemCount()-1)
+            keydown_item.child(keydown_item.childCount()-1).setSelected(True)
 
     def build_actions(self, serial_number: str, page: int, button_id: int):
 

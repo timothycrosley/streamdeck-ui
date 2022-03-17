@@ -386,13 +386,13 @@ class StreamDeckServer:
 
     # TODO: Change this to ActionType? I.e. these are not the actual actions
     # Actions should be the actual object, bound to settings
-    def get_actions(self) -> List[StreamDeckAction]:
-        """Returns the list of available actions.
+    # def get_actions(self) -> List[StreamDeckAction]:
+    #     """Returns the list of available actions.
 
-        :return: _description_
-        :rtype: _type_
-        """
-        return self.actions
+    #     :return: _description_
+    #     :rtype: _type_
+    #     """
+    #     return self.actions
 
     def remove_action_setting(self, serial_number: str, page: int, button: int, event: str, index: int):
         del self._button_state(serial_number, page, button)[event][index]
