@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
-from PySide2.QtGui import QIcon
-from typing import Callable, Any
 import os
+from abc import ABC, abstractmethod
+from typing import Any, Callable
+
+from PySide2.QtGui import QIcon
 
 
 class ActionSettings:
@@ -16,7 +17,7 @@ class StreamDeckAction(ABC):
         self.category = category
         self.file_path = file_path
 
-    def initialize(self, settings : ActionSettings):
+    def initialize(self, settings: ActionSettings):
         self.settings = settings
 
     def get_name(self):
@@ -47,7 +48,7 @@ class StreamDeckAction(ABC):
     # It could return True or False. False stops futher execution, true lets it continue
     # It could return a numeric result.
     # It could return return an arbitrary result and we pass it on the the next
-    # execute. 
+    # execute.
     # We could have a "conditional" action - all it does, is decides what to do next
     @abstractmethod
     def execute(self):

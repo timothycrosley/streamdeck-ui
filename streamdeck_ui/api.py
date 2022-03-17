@@ -11,8 +11,8 @@ from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
-from streamdeck_ui.actions.stream_deck_action import StreamDeckAction, ActionSettings
 
+from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
@@ -126,14 +126,13 @@ class StreamDeckServer:
     def bind_settings(self, serial_number: str, page: int, key: int, event: str, index: int) -> ActionSettings:
         """Creates an ActionSettings instance for the given button. Effectively creates a get/set method
         for the dictionary contained under the specific deck/page/button/action and action"""
+
         def update(k, v):
             new_values = self.get_action_settings(serial_number, page, key, event, index)
             new_values[k] = v
             self.set_action_settings(serial_number, page, key, event, index, new_values)
 
-        return ActionSettings(
-            lambda k:  self.get_action_settings(serial_number, page, key, event, index).get(k),
-            lambda k, v:  update(k, v))
+        return ActionSettings(lambda k: self.get_action_settings(serial_number, page, key, event, index).get(k), lambda k, v: update(k, v))
 
     def _key_change_callback(self, deck_id: str, _deck: StreamDeck.StreamDeck, key: int, state: bool) -> None:
         """Callback whenever a key is pressed.
@@ -175,8 +174,8 @@ class StreamDeckServer:
                 if os.path.basename(file).endswith("py"):
                     # Import the relevant module (note: a module does not end with .py)
                     module_path = os.path.join(sub_folder_root, os.path.splitext(file)[0])
-                    module_name = module_path.replace(os.path.sep, '.')
-                    module_name = module_name[module_name.find("streamdeck_ui"):]
+                    module_name = module_path.replace(os.path.sep, ".")
+                    module_name = module_name[module_name.find("streamdeck_ui") :]
 
                     # Review - does importing "twice" cause problems
                     module = importlib.import_module(module_name)
@@ -398,13 +397,11 @@ class StreamDeckServer:
         del self._button_state(serial_number, page, button)[event][index]
         self._save_state()
 
-
-    def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id:str) -> StreamDeckAction:
+    def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id: str) -> StreamDeckAction:
         """Adds a new entry """
         actions = self._button_state(serial_number, page, button).setdefault(event, [])
-        actions.append({"id" : id})
+        actions.append({"id": id})
         self._save_state()
-
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""

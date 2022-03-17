@@ -1,8 +1,10 @@
+import shlex
 from subprocess import Popen
+
 from PySide2.QtWidgets import QWidget
+
 from streamdeck_ui.actions.command.ui_commandwidget import Ui_CommandWidget
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
-import shlex
 
 
 class Action(StreamDeckAction):

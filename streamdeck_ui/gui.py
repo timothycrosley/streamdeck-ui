@@ -2,14 +2,14 @@
 import os
 import sys
 from functools import partial
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pkg_resources
 from pynput.keyboard import Controller
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
-from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem, QAbstractItemView
+from PySide2.QtWidgets import QAbstractItemView, QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
