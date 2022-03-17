@@ -9,7 +9,7 @@ from pynput.keyboard import Controller
 from PySide2 import QtWidgets
 from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
-from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem
+from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon, QTreeWidgetItem, QAbstractItemView
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -53,14 +53,11 @@ last_image_dir = ""
 
 plugins = []
 
-
-class DraggableButton(QtWidgets.QToolButton):
-    """A QToolButton that supports drag and drop and swaps the button properties on drop"""
-
+class DraggableSourceTree(QtWidgets.QTreeWidget):
     def __init__(self, parent, ui, api: StreamDeckServer):
-        super(DraggableButton, self).__init__(parent)
+        super(DraggableSourceTree, self).__init__(parent)
 
-        self.setAcceptDrops(True)
+        # self.setAcceptDrops(True)
         self.ui = ui
         self.api = api
 
@@ -69,7 +66,45 @@ class DraggableButton(QtWidgets.QToolButton):
         if e.buttons() != Qt.LeftButton:
             return
 
-        self.api.reset_dimmer(_deck_id(self.ui))
+        if self.currentItem().is_category:
+            print("Can't move category - bailing")
+            return
+
+        mimedata = QMimeData()
+        drag = QDrag(self)
+        drag.setMimeData(mimedata)
+        drag.exec_(Qt.MoveAction)
+
+    def dropEvent(self, e):  # noqa: N802 - Part of QT signature.
+        if e.source():
+            # Ignore drag and drop on yourself
+            if e.source().index == self.index:
+                return
+        else:
+            print("Drop!")
+  
+    def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
+        print("Drag enter")
+
+    def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
+        print("Drag leave")
+
+class DraggableButton(QtWidgets.QToolButton):
+    """A QToolButton that supports drag and drop and swaps the button properties on drop"""
+
+    def __init__(self, parent, window, api: StreamDeckServer):
+        super(DraggableButton, self).__init__(parent)
+
+        self.setAcceptDrops(True)
+        self.window = window
+        self.api = api
+
+    def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
+
+        if e.buttons() != Qt.LeftButton:
+            return
+
+        self.api.reset_dimmer(_deck_id(self.window.ui))
 
         mimedata = QMimeData()
         drag = QDrag(self)
@@ -80,21 +115,38 @@ class DraggableButton(QtWidgets.QToolButton):
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
-        serial_number = _deck_id(self.ui)
-        page = _page(self.ui)
+        serial_number = _deck_id(self.window.ui)
+        page = _page(self.window.ui)
 
         if e.source():
-            # Ignore drag and drop on yourself
-            if e.source().index == self.index:
-                return
 
-            self.api.swap_buttons(serial_number, page, e.source().index, self.index)
-            # In the case that we've dragged the currently selected button, we have to
-            # check the target button instead so it appears that it followed the drag/drop
-            if e.source().isChecked():
-                e.source().setChecked(False)
-                self.setChecked(True)
-                selected_button = self
+            if isinstance(e.source(), DraggableSourceTree):
+                # TODO - new action added to button
+                selected_item = e.source().currentItem()
+                action = selected_item.data(0, Qt.UserRole)
+
+                # We could be dragging a tree node onto a button that is not the
+                # currently selected button
+                if selected_button != self:
+                    selected_button.setChecked(False)
+                    self.setChecked(True)
+                    selected_button = self
+                add_action(self.window, "keydown", action)
+
+                return
+            else:
+
+                # Ignore drag and drop on yourself
+                if e.source().index == self.index:
+                    return
+
+                self.api.swap_buttons(serial_number, page, e.source().index, self.index)
+                # In the case that we've dragged the currently selected button, we have to
+                # check the target button instead so it appears that it followed the drag/drop
+                if e.source().isChecked():
+                    e.source().setChecked(False)
+                    self.setChecked(True)
+                    selected_button = self
         else:
             # Handle drag and drop from outside the application
             if e.mimeData().hasUrls:
@@ -326,24 +378,25 @@ def align_text_vertical(window) -> None:
 
 
 def add_action_button(window) -> None:
-    serial_number = _deck_id(window.ui)
-    page = _page(window.ui)
-    button = selected_button.index
-
-    # TODO: selected action_select_tree
     items = window.ui.select_action_tree.selectedItems()
     if items:
         selected_item = items[0]
         action = selected_item.data(0, Qt.UserRole)
+        add_action(window, "keydown", action)
 
-        api.add_action_setting(serial_number, page, button, "keydown", action().id())
+
+def add_action(window, event: str, action):
+    serial_number = _deck_id(window.ui)
+    page = _page(window.ui)
+    button = selected_button.index
+
+    api.add_action_setting(serial_number, page, button, event, action().id())
         
     window.ui.action_tree.clear()
     build_actions(window, serial_number, _page(window.ui), selected_button.index)
     window.ui.action_tree.scrollToBottom()
 
     keydown_item = window.ui.action_tree.topLevelItem(window.ui.action_tree.topLevelItemCount()-1)
-    
     keydown_item.child(keydown_item.childCount()-1).setSelected(True)
 
 def remove_action_button(window) -> None:
@@ -518,7 +571,7 @@ def build_buttons(main_window, tab) -> None:
         row_layout.addLayout(column_layout)
 
         for _column in range(deck["layout"][1]):  # type: ignore
-            button = DraggableButton(base_widget, ui, api)
+            button = DraggableButton(base_widget, main_window, api)
             button.setCheckable(True)
             button.index = index
             button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
@@ -610,6 +663,31 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.window_shown: bool = True
 
+        # TODO: Start --- Is there a better way then replacing?
+
+        self.ui.select_action_tree.deleteLater()
+        self.ui.select_action_tree = DraggableSourceTree(self.ui.toprightwidget, None, None)
+        self.ui.select_action_tree.setObjectName(u"select_action_tree")
+        self.ui.select_action_tree.setEnabled(True)
+        self.ui.select_action_tree.setAlternatingRowColors(False)
+        self.ui.select_action_tree.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.ui.select_action_tree.setIconSize(QSize(32, 32))
+        self.ui.select_action_tree.setTextElideMode(Qt.ElideLeft)
+        self.ui.select_action_tree.setIndentation(40)
+        self.ui.select_action_tree.setRootIsDecorated(False)
+        self.ui.select_action_tree.setUniformRowHeights(False)
+        self.ui.select_action_tree.setItemsExpandable(False)
+        self.ui.select_action_tree.setExpandsOnDoubleClick(False)
+        self.ui.select_action_tree.header().setVisible(False)
+        self.ui.verticalLayout_9.addWidget(self.ui.select_action_tree)
+        # TODO: --- end
+
+        self.ui.action_tree.setAcceptDrops(True)
+        self.ui.select_action_tree.setDragEnabled(True)
+        self.ui.select_action_tree.setDropIndicatorShown(False)
+        self.ui.select_action_tree.setDragDropMode(QAbstractItemView.DragDrop)
+
+
     def closeEvent(self, event) -> None:  # noqa: N802 - Part of QT signature.
         self.window_shown = False
         self.hide()
@@ -658,6 +736,7 @@ class MainWindow(QMainWindow):
                 widget = QTreeWidgetItem([category])
                 widget.setIcon(0, obj.get_icon())
                 widget.setExpanded(True)
+                widget.is_category = True
                 categories[category] = widget
 
         # Sort categories alphabetically
@@ -674,6 +753,7 @@ class MainWindow(QMainWindow):
 
             parent = categories[obj.get_category()]
             widget = QTreeWidgetItem([obj.get_name()])
+            widget.is_category = False
             parent.addChild(widget)
             # Use the UserRole to associate the action object with the QTreeWidgetItem.
             # This can be used to retrieve a reference to the action in the event handler.
@@ -683,6 +763,10 @@ class MainWindow(QMainWindow):
         # self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
         # self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
+        self.ui.select_action_tree.setAcceptDrops(False)
+        self.ui.select_action_tree.setDragEnabled(True)
+        self.ui.select_action_tree.setDropIndicatorShown(True)
+        self.ui.select_action_tree.setDragDropMode(QAbstractItemView.DragOnly)
 
     def load_plugin_ui(self):
 
