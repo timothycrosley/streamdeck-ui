@@ -1,5 +1,3 @@
-from subprocess import Popen
-
 from obswebsocket import obsws, requests
 from PySide2.QtWidgets import QWidget
 

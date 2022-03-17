@@ -7,8 +7,7 @@ from streamdeck_ui.display.filter import Filter
 
 
 class KeypressFilter(Filter):
-    """This filter is applied whenever a key is being pressed
-    """
+    """This filter is applied whenever a key is being pressed"""
 
     def __init__(self):
         super(KeypressFilter, self).__init__()

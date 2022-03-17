@@ -51,6 +51,7 @@ last_image_dir = ""
 
 plugins = []
 
+
 class DraggableSourceTree(QtWidgets.QTreeWidget):
     def __init__(self, parent, ui, api: StreamDeckServer):
         super(DraggableSourceTree, self).__init__(parent)
@@ -80,12 +81,13 @@ class DraggableSourceTree(QtWidgets.QTreeWidget):
                 return
         else:
             print("Drop!")
-  
+
     def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
         print("Drag enter")
 
     def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
         print("Drag leave")
+
 
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
@@ -175,6 +177,7 @@ class DraggableButton(QtWidgets.QToolButton):
 selected_button: Optional[DraggableButton] = None
 "A reference to the currently selected button"
 
+
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
@@ -207,7 +210,7 @@ class MainWindow(QMainWindow):
         # TODO: Start --- Is there a better way then replacing?
         self.ui.select_action_tree.deleteLater()
         self.ui.select_action_tree = DraggableSourceTree(self.ui.toprightwidget, None, None)
-        self.ui.select_action_tree.setObjectName(u"select_action_tree")
+        self.ui.select_action_tree.setObjectName("select_action_tree")
         self.ui.select_action_tree.setEnabled(True)
         self.ui.select_action_tree.setAlternatingRowColors(False)
         self.ui.select_action_tree.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -278,7 +281,6 @@ class MainWindow(QMainWindow):
         """
         return self.ui.device_list.itemData(self.ui.device_list.currentIndex())
 
-
     def page(self) -> int:
         """Returns the current page (tab) the user is on.
 
@@ -290,11 +292,10 @@ class MainWindow(QMainWindow):
     def streamdeck_cpu_changed(self, serial_number: str, cpu: int):
         if cpu > 100:
             cpu == 100
-        if self.serial_number()== serial_number:
+        if self.serial_number() == serial_number:
             self.ui.cpu_usage.setValue(cpu)
             self.ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
             self.ui.cpu_usage.update()
-
 
     # TODO: This should be done in the API so that all saves
     # are delayed. This will allow for a more responsive
@@ -322,7 +323,6 @@ class MainWindow(QMainWindow):
         text_update_timer.setSingleShot(True)
         text_update_timer.timeout.connect(partial(self.update_button_text, self.ui.text.toPlainText()))
         text_update_timer.start(500)
-
 
     def update_button_text(self, text: str) -> None:
         if selected_button:
@@ -386,11 +386,9 @@ class MainWindow(QMainWindow):
         self.ui.select_action_tree.setEnabled(enabled)
         self.ui.remove_action_button.setEnabled(enabled)
 
-
     def browse_documentation(self):
         url = QUrl("https://github.com/timothycrosley/streamdeck-ui#readme")
         QDesktopServices.openUrl(url)
-
 
     def browse_github(self):
         url = QUrl("https://github.com/timothycrosley/streamdeck-ui")
@@ -408,7 +406,6 @@ class MainWindow(QMainWindow):
         deck_id = self.serial_number()
         api.set_brightness(deck_id, value)
 
-
     def set_brightness_dimmed(self, value: int, full_brightness: int) -> None:
         deck_id = self.serial_number()
         api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
@@ -417,7 +414,6 @@ class MainWindow(QMainWindow):
     def show_settings(self) -> None:
         """Shows the settings dialog and allows the user the change deck specific
         settings. Settings are not saved until OK is clicked."""
-        ui = self.ui
         deck_id = self.serial_number()
         settings = SettingsDialog(self)
         api.stop_dimmer(deck_id)
@@ -579,7 +575,7 @@ class MainWindow(QMainWindow):
                 # ignore them here
                 icon = api.get_button_icon_pixmap(deck_id, self.page(), button.index)
                 if icon:
-                    button.setIcon(icon)        
+                    button.setIcon(icon)
 
     def reset_button_configuration(self):
         """Clears the configuration for a button and disables editing of them. This is done when
@@ -593,8 +589,6 @@ class MainWindow(QMainWindow):
 
     def build_buttons(self, tab) -> None:
         global selected_button
-
-        ui = self.ui
 
         if hasattr(tab, "deck_buttons"):
             buttons = tab.findChildren(QtWidgets.QToolButton)
@@ -656,7 +650,6 @@ class MainWindow(QMainWindow):
         for button in buttons:
             button.clicked.connect(lambda button=button, buttons=buttons: self.button_clicked(button, buttons))
 
-
     def build_device(self, _device_index=None) -> None:
         """This method builds the device configuration user interface.
         It is called if you switch to a different Stream Deck,
@@ -690,7 +683,6 @@ class MainWindow(QMainWindow):
             ui.settingsButton.setEnabled(False)
             self.reset_button_configuration()
 
-
     def streamdeck_attached(self, deck: Dict):
 
         serial_number = deck["serial_number"]
@@ -715,7 +707,6 @@ class MainWindow(QMainWindow):
             action = selected_item.data(0, Qt.UserRole)
             self.add_action("keydown", action)
 
-
     def add_action(self, event: str, action):
 
         if selected_button is not None:
@@ -724,13 +715,13 @@ class MainWindow(QMainWindow):
             button = selected_button.index
 
             api.add_action_setting(serial_number, page, button, event, action().id())
-                
+
             self.ui.action_tree.clear()
             self.build_actions(serial_number, self.page(), selected_button.index)
             self.ui.action_tree.scrollToBottom()
 
-            keydown_item = self.ui.action_tree.topLevelItem(self.ui.action_tree.topLevelItemCount()-1)
-            keydown_item.child(keydown_item.childCount()-1).setSelected(True)
+            keydown_item = self.ui.action_tree.topLevelItem(self.ui.action_tree.topLevelItemCount() - 1)
+            keydown_item.child(keydown_item.childCount() - 1).setSelected(True)
 
     def build_actions(self, serial_number: str, page: int, button_id: int):
 
@@ -743,7 +734,7 @@ class MainWindow(QMainWindow):
         key_pressed = QTreeWidgetItem(["When key pressed:"])
 
         icon = QIcon()
-        icon.addFile(u":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/icons/icons/keyboard-enter.png", QSize(), QIcon.Normal, QIcon.Off)
         key_pressed.setIcon(0, icon)
         key_pressed.setExpanded(True)
         key_pressed.setData(0, Qt.UserRole, None)
@@ -760,7 +751,7 @@ class MainWindow(QMainWindow):
             tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
             key_pressed.addChild(tree_item)
 
-            # Store the action, it's index in the settings and event type in a tuple so 
+            # Store the action, it's index in the settings and event type in a tuple so
             # we can remove it or act on it later.
             tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
 
@@ -815,7 +806,7 @@ class MainWindow(QMainWindow):
             obj = action()
             category = obj.get_category()
 
-            if not category in categories:
+            if category not in categories:
                 widget = QTreeWidgetItem([category])
                 widget.setIcon(0, obj.get_icon())
                 widget.setExpanded(True)
@@ -867,7 +858,6 @@ class MainWindow(QMainWindow):
             action, _index, _event = item.data(0, Qt.UserRole)
             if action:
                 self.ui.actionlayout.addWidget(action.get_ui(self))
-                current_action = action
 
 
 def change_brightness(deck_id: str, brightness: int):

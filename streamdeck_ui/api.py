@@ -398,7 +398,7 @@ class StreamDeckServer:
         self._save_state()
 
     def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id: str) -> StreamDeckAction:
-        """Adds a new entry """
+        """Adds a new entry"""
         actions = self._button_state(serial_number, page, button).setdefault(event, [])
         actions.append({"id": id})
         self._save_state()

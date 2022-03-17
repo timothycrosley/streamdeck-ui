@@ -1,5 +1,5 @@
 import shlex
-from subprocess import Popen
+from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 
 from PySide2.QtWidgets import QWidget
 
