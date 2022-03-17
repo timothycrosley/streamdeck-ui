@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from PySide2.QtGui import QIcon
-from typing import Callable
+from typing import Callable, Any
 import os
 
 
 class ActionSettings:
-    def __init__(self, get_setting: Callable[[str], any], set_setting: Callable[[str], any]):
+    def __init__(self, get_setting: Callable[[str], Any], set_setting: Callable[[str], Any]):
         self.get_setting = get_setting
         self.set_setting = set_setting
 
