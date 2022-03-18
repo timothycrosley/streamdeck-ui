@@ -225,6 +225,8 @@ class MainWindow(QMainWindow):
         self.ui.verticalLayout_9.addWidget(self.ui.select_action_tree)
         # TODO: --- end
 
+        self.ui.select_action_tree.doubleClicked.connect(self.add_action_button)
+
         self.ui.action_tree.setAcceptDrops(True)
         self.ui.select_action_tree.setDragEnabled(True)
         self.ui.select_action_tree.setDropIndicatorShown(False)
@@ -683,7 +685,10 @@ class MainWindow(QMainWindow):
         if items:
             selected_item = items[0]
             action = selected_item.data(0, Qt.UserRole)
-            self.add_action("keydown", action)
+
+            # Category items don't have an action
+            if action:
+                self.add_action("keydown", action)
 
     def add_action(self, event: str, action):
 
