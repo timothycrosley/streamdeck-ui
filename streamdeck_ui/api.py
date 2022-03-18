@@ -78,6 +78,11 @@ class StreamDeckServer:
 
         self.plugins = self.load_plugins()
 
+        "True if the Stream Deck is dimmed, False otherwise"
+        self.save_timer: Optional[threading.Timer] = None
+
+        self.save_timeout = 2
+
     def stop_dimmer(self, serial_number: str) -> None:
         """Stops the dimmer for the given Stream Deck
 
@@ -199,10 +204,24 @@ class StreamDeckServer:
         """Sets the amount of time in seconds before the display gets dimmed."""
         self.state.setdefault(deck_id, {})["display_timeout"] = timeout
         self.dimmers[deck_id].timeout = timeout
-        self._save_state()
+        self.save()
 
-    def _save_state(self):
-        self.export_config(STATE_FILE)
+    def save(self, force: bool = False):
+        """Schedules the current configuration to be saved.
+
+        :param force: Force an immediate save. Defaults to False.
+        :type force: bool, optional
+        """
+        if self.save_timer:
+            print("Delaying save")
+            self.save_timer.cancel()
+            self.save_timer = None
+
+        if force:
+            self.export_config(STATE_FILE)
+        else:
+            self.save_timer = threading.Timer(self.save_timeout, partial(self.export_config, STATE_FILE))
+            self.save_timer.start()
 
     def open_config(self, config_file: str):
 
@@ -220,10 +239,11 @@ class StreamDeckServer:
     def import_config(self, config_file: str) -> None:
         self.stop()
         self.open_config(config_file)
-        self._save_state()
+        self.save(True)
         self.start()
 
     def export_config(self, output_file: str) -> None:
+        self.save_timer = None
         try:
             with open(output_file + ".tmp", "w") as state_file:
                 state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state}, indent=4, separators=(",", ": ")))
@@ -304,6 +324,7 @@ class StreamDeckServer:
 
     def stop(self):
         self.monitor.stop()
+        self.save(True)
 
     def get_deck(self, deck_id: str) -> Dict[str, Dict[str, Union[str, Tuple[int, int]]]]:
         """Returns a dictionary with some Stream Deck properties
@@ -325,7 +346,7 @@ class StreamDeckServer:
         temp = cast(dict, self.state[deck_id]["buttons"])[page][source_button]
         cast(dict, self.state[deck_id]["buttons"])[page][source_button] = cast(dict, self.state[deck_id]["buttons"])[page][target_button]
         cast(dict, self.state[deck_id]["buttons"])[page][target_button] = temp
-        self._save_state()
+        self.save()
 
         # Update rendering for these two images
         self.update_button_filters(deck_id, page, source_button)
@@ -337,7 +358,7 @@ class StreamDeckServer:
         """Set the text associated with a button"""
         if self.get_button_text(deck_id, page, button) != text:
             self._button_state(deck_id, page, button)["text"] = text
-            self._save_state()
+            self.save()
             self.update_button_filters(deck_id, page, button)
             display_handler = self.display_handlers[deck_id]
             display_handler.synchronize()
@@ -359,7 +380,7 @@ class StreamDeckServer:
         :type settings: dict
         """
         self._button_state(serial_number, page, button)[event][index] = settings
-        self._save_state()
+        self.save()
 
     def get_action_settings(self, serial_number: str, page: int, button: int, event: str, index: int) -> dict:
         """Gets the settings associated with a button and a given plugin"""
@@ -395,13 +416,13 @@ class StreamDeckServer:
 
     def remove_action_setting(self, serial_number: str, page: int, button: int, event: str, index: int):
         del self._button_state(serial_number, page, button)[event][index]
-        self._save_state()
+        self.save()
 
     def add_action_setting(self, serial_number: str, page: int, button: int, event: str, id: str) -> StreamDeckAction:
         """Adds a new entry"""
         actions = self._button_state(serial_number, page, button).setdefault(event, [])
         actions.append({"id": id})
-        self._save_state()
+        self.save()
 
     def get_button_text(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text set for the specified button"""
@@ -412,7 +433,7 @@ class StreamDeckServer:
 
         if self.get_button_icon(deck_id, page, button) != icon:
             self._button_state(deck_id, page, button)["icon"] = icon
-            self._save_state()
+            self.save()
             self.update_button_filters(deck_id, page, button)
             display_handler = self.display_handlers[deck_id]
             display_handler.synchronize()
@@ -445,7 +466,7 @@ class StreamDeckServer:
         """
         if self.get_text_vertical_align(serial_number, page, button) != alignment:
             self._button_state(serial_number, page, button)["text_vertical_align"] = alignment
-            self._save_state()
+            self.save()
             self.update_button_filters(serial_number, page, button)
             display_handler = self.display_handlers[serial_number]
             display_handler.synchronize()
@@ -478,7 +499,7 @@ class StreamDeckServer:
         """Sets the brightness changing associated with a button"""
         if self.get_button_change_brightness(deck_id, page, button) != amount:
             self._button_state(deck_id, page, button)["brightness_change"] = amount
-            self._save_state()
+            self.save()
 
     def get_button_change_brightness(self, deck_id: str, page: int, button: int) -> int:
         """Returns the brightness change set for a particular button"""
@@ -488,7 +509,7 @@ class StreamDeckServer:
         """Sets the command associated with the button"""
         if self.get_button_command(deck_id, page, button) != command:
             self._button_state(deck_id, page, button)["command"] = command
-            self._save_state()
+            self.save()
 
     def get_button_command(self, deck_id: str, page: int, button: int) -> str:
         """Returns the command set for the specified button"""
@@ -498,7 +519,7 @@ class StreamDeckServer:
         """Sets the page switch associated with the button"""
         if self.get_button_switch_page(deck_id, page, button) != switch_page:
             self._button_state(deck_id, page, button)["switch_page"] = switch_page
-            self._save_state()
+            self.save()
 
     def get_button_switch_page(self, deck_id: str, page: int, button: int) -> int:
         """Returns the page switch set for the specified button. 0 implies no page switch."""
@@ -508,7 +529,7 @@ class StreamDeckServer:
         """Sets the keys associated with the button"""
         if self.get_button_keys(deck_id, page, button) != keys:
             self._button_state(deck_id, page, button)["keys"] = keys
-            self._save_state()
+            self.save()
 
     def get_button_keys(self, deck_id: str, page: int, button: int) -> str:
         """Returns the keys set for the specified button"""
@@ -518,7 +539,7 @@ class StreamDeckServer:
         """Sets the text meant to be written when button is pressed"""
         if self.get_button_write(deck_id, page, button) != write:
             self._button_state(deck_id, page, button)["write"] = write
-            self._save_state()
+            self.save()
 
     def get_button_write(self, deck_id: str, page: int, button: int) -> str:
         """Returns the text to be produced when the specified button is pressed"""
@@ -529,7 +550,7 @@ class StreamDeckServer:
         if self.get_brightness(deck_id) != brightness:
             self.decks[deck_id].set_brightness(brightness)
             self.state.setdefault(deck_id, {})["brightness"] = brightness
-            self._save_state()
+            self.save()
 
     def get_brightness(self, deck_id: str) -> int:
         """Gets the brightness that is set for the specified stream deck"""
@@ -543,7 +564,7 @@ class StreamDeckServer:
     def set_brightness_dimmed(self, deck_id: str, brightness_dimmed: int) -> None:
         """Sets the percentage value that will be used for dimming the full brightness"""
         self.state.setdefault(deck_id, {})["brightness_dimmed"] = brightness_dimmed
-        self._save_state()
+        self.save()
 
     def change_brightness(self, deck_id: str, amount: int = 1) -> None:
         """Change the brightness of the deck by the specified amount"""
@@ -560,7 +581,7 @@ class StreamDeckServer:
         """Sets the current page shown on the stream deck"""
         if self.get_page(deck_id) != page:
             self.state.setdefault(deck_id, {})["page"] = page
-            self._save_state()
+            self.save()
 
         display_handler = self.display_handlers[deck_id]
 

@@ -52,9 +52,9 @@ last_image_dir = ""
 plugins = []
 
 
-class DraggableSourceTree(QtWidgets.QTreeWidget):
+class ActionSelectTree(QtWidgets.QTreeWidget):
     def __init__(self, parent, ui, api: StreamDeckServer):
-        super(DraggableSourceTree, self).__init__(parent)
+        super(ActionSelectTree, self).__init__(parent)
 
         # self.setAcceptDrops(True)
         self.ui = ui
@@ -122,7 +122,7 @@ class DraggableButton(QtWidgets.QToolButton):
 
         if e.source():
 
-            if isinstance(e.source(), DraggableSourceTree):
+            if isinstance(e.source(), ActionSelectTree):
                 # TODO - new action added to button
                 selected_item = e.source().currentItem()
                 action = selected_item.data(0, Qt.UserRole)
@@ -209,7 +209,7 @@ class MainWindow(QMainWindow):
 
         # TODO: Start --- Is there a better way then replacing?
         self.ui.select_action_tree.deleteLater()
-        self.ui.select_action_tree = DraggableSourceTree(self.ui.toprightwidget, None, None)
+        self.ui.select_action_tree = ActionSelectTree(self.ui.toprightwidget, None, None)
         self.ui.select_action_tree.setObjectName("select_action_tree")
         self.ui.select_action_tree.setEnabled(True)
         self.ui.select_action_tree.setAlternatingRowColors(False)
@@ -246,7 +246,7 @@ class MainWindow(QMainWindow):
         self.ui.settingsButton.setEnabled(False)
         self.enable_button_configuration(False)
 
-        self.ui.text.textChanged.connect(self.queue_update_button_text)
+        self.ui.text.textChanged.connect(self.update_button_text)
         self.ui.actionAbout.triggered.connect(self.about_dialog)
 
         self.ui.actionExit.triggered.connect(app.exit)
@@ -302,39 +302,12 @@ class MainWindow(QMainWindow):
             self.ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
             self.ui.cpu_usage.update()
 
-    # TODO: This should be done in the API so that all saves
-    # are delayed. This will allow for a more responsive
-    # UI and solves the problem for all control, not just
-    # this one. A parameter should be added that allows
-    # a forced save (for example, on shutdown)
-    def queue_update_button_text(self) -> None:
-        """Instead of directly updating the text (label) associated with
-        the button, add a small delay. If this is called before the
-        timer fires, delay it again. Effectively this creates an update
-        queue. It makes the textbox more response, as rendering the button
-        and saving to the API each time can feel somewhat slow.
-
-        :param ui: Reference to the ui
-        :type ui: _type_
-        :param text: The new text value
-        :type text: str
-        """
-        global text_update_timer
-
-        if text_update_timer:
-            text_update_timer.stop()
-
-        text_update_timer = QTimer()
-        text_update_timer.setSingleShot(True)
-        text_update_timer.timeout.connect(partial(self.update_button_text, self.ui.text.toPlainText()))
-        text_update_timer.start(500)
-
-    def update_button_text(self, text: str) -> None:
+    def update_button_text(self) -> None:
         if selected_button:
             deck_id = self.serial_number()
             if deck_id:
                 # There may be no decks attached
-                api.set_button_text(deck_id, self.page(), selected_button.index, text)
+                api.set_button_text(deck_id, self.page(), selected_button.index, self.ui.text.toPlainText())
                 icon = api.get_button_icon_pixmap(deck_id, self.page(), selected_button.index)
                 if icon:
                     selected_button.setIcon(icon)
