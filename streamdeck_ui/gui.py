@@ -734,7 +734,7 @@ class MainWindow(QMainWindow):
             tree_item = QTreeWidgetItem([action.get_name(), action.get_summary()])
             key_pressed.addChild(tree_item)
 
-            # Store the action, it's index in the settings and event type in a tuple so
+            # Store the action, its index in the settings and event type in a tuple so
             # we can remove it or act on it later.
             tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
 
@@ -827,6 +827,8 @@ class MainWindow(QMainWindow):
 
     def load_plugin_ui(self):
 
+        # TODO: Could we somehow bind the action back to the UI? 
+        # When the summary changes, update the UI
         old = self.ui.actionlayout.takeAt(0)
         if old:
             old.widget().deleteLater()
