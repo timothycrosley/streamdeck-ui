@@ -213,7 +213,6 @@ class StreamDeckServer:
         :type force: bool, optional
         """
         if self.save_timer:
-            print("Delaying save")
             self.save_timer.cancel()
             self.save_timer = None
 
