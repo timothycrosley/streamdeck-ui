@@ -343,16 +343,23 @@ class MainWindow(QMainWindow):
 
             # Parent items (events) don't have data
             if selected_item.data(0, Qt.UserRole) and selected_button is not None:
-                action, index, event = selected_item.data(0, Qt.UserRole)
-                api.remove_action_setting(serial_number, self.page(), selected_button.index, event, index)
 
-                self.ui.action_tree.clear()
+                confirm = QMessageBox(self)
+                confirm.setWindowTitle("Remove action")
+                confirm.setText("Are you sure you want to remove the selected action?")
+                confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                confirm.setIcon(QMessageBox.Question)
+                button = confirm.exec_()
+                if button == QMessageBox.Yes:
+                    action, index, event = selected_item.data(0, Qt.UserRole)
+                    api.remove_action_setting(serial_number, self.page(), selected_button.index, event, index)
+                    self.ui.action_tree.clear()
 
-                # Rebuild the action list
-                self.build_actions(serial_number, self.page(), selected_button.index)
+                    # Rebuild the action list
+                    self.build_actions(serial_number, self.page(), selected_button.index)
 
-                # Clear the configuration area
-                self.load_plugin_ui()
+                    # Clear the configuration area
+                    self.load_plugin_ui()
 
     def enable_button_configuration(self, enabled: bool):
         self.ui.text.setEnabled(enabled)
@@ -827,7 +834,7 @@ class MainWindow(QMainWindow):
 
     def load_plugin_ui(self):
 
-        # TODO: Could we somehow bind the action back to the UI? 
+        # TODO: Could we somehow bind the action back to the UI?
         # When the summary changes, update the UI
         old = self.ui.actionlayout.takeAt(0)
         if old:
