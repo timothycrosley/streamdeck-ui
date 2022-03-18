@@ -226,6 +226,8 @@ class StreamDeckServer:
 
         with open(config_file) as state_file:
             config = json.loads(state_file.read())
+
+            # TODO: Upgrade existing file to version 1. Move existing properties into event specific lists
             file_version = config.get("streamdeck_ui_version", 0)
             if file_version != CONFIG_FILE_VERSION:
                 raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
