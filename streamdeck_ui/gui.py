@@ -254,6 +254,10 @@ class MainWindow(QMainWindow):
         self.ui.action_tree.header().setHighlightSections(False)
         self.ui.verticalLayout_8.addWidget(self.ui.action_tree)
 
+        action_header = self.ui.action_tree.headerItem()
+        action_header.setText(1, "Configuration");
+        action_header.setText(0, "Action");
+
         # end of hack
 
         self.ui.select_action_tree.doubleClicked.connect(self.add_action_button)
@@ -383,12 +387,29 @@ class MainWindow(QMainWindow):
                     # Rebuild the action list
                     self.build_actions(self.serial_number(), self.page(), selected_button.index)
 
-                    # Clear the configuration area
-                    self.load_plugin_ui()
+                    # Re-select the new item
+                    self.ui.action_tree.topLevelItem(0).child(index-1).setSelected(True)
 
 
     def down_action_button(self) -> None:
-        pass
+        items = self.ui.action_tree.selectedItems()
+        if items:
+            item = items[0]
+            item_data = item.data(0, Qt.UserRole)
+            if item_data:
+                action, index, event = item_data
+
+                action_settings = api.get_action_settings_list(self.serial_number(), self.page(), selected_button.index, event)
+
+                if index < (len(action_settings)-1):
+                    action_settings[index], action_settings[index + 1] = action_settings[index + 1], action_settings[index] 
+                    api.set_action_settings_list(self.serial_number(), self.page(), selected_button.index, event, action_settings)
+
+                    # Rebuild the action list
+                    self.build_actions(self.serial_number(), self.page(), selected_button.index)
+
+                    # Re-select the new item
+                    self.ui.action_tree.topLevelItem(0).child(index+1).setSelected(True)
 
     def remove_action_button(self) -> None:
         serial_number = self.serial_number()
@@ -800,7 +821,6 @@ class MainWindow(QMainWindow):
             # we can remove it or act on it later.
             tree_item.setData(0, Qt.UserRole, (action, index, "keydown"))
 
-        # ui.action_tree.itemClicked.connect(main_window.load_plugin_ui)
         ui.action_tree.itemSelectionChanged.connect(self.load_plugin_ui)
         ui.action_tree.addTopLevelItem(key_pressed)
         ui.action_tree.expandAll()
@@ -878,14 +898,7 @@ class MainWindow(QMainWindow):
             # This can be used to retrieve a reference to the action in the event handler.
             widget.setData(0, Qt.UserRole, action)
 
-        # TODO: This must happen only when you click "+"
-        # self.ui.select_action_tree.itemClicked.connect(self.load_plugin_ui)
-        # self.ui.select_action_tree.addTopLevelItem(system_widget)
         self.ui.select_action_tree.expandAll()
-        # self.ui.select_action_tree.setAcceptDrops(False)
-        # self.ui.select_action_tree.setDragEnabled(True)
-        # self.ui.select_action_tree.setDropIndicatorShown(True)
-        # self.ui.select_action_tree.setDragDropMode(QAbstractItemView.DragOnly)
 
     def load_plugin_ui(self):
 
