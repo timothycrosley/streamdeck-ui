@@ -137,7 +137,6 @@ class DraggableButton(QtWidgets.QToolButton):
         if e.source():
 
             if isinstance(e.source(), ActionSelectTree):
-                # TODO - new action added to button
                 selected_item = e.source().currentItem()
                 action = selected_item.data(0, Qt.UserRole)
 
@@ -279,6 +278,8 @@ class MainWindow(QMainWindow):
         self.ui.settingsButton.clicked.connect(self.show_settings)
 
         self.ui.remove_action_button.clicked.connect(self.remove_action_button)
+        self.ui.up_action_button.clicked.connect(self.up_action_button)
+        self.ui.down_action_button.clicked.connect(self.down_action_button)
         self.ui.actionDocs.triggered.connect(self.browse_documentation)
         self.ui.actionGithub.triggered.connect(self.browse_github)
         self.ui.settingsButton.setEnabled(False)
@@ -298,9 +299,6 @@ class MainWindow(QMainWindow):
     def handle_keypress(self, deck_id: str, key: int, state: bool) -> None:
 
         if state:
-            if api.reset_dimmer(deck_id):
-                return
-
             page = api.get_page(deck_id)
 
             brightness_change = api.get_button_change_brightness(deck_id, page, key)
@@ -370,6 +368,28 @@ class MainWindow(QMainWindow):
             deck_id = self.serial_number()
             api.set_button_switch_page(deck_id, self.page(), selected_button.index, page)
 
+    def up_action_button(self) -> None:
+        items = self.ui.action_tree.selectedItems()
+        if items:
+            item = items[0]
+            item_data = item.data(0, Qt.UserRole)
+            if item_data:
+                action, index, event = item_data
+                if index:
+                    action_settings = api.get_action_settings_list(self.serial_number(), self.page(), selected_button.index, event)
+                    action_settings[index-1], action_settings[index] = action_settings[index], action_settings[index-1] 
+                    api.set_action_settings_list(self.serial_number(), self.page(), selected_button.index, event, action_settings)
+
+                    # Rebuild the action list
+                    self.build_actions(self.serial_number(), self.page(), selected_button.index)
+
+                    # Clear the configuration area
+                    self.load_plugin_ui()
+
+
+    def down_action_button(self) -> None:
+        pass
+
     def remove_action_button(self) -> None:
         serial_number = self.serial_number()
 
@@ -389,7 +409,6 @@ class MainWindow(QMainWindow):
                 if button == QMessageBox.Yes:
                     action, index, event = selected_item.data(0, Qt.UserRole)
                     api.remove_action_setting(serial_number, self.page(), selected_button.index, event, index)
-                    self.ui.action_tree.clear()
 
                     # Rebuild the action list
                     self.build_actions(serial_number, self.page(), selected_button.index)

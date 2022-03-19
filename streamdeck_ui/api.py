@@ -151,8 +151,10 @@ class StreamDeckServer:
             # Visually change key on deck
             displayhandler = self.display_handlers[deck_id]
             displayhandler.set_keypress(key, state)
-
             page = self.get_page(deck_id)
+
+            # When a key is pressed or released, update dimmer state
+            self.reset_dimmer(deck_id)
 
             if state:
                 action_settings = self.get_action_settings_list(deck_id, page, key, "keydown")
@@ -388,8 +390,13 @@ class StreamDeckServer:
         return self._button_state(serial_number, page, button)[event][index]
 
     def get_action_settings_list(self, serial_number: str, page: int, button: int, event: str) -> List[dict]:
-        """Gets the settings associated with a button and a given plugin"""
+        """Gets the settings associated with a button and event"""
         return self._button_state(serial_number, page, button).setdefault(event, [])
+
+    def set_action_settings_list(self, serial_number: str, page: int, button: int, event: str, value: List[dict]) -> None:
+        """Sets the settings associated with a button and event"""
+        self._button_state(serial_number, page, button)[event] = value
+        self.save()
 
     def get_action_list(self, serial_number: str, page: int, button: int, event: str) -> List[StreamDeckAction]:
         action_settings = self.get_action_settings_list(serial_number, page, button, event)
