@@ -16,11 +16,10 @@ class Action(StreamDeckAction):
     def execute(self):
         brightness_change = self.settings.get_setting("brightness_change")
         if brightness_change:
-            # TODO: Get API reference
-            pass
+            self.api.change_brightness(int(brightness_change))
 
     def get_summary(self) -> str:
-        return self.settings.get_setting("command")
+        return str(self.settings.get_setting("brightness_change"))
 
 
 class BrightnessWidget(QWidget):

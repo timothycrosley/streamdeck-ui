@@ -12,7 +12,7 @@ from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 
-from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction
+from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAPI, StreamDeckAction
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
@@ -164,7 +164,7 @@ class StreamDeckServer:
 
                     if action:
                         action = action()
-                        action.initialize(self.bind_settings(deck_id, page, key, "keydown", index))
+                        action.initialize(self.bind_settings(deck_id, page, key, "keydown", index), StreamDeckServerAPI(self, deck_id))
                         action.execute()
 
             # Emit so UI could react on key press
@@ -184,7 +184,7 @@ class StreamDeckServer:
                     module_name = module_path.replace(os.path.sep, ".")
                     module_name = module_name[module_name.find("streamdeck_ui") :]
 
-                    # Review - does importing "twice" cause problems
+                    # Review - does importing "twice" cause problems?
                     module = importlib.import_module(module_name)
 
                     # Look for classes that derives from StreamDeckAction class
@@ -407,7 +407,7 @@ class StreamDeckServer:
             action = self.plugins.get(action_setting["id"])
             if action:
                 action = action()
-                action.initialize(self.bind_settings(serial_number, page, button, event, index))
+                action.initialize(self.bind_settings(serial_number, page, button, event, index), StreamDeckServerAPI(self, serial_number))
                 actions.append(action)
 
         return actions
@@ -663,3 +663,15 @@ class StreamDeckServer:
             filters.append(TextFilter(text, font, vertical_align))
 
         display_handler.replace(page, button, filters)
+
+class StreamDeckServerAPI(StreamDeckAPI):
+    """Concrete implementation of the StreamDeckAPI. This is the binding between the StreamDeckServer and the Action."""
+    def __init__(self, server: StreamDeckServer, serial_number: str):
+        self.server = server
+        self.serial_number = serial_number
+
+    def change_brightness(self, amount: int) -> None:
+        self.server.change_brightness(self.serial_number)
+
+    def set_page(self, page: int) -> None:
+        self.server.set_page(self.serial_number, page)

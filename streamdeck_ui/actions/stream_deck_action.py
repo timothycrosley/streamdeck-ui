@@ -4,6 +4,29 @@ from typing import Any, Callable
 
 from PySide2.QtGui import QIcon
 
+class StreamDeckAPI(ABC):
+    """An API provided to StreamDeckAction instances that allow them to interaction with 
+    the Stream Deck. 
+    """
+    @abstractmethod
+    def change_brightness(self, amount: int) -> None:
+        """Changes the brightness of the Stream Deck by the given amount.
+
+        :param amount: The amount the change the brightness by. Positive values make the buttons
+        appear brighter, negative values darker.
+        :type amount: int
+        """
+        pass
+
+    @abstractmethod
+    def set_page(self, page: int) -> None:
+        """Sets the current page shown on the Stream Deck.
+
+        :param page: The page number to change to.
+        :type page: int
+        """
+
+
 
 class ActionSettings:
     def __init__(self, get_setting: Callable[[str], Any], set_setting: Callable[[str], Any]):
@@ -17,8 +40,9 @@ class StreamDeckAction(ABC):
         self.category = category
         self.file_path = file_path
 
-    def initialize(self, settings: ActionSettings):
+    def initialize(self, settings: ActionSettings, api: StreamDeckAPI):
         self.settings = settings
+        self.api = api
 
     def get_name(self):
         return self.name
