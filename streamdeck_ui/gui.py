@@ -52,7 +52,6 @@ last_image_dir = ""
 plugins = []
 
 
-
 class ActionTree(QtWidgets.QTreeWidget):
     def __init__(self, parent, parent_window, api: StreamDeckServer):
         super(ActionTree, self).__init__(parent)
@@ -73,13 +72,14 @@ class ActionTree(QtWidgets.QTreeWidget):
     def dropEvent(self, e):  # noqa: N802 - Part of QT signature.
         if e.source():
             if isinstance(e.source(), ActionSelectTree):
-                    selected_item = e.source().currentItem()
-                    action = selected_item.data(0, Qt.UserRole)
-                    self.parent_window.add_action("keydown", action)
+                selected_item = e.source().currentItem()
+                action = selected_item.data(0, Qt.UserRole)
+                self.parent_window.add_action("keydown", action)
 
     def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
         if isinstance(e.source(), ActionSelectTree):
             e.accept()
+
 
 class ActionSelectTree(QtWidgets.QTreeWidget):
     def __init__(self, parent, ui, api: StreamDeckServer):
@@ -102,6 +102,7 @@ class ActionSelectTree(QtWidgets.QTreeWidget):
         drag = QDrag(self)
         drag.setMimeData(mimedata)
         drag.exec_(Qt.MoveAction)
+
 
 class DraggableButton(QtWidgets.QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
@@ -149,6 +150,8 @@ class DraggableButton(QtWidgets.QToolButton):
                 self.parent_window.add_action("keydown", action)
 
                 return
+            elif isinstance(e.source(), ActionTree):
+                return
             else:
 
                 # Ignore drag and drop on yourself
@@ -177,6 +180,10 @@ class DraggableButton(QtWidgets.QToolButton):
             self.setIcon(icon)
 
     def dragEnterEvent(self, e):  # noqa: N802 - Part of QT signature.
+        if isinstance(e.source(), ActionTree):
+            e.setAccepted(False)
+            return
+
         if type(self) is DraggableButton:
             e.setAccepted(True)
             self.setStyleSheet(BUTTON_DRAG_STYLE)
@@ -246,7 +253,7 @@ class MainWindow(QMainWindow):
         # Replace action tree
         self.ui.action_tree.deleteLater()
         self.ui.action_tree = ActionTree(self.ui.topleftwidget, self, api)
-        self.ui.action_tree.setObjectName(u"action_tree")
+        self.ui.action_tree.setObjectName("action_tree")
         self.ui.action_tree.setSelectionMode(QAbstractItemView.SingleSelection)
         self.ui.action_tree.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.action_tree.setIndentation(0)
@@ -255,8 +262,8 @@ class MainWindow(QMainWindow):
         self.ui.verticalLayout_8.addWidget(self.ui.action_tree)
 
         action_header = self.ui.action_tree.headerItem()
-        action_header.setText(1, "Configuration");
-        action_header.setText(0, "Action");
+        action_header.setText(1, "Configuration")
+        action_header.setText(0, "Action")
 
         # end of hack
 
@@ -379,37 +386,36 @@ class MainWindow(QMainWindow):
             item_data = item.data(0, Qt.UserRole)
             if item_data:
                 action, index, event = item_data
-                if index:
+                if index and selected_button is not None:
                     action_settings = api.get_action_settings_list(self.serial_number(), self.page(), selected_button.index, event)
-                    action_settings[index-1], action_settings[index] = action_settings[index], action_settings[index-1] 
+                    action_settings[index - 1], action_settings[index] = action_settings[index], action_settings[index - 1]
                     api.set_action_settings_list(self.serial_number(), self.page(), selected_button.index, event, action_settings)
 
                     # Rebuild the action list
                     self.build_actions(self.serial_number(), self.page(), selected_button.index)
 
                     # Re-select the new item
-                    self.ui.action_tree.topLevelItem(0).child(index-1).setSelected(True)
-
+                    self.ui.action_tree.topLevelItem(0).child(index - 1).setSelected(True)
 
     def down_action_button(self) -> None:
         items = self.ui.action_tree.selectedItems()
         if items:
             item = items[0]
             item_data = item.data(0, Qt.UserRole)
-            if item_data:
+            if item_data and selected_button is not None:
                 action, index, event = item_data
 
                 action_settings = api.get_action_settings_list(self.serial_number(), self.page(), selected_button.index, event)
 
-                if index < (len(action_settings)-1):
-                    action_settings[index], action_settings[index + 1] = action_settings[index + 1], action_settings[index] 
+                if index < (len(action_settings) - 1):
+                    action_settings[index], action_settings[index + 1] = action_settings[index + 1], action_settings[index]
                     api.set_action_settings_list(self.serial_number(), self.page(), selected_button.index, event, action_settings)
 
                     # Rebuild the action list
                     self.build_actions(self.serial_number(), self.page(), selected_button.index)
 
                     # Re-select the new item
-                    self.ui.action_tree.topLevelItem(0).child(index+1).setSelected(True)
+                    self.ui.action_tree.topLevelItem(0).child(index + 1).setSelected(True)
 
     def remove_action_button(self) -> None:
         serial_number = self.serial_number()

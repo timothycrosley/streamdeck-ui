@@ -8,3 +8,4 @@ poetry run pyside2-uic streamdeck_ui/actions/command/commandwidget.ui --from-imp
 poetry run pyside2-uic streamdeck_ui/actions/text/text.ui --from-imports streamdeck_ui -o streamdeck_ui/actions/text/ui_text.py
 poetry run pyside2-uic streamdeck_ui/actions/keypress/keypress.ui --from-imports streamdeck_ui -o streamdeck_ui/actions/keypress/ui_keypress.py
 poetry run pyside2-uic streamdeck_ui/actions/obs/obs.ui --from-imports streamdeck_ui -o streamdeck_ui/actions/obs/ui_obs.py
+poetry run pyside2-uic streamdeck_ui/actions/brightness/brightness.ui --from-imports streamdeck_ui -o streamdeck_ui/actions/brightness/ui_brightness.py

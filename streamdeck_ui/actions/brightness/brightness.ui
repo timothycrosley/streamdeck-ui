@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>action_command</class>
- <widget class="QWidget" name="action_command">
+ <class>Brightness</class>
+ <widget class="QWidget" name="Brightness">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -70,7 +70,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="amount">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -78,7 +78,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0%</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
