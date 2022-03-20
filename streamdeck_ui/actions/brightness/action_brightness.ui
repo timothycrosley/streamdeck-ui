@@ -93,10 +93,10 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Use the **brigtness** action to increase or decrease the Stream Deck brightness.</string>
+        <string>Use the brigtness action to increase or decrease the Stream Deck brightness.</string>
        </property>
        <property name="textFormat">
-        <enum>Qt::MarkdownText</enum>
+        <enum>Qt::PlainText</enum>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
