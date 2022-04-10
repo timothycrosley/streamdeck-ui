@@ -90,7 +90,16 @@ class DisplayGrid:
         with self.lock:
             for filter in self.pages[self.current_page][button].filters:
                 if isinstance(filter[0], KeypressFilter):
-                    filter[0].active = active
+                    if filter[0].active == active:
+                        filter[0].active = not active
+                    else:
+                        filter[0].active = active
+
+    def get_keypress(self, button: int):
+        with self.lock:
+            for filter in self.pages[self.current_page][button].filters:
+                if isinstance(filter[0], KeypressFilter):
+                    return filter[0].active
 
     def synchronize(self):
         # Wait until the next cycle is complete.
