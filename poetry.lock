@@ -1646,7 +1646,7 @@ pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [[package]]
 name = "streamdeck"
-version = "0.9.0"
+version = "0.9.1"
 description = "Library to control Elgato StreamDeck devices."
 category = "main"
 optional = false
@@ -2798,8 +2798,8 @@ stevedore = [
     {file = "stevedore-3.5.0.tar.gz", hash = "sha256:f40253887d8712eaa2bb0ea3830374416736dc8ec0e22f5a65092c1174c44335"},
 ]
 streamdeck = [
-    {file = "streamdeck-0.9.0-py3-none-any.whl", hash = "sha256:a2637645deeb9c8fb5ae7532011c2bd5671b909a653f9c54e8a1d744a77ef3db"},
-    {file = "streamdeck-0.9.0.tar.gz", hash = "sha256:f7be77e111cebab6388394b5d2c54dd6a358625e30dbb0317e7197e4c80f65ae"},
+    {file = "streamdeck-0.9.1-py3-none-any.whl", hash = "sha256:01b8c9245835b593a0dae9b0e371fcdbc8dc7ea42f3ac6c6d079694796911d8d"},
+    {file = "streamdeck-0.9.1.tar.gz", hash = "sha256:0116a376afc18f3abbf79cc1a4409f81472e19197d5641b9e97e697d105cbdc0"},
 ]
 terminado = [
     {file = "terminado-0.13.1-py3-none-any.whl", hash = "sha256:f446b522b50a7aa68b5def0a02893978fb48cb82298b0ebdae13003c6ee6f198"},

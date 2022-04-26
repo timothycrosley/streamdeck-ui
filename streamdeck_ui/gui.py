@@ -788,8 +788,12 @@ def streamdeck_detatched(ui, serial_number):
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
         # Check anyways
-        ui.device_list.removeItem(index)
-
+        blocker = QSignalBlocker(ui.device_list)
+        try:
+             ui.device_list.removeItem(index)
+        finally:
+            blocker.unblock()
+        build_device(ui)
 
 def start(_exit: bool = False) -> None:
     global api

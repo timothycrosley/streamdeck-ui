@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional
 
 from StreamDeck import DeviceManager
 from StreamDeck.Devices.StreamDeck import StreamDeck
+from StreamDeck.Transport.Transport import TransportError
 
 
 class StreamDeckMonitor:
@@ -79,12 +80,39 @@ class StreamDeckMonitor:
 
             with self.lock:
                 attached_streamdecks = DeviceManager.DeviceManager().enumerate()
+
+            # Look for new StreamDecks
             for streamdeck in attached_streamdecks:
                 streamdeck_id = streamdeck.id()
                 if streamdeck_id not in self.streamdecks:
-                    self.streamdecks[streamdeck_id] = streamdeck
-                    self.attached(streamdeck_id, streamdeck)
+                    try:
+                        self.attached(streamdeck_id, streamdeck)
+                        self.streamdecks[streamdeck_id] = streamdeck
+                    except TransportError as error:
+                        print(f"Error during attach: {error}")
+                        pass
 
+            # Look for suspended/resumed StreamDecks
+            for streamdeck in list(self.streamdecks.values()):
+                # Note that streamdeck.connected() will enumerate the devices attached. 
+                # Enumeration must not be done while other device operations on other
+                # threads are running. Protect with the lock.
+                # Note that it will only enumerate when is_open() returns false (short circuit),
+                # so it won't do it uncessarily anyways.
+
+                # Use a flag so we don't hold the lock while executing callback
+                failed_but_attached = False
+                with self.lock:
+                    if not streamdeck.is_open() and streamdeck.connected():
+                        failed_but_attached = True
+
+                # The recovery strategy is to treat this as a detach and let the 
+                # next enumeration pick up the device and reinitialize.
+                if failed_but_attached:
+                    del self.streamdecks[streamdeck.id()]
+                    self.detatched(streamdeck.id())
+
+            # Remove unplugged StreamDecks
             for streamdeck_id in list(self.streamdecks.keys()):
                 if streamdeck_id not in [deck.id() for deck in attached_streamdecks]:
                     streamdeck = self.streamdecks[streamdeck_id]
