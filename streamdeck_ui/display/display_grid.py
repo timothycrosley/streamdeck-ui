@@ -206,7 +206,7 @@ class DisplayGrid:
             page (int): The page number to switch to.
         """
         with self.lock:
-            if self.current_page > 0:
+            if self.current_page >= 0:
                 # Ensure none of the button filters are active anymore
                 old_page = self.pages[self.current_page]
                 for _, pipeline in old_page.items():
