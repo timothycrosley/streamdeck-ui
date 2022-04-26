@@ -22,6 +22,7 @@ Change log
 
 ### Fixes
 - Button icon stuck in pushed state when changing from page 1.
+- Remove python3-xlib dependency.
 
 ## 2.0.3 - 6 Mar 2022
 
