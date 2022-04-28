@@ -8,10 +8,15 @@ from subprocess import Popen  # nosec - Need to allow users to specify arbitrary
 from typing import Dict, Optional
 
 import pkg_resources
-from pynput import keyboard
-from pynput.keyboard import Controller, Key
+
+"""Okay to fail if --no-ui"""
+try:
+    from pynput import keyboard
+    from pynput.keyboard import Controller, Key
+except ImportError:
+    pass
 from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
+from PySide2.QtCore import QCoreApplication, QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide2.QtGui import QDesktopServices, QDrag, QIcon
 from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
@@ -141,7 +146,8 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         if api.reset_dimmer(deck_id):
             return
 
-        kb = Controller()
+        if ui:
+            kb = Controller()
         page = api.get_page(deck_id)
 
         command = api.get_button_command(deck_id, page, key)
@@ -217,7 +223,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
             api.set_page(deck_id, switch_page - 1)
-            if _deck_id(ui) == deck_id:
+            if ui and _deck_id(ui) == deck_id:
                 ui.pages.setCurrentIndex(switch_page - 1)
 
 
@@ -818,28 +824,34 @@ def start(_exit: bool = False) -> None:
 
     # The QApplication object holds the Qt event loop and you need one of these
     # for your application
-    app = QApplication(sys.argv)
+    if show_ui:
+        app = QApplication(sys.argv)
+    else:
+        app = QCoreApplication(sys.argv)
     app.setApplicationName("Streamdeck UI")
     app.setApplicationVersion(version)
-    logo = QIcon(LOGO)
-    app.setWindowIcon(logo)
-    main_window = create_main_window(logo, app)
-    ui = main_window.ui
-    tray = create_tray(logo, app, main_window)
+    if show_ui:
+        logo = QIcon(LOGO)
+        app.setWindowIcon(logo)
+        main_window = create_main_window(logo, app)
+        ui = main_window.ui
+        tray = create_tray(logo, app, main_window)
 
-    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+        api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
-    ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
-    ui.pages.currentChanged.connect(partial(change_page, ui))
+        ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
+        ui.pages.currentChanged.connect(partial(change_page, ui))
 
-    api.plugevents.attached.connect(partial(streamdeck_attached, ui))
-    api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
-    api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+        api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+        api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
+        api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+    else:
+        api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, None))
 
     api.start()
 
-    tray.show()
     if show_ui:
+        tray.show()
         main_window.show()
 
     if _exit:
