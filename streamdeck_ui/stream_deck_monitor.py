@@ -94,7 +94,7 @@ class StreamDeckMonitor:
 
             # Look for suspended/resumed StreamDecks
             for streamdeck in list(self.streamdecks.values()):
-                # Note that streamdeck.connected() will enumerate the devices attached. 
+                # Note that streamdeck.connected() will enumerate the devices attached.
                 # Enumeration must not be done while other device operations on other
                 # threads are running. Protect with the lock.
                 # Note that it will only enumerate when is_open() returns false (short circuit),
@@ -106,7 +106,7 @@ class StreamDeckMonitor:
                     if not streamdeck.is_open() and streamdeck.connected():
                         failed_but_attached = True
 
-                # The recovery strategy is to treat this as a detach and let the 
+                # The recovery strategy is to treat this as a detach and let the
                 # next enumeration pick up the device and reinitialize.
                 if failed_but_attached:
                     del self.streamdecks[streamdeck.id()]
