@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 2.0.4 - TBD
+## 2.0.4 - 29 Apr 2022
 ### Features
 - Recover from a suspend/resume cycle.
 
