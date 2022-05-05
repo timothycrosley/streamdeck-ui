@@ -33,6 +33,8 @@ class StreamDeckSignalEmitter(QObject):
     detached = Signal(str)
     "A signal that is raised whenever a StreamDeck is detached. "
     cpu_changed = Signal(str, int)
+    "A signal that is raised whenever an action's settings changes."
+    action_settings_changed = Signal(str)
 
 
 class StreamDeckServer:
@@ -70,6 +72,7 @@ class StreamDeckServer:
         self.streamdeck_keys = KeySignalEmitter()
         "Use the connect method on the key_pressed signal to subscribe"
 
+        # TODO: rename plugevents to something else and consolidate all events there
         self.plugevents = StreamDeckSignalEmitter()
         "Use the connect method on the attached and detached methods to subscribe"
 
@@ -136,6 +139,7 @@ class StreamDeckServer:
             new_values = self.get_action_settings(serial_number, page, key, event, index)
             new_values[k] = v
             self.set_action_settings(serial_number, page, key, event, index, new_values)
+            self.plugevents.action_settings_changed.emit(f"{index}")
 
         return ActionSettings(lambda k: self.get_action_settings(serial_number, page, key, event, index).get(k), lambda k, v: update(k, v))
 

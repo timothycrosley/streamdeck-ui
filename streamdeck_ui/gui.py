@@ -341,6 +341,10 @@ class MainWindow(QMainWindow):
         """
         return self.ui.pages.currentIndex()
 
+    def action_settings_changed(self, action: str):
+        # TODO: Update model and refresh UI.
+        print(f"Settings changed: {action}")
+
     def streamdeck_cpu_changed(self, serial_number: str, cpu: int):
         if cpu > 100:
             cpu == 100
@@ -1001,6 +1005,7 @@ def start(_exit: bool = False) -> None:
     api.plugevents.attached.connect(main_window.streamdeck_attached)
     api.plugevents.detached.connect(main_window.streamdeck_detached)
     api.plugevents.cpu_changed.connect(main_window.streamdeck_cpu_changed)
+    api.plugevents.action_settings_changed.connect(main_window.action_settings_changed)
 
     api.start()
 
