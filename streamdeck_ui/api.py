@@ -11,6 +11,7 @@ from PIL.ImageQt import ImageQt
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
+from StreamDeck.Transport.Transport import TransportError
 
 from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAPI, StreamDeckAction
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
@@ -317,8 +318,7 @@ class StreamDeckServer:
                 streamdeck.set_brightness(50)
                 streamdeck.reset()
                 streamdeck.close()
-        except Exception as error:
-            print(f"Error during detatch: {error}")
+        except TransportError:
             pass
 
         del self.decks[serial_number]

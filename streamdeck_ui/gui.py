@@ -771,7 +771,12 @@ class MainWindow(QMainWindow):
         if index != -1:
             # Should not be (how can you remove a device that was never attached?)
             # Check anyways
-            self.ui.device_list.removeItem(index)
+            blocker = QSignalBlocker(self.ui.device_list)
+            try:
+                self.ui.device_list.removeItem(index)
+            finally:
+                blocker.unblock()
+            self.build_device(self)
 
     def add_action_button(self) -> None:
         items = self.ui.select_action_tree.selectedItems()
