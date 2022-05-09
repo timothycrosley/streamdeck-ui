@@ -24,6 +24,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
       #----------------------------------------------
+      # Debug
+      #----------------------------------------------      
+      - name: Show pip version
+        run: |
+          pip --version     
+      #----------------------------------------------
       #  -----  install & configure poetry  -----      
       #----------------------------------------------
       - name: Install Poetry
