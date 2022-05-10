@@ -4,10 +4,12 @@ from typing import Any, Callable
 
 from PySide2.QtGui import QIcon
 
+
 class StreamDeckAPI(ABC):
     """An API provided to StreamDeckAction instances that allow them to interact with 
     the Stream Deck. 
     """
+
     @abstractmethod
     def change_brightness(self, amount: int) -> None:
         """Changes the brightness of the Stream Deck by the given amount.

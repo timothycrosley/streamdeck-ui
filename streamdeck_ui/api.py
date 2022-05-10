@@ -13,7 +13,7 @@ from PySide2.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAPI, StreamDeckAction
+from streamdeck_ui.actions.stream_deck_action import ActionSettings, StreamDeckAction, StreamDeckAPI
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
@@ -668,8 +668,10 @@ class StreamDeckServer:
 
         display_handler.replace(page, button, filters)
 
+
 class StreamDeckServerAPI(StreamDeckAPI):
     """Concrete implementation of the StreamDeckAPI. This is the binding between the StreamDeckServer and the Action."""
+
     def __init__(self, server: StreamDeckServer, serial_number: str):
         self.server = server
         self.serial_number = serial_number
