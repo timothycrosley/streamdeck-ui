@@ -6,8 +6,8 @@ from PySide2.QtGui import QIcon
 
 
 class StreamDeckAPI(ABC):
-    """An API provided to StreamDeckAction instances that allow them to interact with 
-    the Stream Deck. 
+    """An API provided to StreamDeckAction instances that allow them to interact with
+    the Stream Deck.
     """
 
     @abstractmethod
