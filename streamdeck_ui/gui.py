@@ -17,10 +17,12 @@ from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMain
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
+from streamdeck_ui.system_api import SystemApi
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 api: StreamDeckServer
+system_api: SystemApi
 
 BUTTON_STYLE = """
     QToolButton {
@@ -137,12 +139,19 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
 
     # TODO: Handle both key down and key up events in future.
     if state:
+        page = api.get_page(deck_id)
+
+        run_when_locked = api.get_button_run_when_locked(deck_id, page, key)
+        is_system_locked = system_api.get_is_system_locked()
+
+        if is_system_locked and not run_when_locked:
+            print(f"Button not allowed when system is locked")
+            return
 
         if api.reset_dimmer(deck_id):
             return
 
         kb = Controller()
-        page = api.get_page(deck_id)
 
         command = api.get_button_command(deck_id, page, key)
         if command:
@@ -271,6 +280,13 @@ def update_change_brightness(ui, amount: int) -> None:
         api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
 
 
+def update_run_when_locked(ui, value: int) -> None:
+    if selected_button:
+        deck_id = _deck_id(ui)
+        checked = True if value == 2 else False
+        api.set_button_run_when_locked(deck_id, _page(ui), selected_button.index, checked)
+
+
 def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
@@ -396,6 +412,7 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
         ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
         ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
+        ui.run_when_locked.setChecked(api.get_button_run_when_locked(deck_id, _page(ui), button_id))
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         api.reset_dimmer(deck_id)
     else:
@@ -409,6 +426,7 @@ def enable_button_configuration(ui, enabled: bool):
     ui.keys.setEnabled(enabled)
     ui.write.setEnabled(enabled)
     ui.change_brightness.setEnabled(enabled)
+    ui.run_when_locked.setEnabled(enabled)
     ui.switch_page.setEnabled(enabled)
     ui.imageButton.setEnabled(enabled)
     ui.removeButton.setEnabled(enabled)
@@ -424,6 +442,7 @@ def reset_button_configuration(ui):
     ui.keys.clearEditText()
     ui.write.clear()
     ui.change_brightness.setValue(0)
+    ui.run_when_locked.setChecked(False)
     ui.switch_page.setValue(0)
     enable_button_configuration(ui, False)
 
@@ -716,6 +735,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
+    ui.run_when_locked.stateChanged.connect(partial(update_run_when_locked, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.textButton.clicked.connect(partial(align_text_vertical, main_window))
@@ -797,7 +817,7 @@ def streamdeck_detached(ui, serial_number):
 
 
 def start(_exit: bool = False) -> None:
-    global api
+    global api, system_api
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")
@@ -814,6 +834,7 @@ def start(_exit: bool = False) -> None:
         version = "devel"
 
     api = StreamDeckServer()
+    system_api = SystemApi()
     if os.path.isfile(STATE_FILE):
         api.open_config(STATE_FILE)
 

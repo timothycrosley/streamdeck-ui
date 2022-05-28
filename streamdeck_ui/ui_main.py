@@ -259,15 +259,25 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(5, QFormLayout.FieldRole, self.change_brightness)
 
+        self.label_run_when_locked = QLabel(self.groupBox)
+        self.label_run_when_locked.setObjectName(u"label_run_when_locked")
+
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_run_when_locked)
+
+        self.run_when_locked = QCheckBox(self.groupBox)
+        self.run_when_locked.setObjectName(u"run_when_locked")
+
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.run_when_locked)
+
         self.label_6 = QLabel(self.groupBox)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(self.groupBox)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.write)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -323,7 +333,8 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.command, self.keys)
         QWidget.setTabOrder(self.keys, self.switch_page)
         QWidget.setTabOrder(self.switch_page, self.change_brightness)
-        QWidget.setTabOrder(self.change_brightness, self.write)
+        QWidget.setTabOrder(self.change_brightness, self.run_when_locked)
+        QWidget.setTabOrder(self.run_when_locked, self.write)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -377,6 +388,7 @@ class Ui_MainWindow(object):
 
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
+        self.label_run_when_locked.setText(QCoreApplication.translate("MainWindow", u"Run When Locked:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
 #if QT_CONFIG(tooltip)
         self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
