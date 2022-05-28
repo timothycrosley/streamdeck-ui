@@ -363,6 +363,16 @@ class StreamDeckServer:
         """Returns the brightness change set for a particular button"""
         return self._button_state(deck_id, page, button).get("brightness_change", 0)
 
+    def set_button_run_when_locked(self, deck_id: str, page: int, button: int, value: bool) -> None:
+        """Sets whether the button should run when the system is locked"""
+        if self.get_button_run_when_locked(deck_id, page, button) != value:
+            self._button_state(deck_id, page, button)["run_when_locked"] = value
+            self._save_state()
+
+    def get_button_run_when_locked(self, deck_id: str, page: int, button: int) -> bool:
+        """Returns whether the button should run when the system is locked"""
+        return self._button_state(deck_id, page, button).get("run_when_locked", False)
+
     def set_button_command(self, deck_id: str, page: int, button: int, command: str) -> None:
         """Sets the command associated with the button"""
         if self.get_button_command(deck_id, page, button) != command:
