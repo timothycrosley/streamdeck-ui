@@ -180,6 +180,9 @@ Joe
 ```
 ![nope](art/nope.gif)
 
+### Simple plugin system
+The script you specify as command for a button can return JSON formatted instructions (to `STDOUT`), which influence the buttons appearance and future behaviour. For the JSON structure definition and example of audio switching plugin check the `plugin-examples` directory.
+
 ## Known issues
 Confirm you are running the latest release with `pip3 show streamdeck-ui`. Compare it to: [![PyPI version](https://badge.fury.io/py/streamdeck-ui.svg)](http://badge.fury.io/py/streamdeck-ui)
 

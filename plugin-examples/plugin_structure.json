@@ -1,0 +1,18 @@
+{
+    "streamdeck-plugin": {
+        "tasks": [
+            {
+                "function": "set_button_icon",
+                "data": "[new button image path here]"
+            },
+            {
+                "function": "set_button_text",
+                "data": "[new button text here]"
+            },
+            {
+                "function": "set_button_command",
+                "data": "[new button command here]"
+            }
+        ]
+    }
+}

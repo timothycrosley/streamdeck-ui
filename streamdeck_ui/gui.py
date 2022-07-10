@@ -3,8 +3,9 @@ import os
 import shlex
 import sys
 import time
+from streamdeck_ui.plugin import PluginManager
 from functools import partial
-from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from subprocess import Popen, PIPE  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Optional
 
 import pkg_resources
@@ -133,8 +134,7 @@ def _replace_special_keys(key):
     return key
 
 
-def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
-
+def handle_keypress(ui, plugin: PluginManager, deck_id: str, key: int, state: bool) -> None:
     # TODO: Handle both key down and key up events in future.
     if state:
 
@@ -147,9 +147,16 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         command = api.get_button_command(deck_id, page, key)
         if command:
             try:
-                Popen(shlex.split(command))
+                sub_output = Popen(shlex.split(command), stdout=PIPE)
+                command_stdout = sub_output.communicate()[0].decode("utf-8")
+                if len(command_stdout) > 0:
+                    print(command_stdout, end="")
+                else:
+                    command_stdout = None
             except Exception as error:
                 print(f"The command '{command}' failed: {error}")
+            if command_stdout is not None:
+                plugin.get_plugin_data(command_stdout, key)
 
         keys = api.get_button_keys(deck_id, page, key)
         if keys:
@@ -827,8 +834,9 @@ def start(_exit: bool = False) -> None:
     main_window = create_main_window(logo, app)
     ui = main_window.ui
     tray = create_tray(logo, app, main_window)
+    plugin = PluginManager(api, ui)
 
-    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui, plugin))
 
     ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
     ui.pages.currentChanged.connect(partial(change_page, ui))
