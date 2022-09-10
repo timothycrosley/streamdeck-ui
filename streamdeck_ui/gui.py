@@ -103,9 +103,10 @@ class DraggableButton(QtWidgets.QToolButton):
                 file_name = e.mimeData().urls()[0].toLocalFile()
                 self.api.set_button_icon(serial_number, page, self.index, file_name)
 
-        icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
-        if icon:
-            e.source().setIcon(icon)
+        if e.source():
+            icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
+            if icon:
+                e.source().setIcon(icon)
 
         icon = self.api.get_button_icon_pixmap(serial_number, page, self.index)
         if icon:
