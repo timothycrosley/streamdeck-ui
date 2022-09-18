@@ -16,6 +16,11 @@ OR
 
 Change log
 ==========
+## 2.0.5 - 18 Sep 2022
+### Features
+- Support for new Stream Deck Mini.
+### Fixes
+- Fix install under Fedora 36 (pillow dependency version bump).
 ## 2.0.4 - 29 Apr 2022
 ### Features
 - Recover from a suspend/resume cycle.

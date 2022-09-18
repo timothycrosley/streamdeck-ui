@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streamdeck_ui"
-version = "2.0.4"
+version = "2.0.5"
 description = "A service, Web Interface, and UI for interacting with your computer using a Stream Deck"
 authors = ["Timothy Crosley <timothy.crosley@gmail.com>"]
 license = "MIT"
@@ -8,8 +8,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-streamdeck = "^0.9.1"
-pillow = "^9.0.0"
+streamdeck = "^0.9.2"
+pillow = "^9.2.0"
 pynput = "^1.7"
 pyside2 = "^5.15"
 CairoSVG = "^2.5.2"
