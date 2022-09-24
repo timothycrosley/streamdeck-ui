@@ -480,9 +480,9 @@ class MainWindow(QMainWindow):
         deck_id = self.serial_number()
         api.set_brightness(deck_id, value)
 
-    def set_brightness_dimmed(self, value: int, full_brightness: int) -> None:
+    def set_brightness_dimmed(self, value: int) -> None:
         deck_id = self.serial_number()
-        api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
+        api.set_brightness_dimmed(deck_id, value)
         api.reset_dimmer(deck_id)
 
     def show_settings(self) -> None:
@@ -518,7 +518,7 @@ class MainWindow(QMainWindow):
                 # dimmers[deck_id].timeout = settings.ui.dim.currentData()
                 api.set_display_timeout(deck_id, settings.ui.dim.currentData())
             self.set_brightness(settings.ui.brightness.value())
-            self.set_brightness_dimmed(settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
+            self.set_brightness_dimmed(settings.ui.brightness_dimmed.value())
         else:
             # User cancelled, reset to original brightness
             self.change_brightness(deck_id, api.get_brightness(deck_id))

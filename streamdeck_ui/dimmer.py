@@ -10,17 +10,28 @@ class Dimmer:
 
         :param int timeout: The time in seconds before the dimmer starts.
         :param int brightness: The normal brightness level.
+        :param int brightness_dimmed: The percentage of normal brightness when dimmed.
         :param Callable[[int], None] brightness_callback: Callback that receives the current
                                                           brightness level.
         """
         self.timeout = timeout
         self.brightness = brightness
+        "The brightness when not dimmed"
         self.brightness_dimmed = brightness_dimmed
+        "The percentage of normal brightness when dimmed"
         self.brightness_callback = brightness_callback
         self.__stopped = False
         self.dimmed = True
         "True if the Stream Deck is dimmed, False otherwise"
         self.__timer: Optional[threading.Timer] = None
+
+    def dimmed_brightness(self) -> int:
+        """Calculates the effective brightness when dimmed.
+
+        :return: The brightness value when applying the dim percentage to the normal brightness.
+        :rtype: int
+        """
+        return int(self.brightness * (self.brightness_dimmed / 100))
 
     def stop(self) -> None:
         """Stops the dimmer and sets the brightness back to normal. Call
@@ -54,7 +65,7 @@ class Dimmer:
         if self.dimmed:
             self.brightness_callback(self.brightness)
             self.dimmed = False
-            if self.brightness_dimmed < 20:
+            if self.dimmed_brightness() < 20:
                 # The screen was "too dark" so reset and let caller know
                 return True
 
@@ -76,5 +87,5 @@ class Dimmer:
             self.__timer.cancel()
             self.__timer = None
 
-            self.brightness_callback(self.brightness_dimmed)
+            self.brightness_callback(self.dimmed_brightness())
             self.dimmed = True
