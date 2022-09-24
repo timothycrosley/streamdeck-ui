@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 2.0.6 - TBD
+## 2.0.6 - 23 Sep 2022
 ### Fixes
 - Image drag/drop from external applications.
 - Dimmer not working properly.
