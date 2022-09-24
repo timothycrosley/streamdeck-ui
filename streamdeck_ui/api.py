@@ -84,13 +84,15 @@ class StreamDeckServer:
 
     def reset_dimmer(self, serial_number: str) -> bool:
         """Resets the dimmer for the given Stream Deck. This means the display
-        will not be dimmed and the timer starts.
+        will not be dimmed and the timer starts. Reloads configuration.
 
         Args:
             serial_number (str): The Stream Deck serial number
         Returns:
             bool: Returns True if the dimmer had to be reset (i.e. woken up), False otherwise.
         """
+        self.dimmers[serial_number].brightness = self.get_brightness(serial_number)
+        self.dimmers[serial_number].brightness_dimmed = self.get_brightness_dimmed(serial_number)
         return self.dimmers[serial_number].reset()
 
     def toggle_dimmers(self):

@@ -18,7 +18,8 @@ Change log
 ==========
 ## 2.0.6 - TBD
 ### Fixes
-- Fix image drag/drop from external applications.
+- Image drag/drop from external applications.
+- Dimmer not working properly.
 ## 2.0.5 - 18 Sep 2022
 ### Features
 - Support for new Stream Deck Mini.

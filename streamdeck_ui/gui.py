@@ -371,11 +371,9 @@ def set_brightness(ui, value: int) -> None:
     api.set_brightness(deck_id, value)
 
 
-def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
+def set_brightness_dimmed(ui, value: int) -> None:
     deck_id = _deck_id(ui)
-    # TODO: Verify this is correct. Looks like it was a bug in the MR
-    api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
-    # dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
+    api.set_brightness_dimmed(deck_id, value)
     api.reset_dimmer(deck_id)
 
 
@@ -682,7 +680,7 @@ def show_settings(window: MainWindow) -> None:
             # dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
-        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
+        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value())
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
