@@ -137,7 +137,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
     page = api.get_page(deck_id)
 
     toggle_buttons = ["REC"]
-    mutex_buttons = ["PP", "SX", "DX"]
+    mutex_buttons = ["PP", "SX", "DX", "HDMI"]
 
     if not state:
         button_text = api.get_button_text(deck_id, page, key)
