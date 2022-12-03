@@ -51,7 +51,7 @@ sudo dnf install python3-pip python3-devel hidapi
 
 openSUSE Leap & Tumbleweed:
 ``` console
-sudo zypper install python3-pip libhidapi-libusb0 libxcb-xinerama0 python-devel python3-devel python310 python310-devel gcc gcc-c++ kernel-devel
+sudo zypper install python3-pip libhidapi-libusb0 libxcb-xinerama0 python310 python310-devel kernel-devel
 ```
 
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
@@ -85,7 +85,7 @@ sudo udevadm control --reload-rules
 
 Installing the application itself is done via pip:
 ``` console
-pip3 install wheel pillow streamdeck-ui --user
+pip3 install streamdeck-ui --user
 ```
 Make sure to include `$HOME/.local/bin` to your PATH.  
 If you haven't already, add
