@@ -48,6 +48,12 @@ Fedora:
 ``` console
 sudo dnf install python3-pip python3-devel hidapi
 ```
+
+openSUSE Leap & Tumbleweed:
+``` console
+sudo zypper install python3-pip libhidapi-libusb0 libxcb-xinerama0 python-devel python3-devel python310 python310-devel gcc gcc-c++ kernel-devel
+```
+
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
 
 To use streamdeck_ui without root permissions, you have to give your user full access to the device.
