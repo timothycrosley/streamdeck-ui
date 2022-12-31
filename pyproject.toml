@@ -14,7 +14,7 @@ pynput = "^1.7"
 pyside2 = "^5.15"
 CairoSVG = "^2.5.2"
 filetype = "^1.0.10"
-python-xlib = "^0.31"
+python-xlib = "^0.33"
 
 [tool.poetry.dev-dependencies]
 vulture = "^1.0"
