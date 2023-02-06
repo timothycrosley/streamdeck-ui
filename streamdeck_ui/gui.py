@@ -135,6 +135,26 @@ def _replace_special_keys(key):
 
 
 def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
+    page = api.get_page(deck_id)
+
+    toggle_buttons = ["REC"]
+    mutex_buttons = ["PP", "SX", "DX", "HDMI"]
+
+    if not state:
+        button_text = api.get_button_text(deck_id, page, key)
+        if button_text in toggle_buttons:
+            print(f"Button {button_text} is a toggle")
+            api.display_handlers[deck_id].set_keypress(key, True)
+        if button_text in mutex_buttons:
+            print(f"Button {button_text} is a mutex")
+            for i in range(15):
+                i_text = api.get_button_text(deck_id, page, i)
+                i_pressed = api.display_handlers[deck_id].get_keypress(i)
+                if i_text in mutex_buttons:
+                    if i_text == button_text:
+                        api.display_handlers[deck_id].set_keypress(i, True)
+                    elif i_pressed:
+                        api.display_handlers[deck_id].set_keypress(i, False)
 
     # TODO: Handle both key down and key up events in future.
     if state:
@@ -143,7 +163,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
             return
 
         kb = Controller()
-        page = api.get_page(deck_id)
 
         command = api.get_button_command(deck_id, page, key)
         if command:
