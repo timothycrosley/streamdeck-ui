@@ -103,9 +103,10 @@ class DraggableButton(QtWidgets.QToolButton):
                 file_name = e.mimeData().urls()[0].toLocalFile()
                 self.api.set_button_icon(serial_number, page, self.index, file_name)
 
-        icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
-        if icon:
-            e.source().setIcon(icon)
+        if e.source():
+            icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
+            if icon:
+                e.source().setIcon(icon)
 
         icon = self.api.get_button_icon_pixmap(serial_number, page, self.index)
         if icon:
@@ -389,11 +390,9 @@ def set_brightness(ui, value: int) -> None:
     api.set_brightness(deck_id, value)
 
 
-def set_brightness_dimmed(ui, value: int, full_brightness: int) -> None:
+def set_brightness_dimmed(ui, value: int) -> None:
     deck_id = _deck_id(ui)
-    # TODO: Verify this is correct. Looks like it was a bug in the MR
-    api.set_brightness_dimmed(deck_id, int(full_brightness * (value / 100)))
-    # dimmers[deck_id].brightness_dimmed = int(full_brightness * (value / 100))
+    api.set_brightness_dimmed(deck_id, value)
     api.reset_dimmer(deck_id)
 
 
@@ -700,7 +699,7 @@ def show_settings(window: MainWindow) -> None:
             # dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
         set_brightness(window.ui, settings.ui.brightness.value())
-        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value(), settings.ui.brightness.value())
+        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value())
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
@@ -802,12 +801,17 @@ def streamdeck_attached(ui, deck: Dict):
     build_device(ui)
 
 
-def streamdeck_detatched(ui, serial_number):
+def streamdeck_detached(ui, serial_number):
     index = ui.device_list.findData(serial_number)
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
         # Check anyways
-        ui.device_list.removeItem(index)
+        blocker = QSignalBlocker(ui.device_list)
+        try:
+            ui.device_list.removeItem(index)
+        finally:
+            blocker.unblock()
+        build_device(ui)
 
 
 def start(_exit: bool = False) -> None:
@@ -848,7 +852,7 @@ def start(_exit: bool = False) -> None:
     ui.pages.currentChanged.connect(partial(change_page, ui))
 
     api.plugevents.attached.connect(partial(streamdeck_attached, ui))
-    api.plugevents.detatched.connect(partial(streamdeck_detatched, ui))
+    api.plugevents.detached.connect(partial(streamdeck_detached, ui))
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 
     api.start()

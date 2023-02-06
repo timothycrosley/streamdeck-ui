@@ -12,8 +12,9 @@ def get_asset(file_name):
 
 
 def test_default():
-    default = empty_filter.EmptyFilter((32, 32))
-    image = default.transform(None, Fraction(0))
+    default = empty_filter.EmptyFilter()
+    default.initialize((16, 16))
+    image, _ = default.transform(lambda: None, lambda hash: None, True, Fraction(0))
     assert image is not None
     assert default.is_complete is False
 
@@ -23,22 +24,33 @@ def test_default():
 def test_image_filter(image: str):
 
     size = (72, 72)
-    pipe = pipeline.Pipeline(size)
+    pipe = pipeline.Pipeline()
 
-    pipe.add(empty_filter.EmptyFilter(size))
+    filter = empty_filter.EmptyFilter()
+    filter.initialize(size)
+
+    pipe.add(filter)
     time = Fraction(0)
 
-    pipe.add(image_filter.ImageFilter(size, get_asset(image)))
-    image = pipe.execute(time)
-    image = pipe.execute(1)
-    image = pipe.execute(2)
+    filter = image_filter.ImageFilter(get_asset(image))
+    filter.initialize(size)
+    pipe.add(filter)
+    image, _ = pipe.execute(time)
+    image, _ = pipe.execute(1)
+    image, _ = pipe.execute(2)
 
 
 def test_pipeline():
-    pipe = pipeline.Pipeline((32, 32))
+    size = (72, 72)
+    pipe = pipeline.Pipeline()
 
-    filter = image_filter.ImageFilter((32, 32), os.path.join(os.path.dirname(__file__), "assets/smile.png"))
+    filter = empty_filter.EmptyFilter()
+    filter.initialize(size)
     pipe.add(filter)
-    final_image = pipe.execute()
 
+    filter = image_filter.ImageFilter(os.path.join(os.path.dirname(__file__), "assets/smile.png"))
+    filter.initialize(size)
+    pipe.add(filter)
+    time = Fraction(0)
+    final_image, _ = pipe.execute(time)
     assert final_image is not None

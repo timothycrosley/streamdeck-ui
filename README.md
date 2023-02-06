@@ -52,19 +52,13 @@ If you're using GNOME shell, you might need to manually install an extension tha
 
 To use streamdeck_ui without root permissions, you have to give your user full access to the device.
 
-Add the udev rules using your text editor:
+Add the udev rules using the nano text editor:
 ``` console
-sudoedit /etc/udev/rules.d/70-streamdeck.rules
-# If that doesn't work, try:
 sudo nano /etc/udev/rules.d/70-streamdeck.rules
 ```
-Paste the following lines:
-``` console
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", TAG+="uaccess"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", TAG+="uaccess"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", TAG+="uaccess"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", TAG+="uaccess"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0080", TAG+="uaccess"
+Paste the following line and write the file:
+``` console 
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
 ```
 Make the new rule take effect:
 ``` console

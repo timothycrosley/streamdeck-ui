@@ -16,6 +16,23 @@ OR
 
 Change log
 ==========
+## 2.0.6 - 23 Sep 2022
+### Fixes
+- Image drag/drop from external applications.
+- Dimmer not working properly.
+## 2.0.5 - 18 Sep 2022
+### Features
+- Support for new Stream Deck Mini.
+### Fixes
+- Fix install under Fedora 36 (pillow dependency version bump).
+## 2.0.4 - 29 Apr 2022
+### Features
+- Recover from a suspend/resume cycle.
+
+### Fixes
+- Button icon stuck in pushed state when changing from page 1.
+- Remove python3-xlib dependency.
+
 ## 2.0.3 - 6 Mar 2022
 
 ### Features
