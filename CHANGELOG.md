@@ -23,6 +23,7 @@ Change log
 - Better support for dark/light mode (due to pyside6).
 ### Features
 - Added support for a new sub-variant of the StreamDeck XL.
+- Allow Stream Deck UI to start, even if virtual keyboard wont' work.
 ## 2.0.6 - 23 Sep 2022
 ### Fixes
 - Image drag/drop from external applications.

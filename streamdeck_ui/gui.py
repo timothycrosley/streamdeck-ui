@@ -8,8 +8,6 @@ from subprocess import Popen  # nosec - Need to allow users to specify arbitrary
 from typing import Dict, Optional
 
 import pkg_resources
-from pynput import keyboard
-from pynput.keyboard import Controller, Key
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon
@@ -19,6 +17,20 @@ from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
+
+pnput_supported: bool = True
+try:
+    from pynput import keyboard
+    from pynput.keyboard import Controller, Key
+except ImportError as pynput_error:
+    pnput_supported = False
+    print("Virtual keyboard functionality disabled.")
+    print("You can still run Stream Deck UI, however you will not be able to emulate key presses or text typing.")
+    print("The most likely reason you are seeing this message is because you don't have an X server running")
+    print("and your operating system uses Wayland.")
+    print("")
+    print(f"For troubleshooting purposes, the actual error is: \n{pynput_error}")
+
 
 api: StreamDeckServer
 
@@ -139,7 +151,8 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         if api.reset_dimmer(deck_id):
             return
 
-        kb = Controller()
+        if pnput_supported:
+            kb = Controller()
         page = api.get_page(deck_id)
 
         command = api.get_button_command(deck_id, page, key)
@@ -149,61 +162,63 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
             except Exception as error:
                 print(f"The command '{command}' failed: {error}")
 
-        keys = api.get_button_keys(deck_id, page, key)
-        if keys:
-            keys = keys.strip().replace(" ", "")
-            for section in keys.split(","):
-                # Since + and , are used to delimit our section and keys to press,
-                # they need to be substituted with keywords.
-                section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
+        if pnput_supported:
+            keys = api.get_button_keys(deck_id, page, key)
+            if keys:
+                keys = keys.strip().replace(" ", "")
+                for section in keys.split(","):
+                    # Since + and , are used to delimit our section and keys to press,
+                    # they need to be substituted with keywords.
+                    section_keys = [_replace_special_keys(key_name) for key_name in section.split("+")]
 
-                # Translate string to enum, or just the string itself if not found
-                section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
+                    # Translate string to enum, or just the string itself if not found
+                    section_keys = [getattr(Key, key_name.lower(), key_name) for key_name in section_keys]
 
-                for key_name in section_keys:
-                    if isinstance(key_name, str) and key_name.startswith("delay"):
-                        sleep_time_arg = key_name.split("delay", 1)[1]
-                        if sleep_time_arg:
-                            try:
-                                sleep_time = float(sleep_time_arg)
-                            except Exception:
-                                print(f"Could not convert sleep time to float '{sleep_time_arg}'")
-                                sleep_time = 0
+                    for key_name in section_keys:
+                        if isinstance(key_name, str) and key_name.startswith("delay"):
+                            sleep_time_arg = key_name.split("delay", 1)[1]
+                            if sleep_time_arg:
+                                try:
+                                    sleep_time = float(sleep_time_arg)
+                                except Exception:
+                                    print(f"Could not convert sleep time to float '{sleep_time_arg}'")
+                                    sleep_time = 0
+                            else:
+                                # default if not specified
+                                sleep_time = 0.5
+
+                            if sleep_time:
+                                try:
+                                    time.sleep(sleep_time)
+                                except Exception:
+                                    print(f"Could not sleep with provided sleep time '{sleep_time}'")
                         else:
-                            # default if not specified
-                            sleep_time = 0.5
-
-                        if sleep_time:
                             try:
-                                time.sleep(sleep_time)
+                                if isinstance(key_name, str) and key_name.lower().startswith("0x"):
+                                    kb.press(keyboard.KeyCode(int(key_name, 16)))
+                                else:
+                                    kb.press(key_name)
+
                             except Exception:
-                                print(f"Could not sleep with provided sleep time '{sleep_time}'")
-                    else:
-                        try:
-                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-                                kb.press(keyboard.KeyCode(int(key_name, 16)))
-                            else:
-                                kb.press(key_name)
+                                print(f"Could not press key '{key_name}'")
 
-                        except Exception:
-                            print(f"Could not press key '{key_name}'")
+                    for key_name in section_keys:
+                        if not (isinstance(key_name, str) and key_name.startswith("delay")):
+                            try:
+                                if isinstance(key_name, str) and key_name.lower().startswith("0x"):
+                                    kb.release(keyboard.KeyCode(int(key_name, 16)))
+                                else:
+                                    kb.release(key_name)
+                            except Exception:
+                                print(f"Could not release key '{key_name}'")
 
-                for key_name in section_keys:
-                    if not (isinstance(key_name, str) and key_name.startswith("delay")):
-                        try:
-                            if isinstance(key_name, str) and key_name.lower().startswith("0x"):
-                                kb.release(keyboard.KeyCode(int(key_name, 16)))
-                            else:
-                                kb.release(key_name)
-                        except Exception:
-                            print(f"Could not release key '{key_name}'")
-
-        write = api.get_button_write(deck_id, page, key)
-        if write:
-            try:
-                kb.type(write)
-            except Exception as error:
-                print(f"Could not complete the write command: {error}")
+        if pnput_supported:
+            write = api.get_button_write(deck_id, page, key)
+            if write:
+                try:
+                    kb.type(write)
+                except Exception as error:
+                    print(f"Could not complete the write command: {error}")
 
         brightness_change = api.get_button_change_brightness(deck_id, page, key)
         if brightness_change:
@@ -409,6 +424,10 @@ def enable_button_configuration(ui, enabled: bool):
     ui.imageButton.setEnabled(enabled)
     ui.removeButton.setEnabled(enabled)
     ui.textButton.setEnabled(enabled)
+    ui.label_5.setVisible(pnput_supported)
+    ui.keys.setVisible(pnput_supported)
+    ui.label_6.setVisible(pnput_supported)
+    ui.write.setVisible(pnput_supported)
 
 
 def reset_button_configuration(ui):
