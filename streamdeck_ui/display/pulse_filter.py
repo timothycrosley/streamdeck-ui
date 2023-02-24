@@ -19,7 +19,6 @@ class PulseFilter(Filter):
         pass
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
-
         brightness_changed = False
         if time - self.last_time > self.pulse_delay:
             brightness_changed = True

@@ -22,7 +22,6 @@ def test_default():
 # TODO: Incorrect file locations default to "empty". Probably better that it throws.
 @pytest.mark.parametrize("image", ["smile.png", "smile.jpg", "smile.svg", "dog.gif"])
 def test_image_filter(image: str):
-
     size = (72, 72)
     pipe = pipeline.Pipeline()
 

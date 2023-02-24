@@ -12,9 +12,8 @@ from pynput import keyboard
 from pynput.keyboard import Controller, Key
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QDesktopServices, QDrag, QIcon
+from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
-from PySide6.QtGui import QAction
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -68,7 +67,6 @@ class DraggableButton(QtWidgets.QToolButton):
         self.api = api
 
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
-
         if e.buttons() != Qt.LeftButton:
             return
 
@@ -136,10 +134,8 @@ def _replace_special_keys(key):
 
 
 def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
-
     # TODO: Handle both key down and key up events in future.
     if state:
-
         if api.reset_dimmer(deck_id):
             return
 
@@ -243,8 +239,8 @@ def update_button_text(ui, text: str) -> None:
         deck_id = _deck_id(ui)
         if deck_id:
             # There may be no decks attached
-            api.set_button_text(deck_id, _page(ui), selected_button.index, text)
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)
+            api.set_button_text(deck_id, _page(ui), selected_button.index, text)  # type: ignore # Index property added
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)  # type: ignore # Index property added
             if icon:
                 selected_button.setIcon(icon)
 
@@ -252,31 +248,31 @@ def update_button_text(ui, text: str) -> None:
 def update_button_command(ui, command: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), selected_button.index, command)
+        api.set_button_command(deck_id, _page(ui), selected_button.index, command)  # type: ignore # Index property added
 
 
 def update_button_keys(ui, keys: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)
+        api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)  # type: ignore # Index property added
 
 
 def update_button_write(ui) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())
+        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())  # type: ignore # Index property added
 
 
 def update_change_brightness(ui, amount: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)
+        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)  # type: ignore # Index property added
 
 
 def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)
+        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)  # type: ignore # Index property added
 
 
 def change_page(ui, page: int) -> None:
@@ -345,10 +341,10 @@ def remove_image(window) -> None:
         confirm = QMessageBox(window)
         confirm.setWindowTitle("Remove image")
         confirm.setText("Are you sure you want to remove the image for this button?")
-        confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        confirm.setIcon(QMessageBox.Question)
+        confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        confirm.setIcon(QMessageBox.Icon.Question)
         button = confirm.exec_()
-        if button == QMessageBox.Yes:
+        if button == QMessageBox.StandardButton.Yes:
             api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
             redraw_buttons(window.ui)
 
@@ -486,8 +482,8 @@ def build_buttons(ui, tab) -> None:
             button = DraggableButton(base_widget, ui, api)
             button.setCheckable(True)
             button.index = index
-            button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-            button.setToolButtonStyle(Qt.ToolButtonIconOnly)
+            button.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+            button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
             button.setIconSize(QSize(80, 80))
             button.setStyleSheet(BUTTON_STYLE)
             buttons.append(button)
@@ -629,7 +625,7 @@ def queue_update_button_text(ui, text: str) -> None:
 
     text_update_timer = QTimer()
     text_update_timer.setSingleShot(True)
-    text_update_timer.timeout.connect(partial(update_button_text, ui, text))
+    text_update_timer.timeout.connect(partial(update_button_text, ui, text))  # type: ignore [attr-defined]
     text_update_timer.start(500)
 
 
@@ -732,7 +728,7 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     return main_window
 
 
-def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSystemTrayIcon:
+def create_tray(logo: QIcon, app: QApplication, main_window: MainWindow) -> QSystemTrayIcon:
     """Creates a system tray with the provided icon and parent. The main
     window passed will be activated when clicked.
 
@@ -746,18 +742,18 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
     :rtype: QSystemTrayIcon
     """
     tray = QSystemTrayIcon(logo, app)
-    tray.activated.connect(main_window.systray_clicked)
+    tray.activated.connect(main_window.systray_clicked)  # type: ignore [attr-defined]
 
     menu = QMenu()
     action_dim = QAction("Dim display (toggle)", main_window)
-    action_dim.triggered.connect(toggle_dim_all)
+    action_dim.triggered.connect(toggle_dim_all)  # type: ignore [attr-defined]
     action_configure = QAction("Configure...", main_window)
-    action_configure.triggered.connect(main_window.bring_to_top)
+    action_configure.triggered.connect(main_window.bring_to_top)  # type: ignore [attr-defined]
     menu.addAction(action_dim)
     menu.addAction(action_configure)
     menu.addSeparator()
     action_exit = QAction("Exit", main_window)
-    action_exit.triggered.connect(app.exit)
+    action_exit.triggered.connect(app.exit)  # type: ignore [attr-defined]
     menu.addAction(action_exit)
     tray.setContextMenu(menu)
     return tray
@@ -765,7 +761,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: QMainWindow) -> QSy
 
 def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
     if cpu > 100:
-        cpu == 100
+        cpu = 100
     if _deck_id(ui) == serial_number:
         ui.cpu_usage.setValue(cpu)
         ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
@@ -773,7 +769,6 @@ def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
 
 
 def streamdeck_attached(ui, deck: Dict):
-
     serial_number = deck["serial_number"]
     blocker = QSignalBlocker(ui.device_list)
     try:

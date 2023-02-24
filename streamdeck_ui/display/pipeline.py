@@ -21,13 +21,23 @@ class Pipeline:
         Executes all the filter in the pipeline and returns the final image, or None if the pipeline did not yield any changes.
         """
 
-        image: Image
+        image: Image = None
         is_modified = False
         pipeline_hash = 0
 
-        for i, (current_filter, cached) in enumerate(self.filters):
+        # To avoid flake8 B023 (https://docs.python-guide.org/writing/gotchas/#late-binding-closures), we need to
+        # capture the variable going into the lambda. However, as a result of that, we have a lambda that
+        # technically takes an argument (with a default) that does not match the signature we declared
+        # for the transform() method. There are likely other solutions to avoid the warning this produces,
+        # like using functools.partial, but this needs to be investigated.
 
-            (image, hashcode) = current_filter.transform(lambda: image.copy(), lambda output_hash: self.output_cache.get(hash((output_hash, pipeline_hash)), None), is_modified | self.first_run, time)
+        for i, (current_filter, cached) in enumerate(self.filters):
+            (image, hashcode) = current_filter.transform(
+                lambda input_image=image: input_image.copy(),  # type: ignore [misc]
+                lambda output_hash, pipeline_hash=pipeline_hash: self.output_cache.get(hash((output_hash, pipeline_hash)), None),  # type: ignore [misc]
+                is_modified | self.first_run,
+                time,
+            )
 
             pipeline_hash = hash((hashcode, pipeline_hash))
 

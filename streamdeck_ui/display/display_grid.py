@@ -125,7 +125,6 @@ class DisplayGrid:
             pipeline_cache_count = 0
 
             for button, pipeline in page.items():
-
                 # Process all the steps in the pipeline and return the resulting image
                 with self.lock:
                     image, hashcode = pipeline.execute(current_time)

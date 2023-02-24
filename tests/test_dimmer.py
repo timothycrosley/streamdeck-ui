@@ -7,7 +7,6 @@ from streamdeck_ui.dimmer import Dimmer
 
 @pytest.mark.parametrize("brightness, dim_percent, dimmed", [(100, 0, 0), (100, 50, 50), (100, 100, 100), (50, 50, 25)])
 def test_dim_to_zero(brightness: int, dim_percent: int, dimmed: int):
-
     call_count = 0
     last_value = -1
 

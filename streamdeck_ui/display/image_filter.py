@@ -55,7 +55,7 @@ class ImageFilter(Filter):
                         frame_hash.append(image_hash)
                         break
 
-        except (OSError, IOError) as icon_error:
+        except OSError as icon_error:
             # FIXME: caller should handle this?
             print(f"Unable to load icon {self.file} with error {icon_error}")
             image = Image.new("RGB", size)

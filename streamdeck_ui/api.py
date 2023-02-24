@@ -39,7 +39,6 @@ class StreamDeckServer:
     """
 
     def __init__(self) -> None:
-
         self.decks: Dict[str, StreamDeck.StreamDeck] = {}
         "Lookup with serial number -> StreamDeck"
 
@@ -148,7 +147,6 @@ class StreamDeckServer:
         self.export_config(STATE_FILE)
 
     def open_config(self, config_file: str):
-
         with open(config_file) as state_file:
             config = json.loads(state_file.read())
             file_version = config.get("streamdeck_ui_version", 0)
@@ -347,7 +345,7 @@ class StreamDeckServer:
         pil_image = self.display_handlers[deck_id].get_image(page, button)
         if pil_image:
             qt_image = ImageQt(pil_image)
-            qt_image = qt_image.convertToFormat(QImage.Format_ARGB32)
+            qt_image = qt_image.convertToFormat(QImage.Format.Format_ARGB32)
             return QPixmap(qt_image)
         return None
 
@@ -458,7 +456,6 @@ class StreamDeckServer:
         """
 
         for deck_id, deck_state in self.state.items():
-
             deck = self.decks.get(deck_id, None)
 
             # Deck is not attached right now

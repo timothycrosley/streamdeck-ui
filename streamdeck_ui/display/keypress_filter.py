@@ -7,8 +7,7 @@ from streamdeck_ui.display.filter import Filter
 
 
 class KeypressFilter(Filter):
-    """This filter is applied whenever a key is being pressed
-    """
+    """This filter is applied whenever a key is being pressed"""
 
     def __init__(self):
         super(KeypressFilter, self).__init__()
@@ -25,7 +24,6 @@ class KeypressFilter(Filter):
         pass
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
-
         frame_hash = hash((self.filter_hash, self.active))
         if input_changed or self.active != self.last_state:
             self.last_state = self.active
