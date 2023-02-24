@@ -6,8 +6,8 @@ from functools import partial
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from PIL.ImageQt import ImageQt
-from PySide2.QtCore import QObject, Signal
-from PySide2.QtGui import QImage, QPixmap
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 

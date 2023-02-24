@@ -10,10 +10,11 @@ from typing import Dict, Optional
 import pkg_resources
 from pynput import keyboard
 from pynput.keyboard import Controller, Key
-from PySide2 import QtWidgets
-from PySide2.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
-from PySide2.QtGui import QDesktopServices, QDrag, QIcon
-from PySide2.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide6 import QtWidgets
+from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
+from PySide6.QtGui import QDesktopServices, QDrag, QIcon
+from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide6.QtGui import QAction
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
@@ -599,7 +600,7 @@ class MainWindow(QMainWindow):
         description = "A Linux compatible UI for the Elgato Stream Deck."
         app = QApplication.instance()
         body = [description, "Version {}\n".format(app.applicationVersion())]
-        dependencies = ("streamdeck", "pyside2", "pillow", "pynput")
+        dependencies = ("streamdeck", "pyside6", "pillow", "pynput")
         for dep in dependencies:
             try:
                 dist = pkg_resources.get_distribution(dep)

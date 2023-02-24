@@ -16,6 +16,12 @@ OR
 
 Change log
 ==========
+## 2.0.7 - TBD
+### Fixes
+- Requirement for Python < 3.11 removed.
+- Switched to pyside6.
+### Features
+- Added support for a new sub-variant of the StreamDeck XL.
 ## 2.0.6 - 23 Sep 2022
 ### Fixes
 - Image drag/drop from external applications.
