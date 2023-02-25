@@ -49,3 +49,11 @@ line-length = 100
 
 [tool.isort]
 profile = "hug"
+
+[tool.portray]
+output_dir = "site"
+include_reference_documentation = false
+extra_dirs = ["art", "images", "media", "scripts"]
+
+[tool.portray.mkdocs]
+repo_url = "https://github.com/timothycrosley/streamdeck-ui"
