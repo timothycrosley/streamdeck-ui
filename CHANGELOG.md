@@ -16,11 +16,10 @@ OR
 
 Change log
 ==========
-## 2.0.7 - TBD
+## 2.0.8 - TBD
 ### Fixes
 - Requirement for Python < 3.11 removed.
 - Switched to pyside6.
-- Better support for dark/light mode (due to pyside6).
 ### Features
 - Added support for a new sub-variant of the StreamDeck XL.
 - Allow Stream Deck UI to start, even if virtual keyboard won't work.
