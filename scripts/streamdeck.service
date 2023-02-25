@@ -1,0 +1,10 @@
+[Unit]
+Description=A Linux compatible UI for the Elgato Stream Deck.
+
+[Service]
+Type=simple
+ExecStart=<path to streamdeck> -n
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
