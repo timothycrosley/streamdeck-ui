@@ -7,13 +7,13 @@ sudo yum update
 sudo yum install hidapi
 ```
 
-> ### Note for Centos7
+> ### Note for CentOS7
 > 
 > If you're having trouble installing hdapi, try installing the epel from the Fedora site as follows.
 > 
-> ``` console
-> sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-> ```
+``` console
+sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+```
 >  and try the hdapi install again.
 
 ## Install python 3.8
