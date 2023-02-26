@@ -50,6 +50,11 @@ jobs:
       - name: Lint
         run: ./scripts/lint.sh
       #----------------------------------------------
+      # Debug
+      #----------------------------------------------
+      - name: Debug output
+        run: ls -al /home/runner/work/streamdeck-ui/streamdeck-ui/.venv/lib/python3.8/site-packages/
+      #----------------------------------------------
       #    run test suite and output coverage file   
       #----------------------------------------------
       - name: Test
