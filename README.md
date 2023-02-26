@@ -95,8 +95,9 @@ streamdeck
 ```
 
 See the guide for
-* [CentOS 7](docs/centos.md)
-* [Ubuntu 18.04](docs/ubuntu1804.md)
+* [CentOS](docs/installation/centos.md)
+* [Fedora](docs/installation/fedora.md)
+* [Ubuntu 18.04](docs/installation/ubuntu1804.md)
 
 ## Help
 ### Command
