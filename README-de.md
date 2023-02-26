@@ -16,6 +16,8 @@ _________________
 [Release notes](CHANGELOG.md) 
 _________________
 
+> WARNUNG: Diese Dokumentation ist veraltet und möglicherweise nicht korrekt.
+
 **streamdeck_ui** Ein Linux kompatibles UserInterface für das Elgato Stream Deck.
 
 ![Streamdeck UI Usage Example](art/example.gif)
