@@ -16,7 +16,7 @@ OR
 
 Change log
 ==========
-## 2.0.9 - TBD
+## 2.0.12 - TBD
 ### Fixes
 - Requirement for Python < 3.11 removed.
 - Switched to pyside6.
