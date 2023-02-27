@@ -1,4 +1,5 @@
 # Installing on CentOS
+This has been tested on CentOS 7, 8.
 
 ## Install hidapi
 ``` bash
@@ -9,7 +10,7 @@ sudo yum install hidapi
 
 > ### Note for CentOS7
 > 
-> If you're having trouble installing hdapi, try installing the epel from the Fedora site as follows.
+> If you're having trouble installing hdapi, try installing the epel from the Fedora site as follows:
 > 
 ``` console
 sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -51,4 +52,4 @@ Launch with
 ```
 streamdeck
 ```
-See [troubleshooting](troubleshooting.md) for tips if you're stuck.
+See [troubleshooting](../troubleshooting.md) for tips if you're stuck.

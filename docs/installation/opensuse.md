@@ -1,15 +1,16 @@
-# Installing on Fedora
-This has been tested on Fedora 36, 37.
+# Installing on openSUSE
+This has been tested on Tumbleweed.
 
 ## Install hidapi
-``` bash
-sudo dnf install python3-pip python3-devel hidapi
+``` console
+sudo zypper install libhidapi-libusb0 python310-devel kernel-devel
 ```
+ > `python310-devel` and `kernel-devel` are required because pip is going to have to build `evdev`.
 
 ## Upgrade pip
-You need to upgrade pip, using pip. In my experience, old versions of pip may fail to properly install some of the required Python dependencies.
+You may need to upgrade pip, using pip.
 ```
-python -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 ```
 ## Configure access to Elgato devices
 The following will create a file called `/etc/udev/rules.d/70-streamdeck.rules` and add the following text to it: `SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"`. Creating this file adds a udev rule that provides your user with access to USB devices created by Elgato.
@@ -26,6 +27,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 ```
 pip install streamdeck-ui --user
 ```
+
 See [system tray](../troubleshooting.md#no-system-tray-indicator) installation.
 
 Launch with
