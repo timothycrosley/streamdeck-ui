@@ -295,6 +295,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#key-press-and-write-text-do-not-work" class="md-nav__link">
+    Key Press and Write Text do not work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importerror" class="md-nav__link">
     ImportError
   </a>
@@ -309,8 +316,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-press-and-write-text-does-not-work" class="md-nav__link">
-    Key Press and Write Text does not work
+  <a href="#could-not-load-the-qt-platform-plugin-xcb" class="md-nav__link">
+    Could not load the Qt platform plugin "xcb"
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modulenotfounderror-no-module-named-pkg_resources" class="md-nav__link">
+    ModuleNotFoundError: No module named 'pkg_resources'
   </a>
   
 </li>
@@ -447,6 +461,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../installation/arch/" class="md-nav__link">
+        Arch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../installation/centos/" class="md-nav__link">
         Centos
       </a>
@@ -475,8 +503,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../installation/ubuntu1804/" class="md-nav__link">
-        Ubuntu1804
+      <a href="../installation/opensuse/" class="md-nav__link">
+        Opensuse
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/ubuntu/" class="md-nav__link">
+        Ubuntu
       </a>
     </li>
   
@@ -523,6 +565,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#key-press-and-write-text-do-not-work" class="md-nav__link">
+    Key Press and Write Text do not work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importerror" class="md-nav__link">
     ImportError
   </a>
@@ -537,8 +586,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-press-and-write-text-does-not-work" class="md-nav__link">
-    Key Press and Write Text does not work
+  <a href="#could-not-load-the-qt-platform-plugin-xcb" class="md-nav__link">
+    Could not load the Qt platform plugin "xcb"
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modulenotfounderror-no-module-named-pkg_resources" class="md-nav__link">
+    ModuleNotFoundError: No module named 'pkg_resources'
   </a>
   
 </li>
@@ -557,13 +613,16 @@
                 
                   
 
-  <a href="https://github.com/timothycrosley/streamdeck-ui/edit/main/docs/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/timothycrosley/streamdeck-ui/edit/master/docs/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 <h1 id="troubleshooting">Troubleshooting</h1>
+<blockquote>
+<p>Note you may need to use <code>python</code>, <code>python3</code> or <code>python3.8</code> in the commands shown below, depending on your distribution. The examples simply use <code>python</code> for simplicity's sake.</p>
+</blockquote>
 <h2 id="basics">Basics</h2>
 <p>There are <strong>four</strong> important things you need to get a working system.</p>
 <ol>
@@ -572,21 +631,43 @@
 <li>You need a udev rule that allows access to your Stream Deck.</li>
 <li>You need to install streamdeck-ui and all its dependencies with pip.</li>
 </ol>
+<h2 id="key-press-and-write-text-do-not-work">Key Press and Write Text do not work</h2>
+<p>Streamdeck uses <a href="https://github.com/moses-palmer/pynput">pynput</a> for simulating <strong>Key Presses</strong> but it was not designed for <a href="https://github.com/moses-palmer/pynput/issues/189">Wayland</a>. Generally your results will be good when using X, but it seems like most new releases of Linux are switching away from it.</p>
 <h2 id="importerror">ImportError</h2>
-<p>If you get an error such as <code>ImportError: cannot import name 'QtWidgets' from 'PySide6'</code> you can try this:</p>
+<p>If you get an error such as:</p>
+<div class="codehilite"><pre><span></span><code><span class="ne">ImportError</span><span class="p">:</span> <span class="n">cannot</span> <span class="kn">import</span> <span class="nn">name</span> <span class="s1">&#39;QtWidgets&#39;</span> <span class="kn">from</span> <span class="s1">&#39;PySide6&#39;</span>
+</code></pre></div>
+
+<p>This usually means a problem with PySide6. Try resolving with this:</p>
 <div class="codehilite"><pre><span></span><code><span class="go">python -m pip install --force-reinstall --no-cache-dir pyside6</span>
 </code></pre></div>
 
-<blockquote>
-<p>note you may need to use <code>python3</code> or <code>python3.8</code> etc based on your distribution</p>
-</blockquote>
 <h2 id="no-system-tray-indicator">No System Tray Indicator</h2>
-<p>You may receive an error like this on start-up.
-<code>qt.core.qobject.connect: QObject::connect: No such signal QPlatformNativeInterface::systemTrayWindowChanged(QScreen*)</code></p>
+<p>You may receive an error like this on start-up:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">qt</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">qobject</span><span class="o">.</span><span class="n">connect</span><span class="p">:</span><span class="w"> </span><span class="n">QObject</span><span class="p">::</span><span class="n">connect</span><span class="p">:</span><span class="w"> </span><span class="n">No</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="k">signal</span><span class="w"> </span><span class="n">QPlatformNativeInterface</span><span class="p">::</span><span class="n">systemTrayWindowChanged</span><span class="p">(</span><span class="n">QScreen</span><span class="o">*</span><span class="p">)</span>
+</code></pre></div>
+
 <p>This is because gnome does not provide a System Tray out the box and you will need an extension
  <a href="https://extensions.gnome.org/extension/615/appindicator-support/">KStatusNotifierItem/AppIndicator Support</a> to make the system tray icon show up.</p>
-<h2 id="key-press-and-write-text-does-not-work">Key Press and Write Text does not work</h2>
-<p>Streamdeck uses <a href="https://github.com/moses-palmer/pynput">pynput</a> for simulating <strong>Key Presses</strong> but it was not designed for <a href="https://github.com/moses-palmer/pynput/issues/189">Wayland</a>. Generally your results will be good when using X, but it seems like most new releases of Linux are switching away from it.</p>
+<h2 id="could-not-load-the-qt-platform-plugin-xcb">Could not load the Qt platform plugin "xcb"</h2>
+<p>You may get the following error:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">qt</span><span class="o">.</span><span class="n">qpa</span><span class="o">.</span><span class="n">plugin</span><span class="p">:</span><span class="w"> </span><span class="n">Could</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nb">load</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">platform</span><span class="w"> </span><span class="n">plugin</span><span class="w"> </span><span class="s2">&quot;xcb&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="n">though</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">was</span><span class="w"> </span><span class="n">found</span><span class="o">.</span>
+<span class="n">This</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">failed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">platform</span><span class="w"> </span><span class="n">plugin</span><span class="w"> </span><span class="n">could</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">initialized</span><span class="o">.</span><span class="w"> </span><span class="n">Reinstalling</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">fix</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">problem</span><span class="o">.</span>
+</code></pre></div>
+
+<p>On Ubuntu, resolve this problem by installing:</p>
+<div class="codehilite"><pre><span></span><code><span class="go">sudo apt install libxcb-xinerama0</span>
+</code></pre></div>
+
+<p>On Arch, resolve this problem by installing:</p>
+<div class="codehilite"><pre><span></span><code>sudo pacman -S qt6-base
+</code></pre></div>
+
+<p>You could also try <a href="https://archlinux.org/packages/extra/x86_64/qt5-x11extras/"><code>qt5-x11extras</code></a> if <code>qt6-base</code> didn't work for you.</p>
+<h2 id="modulenotfounderror-no-module-named-pkg_resources">ModuleNotFoundError: No module named 'pkg_resources'</h2>
+<p>This module is part of <code>setuptools</code> but may be missing on your system.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">setuptools</span>
+</code></pre></div>
 
 
 

@@ -13,7 +13,7 @@
     
     
       
-        <title>Ubuntu1804 - streamdeck-ui-master</title>
+        <title>Arch - streamdeck-ui-master</title>
       
     
     
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installing-on-ubuntu-1804" class="md-skip">
+        <a href="#installing-on-arch" class="md-skip">
           Skip to content
         </a>
       
@@ -99,7 +99,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Ubuntu1804
+              Arch
             
           </span>
         </div>
@@ -385,6 +385,82 @@
               
   
   
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Arch
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Arch
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install-hidapi" class="md-nav__link">
+    Install hidapi
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade-pip" class="md-nav__link">
+    Upgrade pip
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-access-to-elgato-devices" class="md-nav__link">
+    Configure access to Elgato devices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-stream-deck-ui" class="md-nav__link">
+    Install Stream Deck UI
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
   
     <li class="md-nav__item">
       <a href="../centos/" class="md-nav__link">
@@ -413,21 +489,25 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Ubuntu1804
+    <li class="md-nav__item">
+      <a href="../opensuse/" class="md-nav__link">
+        Opensuse
       </a>
-      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ubuntu/" class="md-nav__link">
+        Ubuntu
+      </a>
     </li>
   
 
@@ -459,6 +539,42 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install-hidapi" class="md-nav__link">
+    Install hidapi
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade-pip" class="md-nav__link">
+    Upgrade pip
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-access-to-elgato-devices" class="md-nav__link">
+    Configure access to Elgato devices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-stream-deck-ui" class="md-nav__link">
+    Install Stream Deck UI
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -471,65 +587,48 @@
                 
                   
 
-  <a href="https://github.com/timothycrosley/streamdeck-ui/edit/main/docs/installation/ubuntu1804.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/timothycrosley/streamdeck-ui/edit/master/docs/installation/arch.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="installing-on-ubuntu-1804">Installing on Ubuntu 18.04</h1>
-<p>The following guide was tested on Ubuntu 18.04.</p>
-<p>This version of Ubuntu comes with Python 3.6 and we have to install Python 3.8 and then make sure we can also run pip.
-Please see this <a href="https://stackoverflow.com/a/63207387/">post</a> for more details.</p>
-<div class="codehilite"><pre><span></span><code><span class="go">sudo apt install python3.8 python3.8-dev libhidapi-libusb0 libxcb-xinerama0</span>
+<h1 id="installing-on-arch">Installing on Arch</h1>
+<p>This has been tested on Arch with XFCE, Manjaro in Feb 2023.</p>
+<h2 id="install-hidapi">Install hidapi</h2>
+<div class="codehilite"><pre><span></span><code><span class="go">sudo pacman -S hidapi python-pip qt6-base</span>
 </code></pre></div>
 
-<blockquote>
-<p><strong>Explanation</strong></p>
-<ul>
-<li>python3.8 - Does a side by side install of python 3.8. Run with <code>python3.8</code>. Your python 3.6 can be run with <code>python3</code> as per usual.</li>
-<li>python3.8-dev - Some dependencies need to be built during the install. You'll need this package for that to work.</li>
-<li>libhidapi-libusb0 - The USB library to communicate to the Stream Deck hardware.</li>
-<li>libxcb-xinerama0 - Required by pyside2 (the Qt based UI library).</li>
-</ul>
-</blockquote>
-<p>This will install pip for python3.6</p>
-<div class="codehilite"><pre><span></span><code><span class="go">sudo apt install python3-pip</span>
+<h2 id="upgrade-pip">Upgrade pip</h2>
+<p>You may need to upgrade pip, using pip. On Arch this is usually not required.
+Setuptools is required but may not be installed on Arch.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">--</span><span class="n">upgrade</span><span class="w"> </span><span class="n">pip</span>
+<span class="n">python</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">setuptools</span>
 </code></pre></div>
 
-<p>Next, we will use the pip module installed in the previous step, to install pip for python 3.8. Yea I know, it's weird, installing pip with pip.</p>
-<div class="codehilite"><pre><span></span><code><span class="go">python3.8 -m pip install pip</span>
+<h2 id="configure-access-to-elgato-devices">Configure access to Elgato devices</h2>
+<p>The following will create a file called <code>/etc/udev/rules.d/70-streamdeck.rules</code> and add the following text to it: <code>SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"</code>. Creating this file adds a udev rule that provides your user with access to USB devices created by Elgato.</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;echo &quot;SUBSYSTEM==\&quot;usb\&quot;, ATTRS{idVendor}==\&quot;0fd9\&quot;, TAG+=\&quot;uaccess\&quot;&quot; &gt; /etc/udev/rules.d/70-streamdeck.rules&#39;</span>
 </code></pre></div>
 
-<p>Before we can run pip3.8, we need to set</p>
+<p>For the rule to take immediate effect, run the following command:</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>udevadm<span class="w"> </span>trigger
+</code></pre></div>
+
+<p>If the software is having problems later to detect the Stream Deck, you can try unplugging/plugging it back in.</p>
+<h2 id="install-stream-deck-ui">Install Stream Deck UI</h2>
+<div class="codehilite"><pre><span></span><code>pip install streamdeck-ui --user
+</code></pre></div>
+
+<p>You need to add <code>~/.local/bin</code> to your path before you can launch. Be sure to add this to your <code>.bashrc</code> file so it automatically sets it for you in future.</p>
 <div class="codehilite"><pre><span></span><code><span class="go">PATH=$PATH:$HOME/.local/bin</span>
 </code></pre></div>
 
-<p>You should also add this to your .bashrc file.</p>
-<p>Confirm you are able to run pip3.8 as follows:</p>
-<div class="codehilite"><pre><span></span><code><span class="gp">$ </span>pip3.8<span class="w"> </span>--version
-<span class="go">pip 21.0.1 from /home/user/.local/lib/python3.8/site-packages/pip (python 3.8)</span>
+<p>Launch with</p>
+<div class="codehilite"><pre><span></span><code>streamdeck
 </code></pre></div>
 
-<p>Install streamdeck-ui</p>
-<div class="codehilite"><pre><span></span><code><span class="go">pip3.8 install streamdeck-ui --user</span>
-</code></pre></div>
-
-<p>We need configure the USB device to be accessible by the currently logged in user, when it is attached:</p>
-<div class="codehilite"><pre><span></span><code><span class="go">sudo nano /etc/udev/rules.d/70-streamdeck.rules</span>
-</code></pre></div>
-
-<p>Paste the following line:</p>
-<div class="codehilite"><pre><span></span><code><span class="go">SUBSYSTEM==&quot;usb&quot;, ATTRS{idVendor}==&quot;0fd9&quot;, TAG+=&quot;uaccess&quot;</span>
-</code></pre></div>
-
-<p>Reload the rules:</p>
-<div class="codehilite"><pre><span></span><code><span class="go">sudo udevadm control --reload-rules</span>
-</code></pre></div>
-
-<p>Remove and plug your Stream Deck in.</p>
-<div class="codehilite"><pre><span></span><code><span class="go">streamdeck</span>
-</code></pre></div>
+<p>See <a href="../../troubleshooting/">troubleshooting</a> for tips if you're stuck.</p>
 
 
 
@@ -550,7 +649,7 @@ Please see this <a href="https://stackoverflow.com/a/63207387/">post</a> for mor
       <nav class="md-footer__inner md-grid" aria-label="Footer">
         
           
-          <a href="../fedora/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Fedora" rel="prev">
+          <a href="../../contributing/4.-acknowledgements/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4. Acknowledgements" rel="prev">
             <div class="md-footer__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
@@ -559,11 +658,26 @@ Please see this <a href="https://stackoverflow.com/a/63207387/">post</a> for mor
                 <span class="md-footer__direction">
                   Previous
                 </span>
-                Fedora
+                4. Acknowledgements
               </div>
             </div>
           </a>
         
+        
+          
+          <a href="../centos/" class="md-footer__link md-footer__link--next" aria-label="Next: Centos" rel="next">
+            <div class="md-footer__title">
+              <div class="md-ellipsis">
+                <span class="md-footer__direction">
+                  Next
+                </span>
+                Centos
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
         
       </nav>
     
