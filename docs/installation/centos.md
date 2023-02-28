@@ -46,7 +46,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 
 ## Install Stream Deck UI
 ```
-pip3.8 install streamdeck-ui --user
+python3.8 -m pip install streamdeck-ui --user
 ```
 Launch with
 ```

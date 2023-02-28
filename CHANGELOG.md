@@ -1,21 +1,15 @@
-Install the latest
-===================
+# Upgrade
 
-To install the latest version of streamdeck_ui simply run:
+To upgrade to the latest version, run:
 
-`pip3 install streamdeck_ui`
+```
+python -m pip install streamdeck-ui --user --upgrade
+```
 
-OR
+> Note you may have to use `python3`, `python3.8` etc. depending on your operating system and Python version.
 
-`poetry add streamdeck_ui`
+# Change log
 
-OR
-
-`pipenv install streamdeck_ui`
-
-
-Change log
-==========
 ## 2.0.13 - 27 Feb 2023
 ### Fixes
 - Requirement for Python < 3.11 removed.

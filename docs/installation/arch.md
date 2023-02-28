@@ -31,7 +31,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 
 ## Install Stream Deck UI
 ```
-pip install streamdeck-ui --user
+python -m pip install streamdeck-ui --user
 ```
 
 Launch with
