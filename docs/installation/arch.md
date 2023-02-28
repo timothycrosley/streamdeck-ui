@@ -5,6 +5,11 @@ This has been tested on Arch with XFCE, Manjaro in Feb 2023.
 ``` console
 sudo pacman -S hidapi python-pip qt6-base
 ```
+## Set path
+You need to add `~/.local/bin` to your path. Be sure to add this to your `.bashrc` (or equivalent) file so it automatically sets it for you in future.
+``` console
+PATH=$PATH:$HOME/.local/bin
+```
 
 ## Upgrade pip
 You may need to upgrade pip, using pip. On Arch this is usually not required.
@@ -28,10 +33,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 ```
 pip install streamdeck-ui --user
 ```
-You need to add `~/.local/bin` to your path before you can launch. Be sure to add this to your `.bashrc` file so it automatically sets it for you in future.
-``` console
-PATH=$PATH:$HOME/.local/bin
-```
+
 Launch with
 ```
 streamdeck
