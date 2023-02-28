@@ -484,6 +484,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#set-path" class="md-nav__link">
+    Set path
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrade-pip" class="md-nav__link">
     Upgrade pip
   </a>
@@ -553,6 +560,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#set-path" class="md-nav__link">
+    Set path
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrade-pip" class="md-nav__link">
     Upgrade pip
   </a>
@@ -602,6 +616,11 @@
 <blockquote>
 <p>Note that for version <code>2.0.6</code> and below, you also need to install <code>libxcb-xinerama0</code> (include it with apt in the line above). </p>
 </blockquote>
+<h2 id="set-path">Set path</h2>
+<p>You need to add <code>~/.local/bin</code> to your path. Be sure to add this to your <code>.bashrc</code> (or equivalent) file so it automatically sets it for you in future.</p>
+<div class="codehilite"><pre><span></span><code><span class="go">PATH=$PATH:$HOME/.local/bin</span>
+</code></pre></div>
+
 <h2 id="upgrade-pip">Upgrade pip</h2>
 <p>You need to upgrade pip, using pip. In my experience, old versions of pip may fail to properly install some of the required Python dependencies.</p>
 <div class="codehilite"><pre><span></span><code>python3 -m pip install --upgrade pip
@@ -619,10 +638,6 @@
 <p>If the software is having problems later to detect the Stream Deck, you can try unplugging/plugging it back in.</p>
 <h2 id="install-stream-deck-ui">Install Stream Deck UI</h2>
 <div class="codehilite"><pre><span></span><code>pip install streamdeck-ui --user
-</code></pre></div>
-
-<p>You need to add <code>~/.local/bin</code> to your path before you can launch. Be sure to add this to your <code>.bashrc</code> file so it automatically sets it for you in future.</p>
-<div class="codehilite"><pre><span></span><code><span class="go">PATH=$PATH:$HOME/.local/bin</span>
 </code></pre></div>
 
 <p>Launch with</p>
