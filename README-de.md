@@ -99,8 +99,12 @@ streamdeck
 ```
 
 Beachten sie auch die Anleitungen für
-* [CentOS 7](docs/centos.md)
-* [Ubuntu 18.04](docs/ubuntu1804.md)
+
+* [Arch/Manjaro](docs/installation/arch.md)
+* [CentOS](docs/installation/centos.md)
+* [Fedora](docs/installation/fedora.md)
+* [openSUSE](docs/installation/opensuse.md)
+* [Ubuntu/Mint](docs/installation/ubuntu.md)
 
 ## Hilfe
 ### Befehl (Command)
