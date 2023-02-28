@@ -24,6 +24,7 @@ Change log
 - Added support for a new sub-variant of the StreamDeck XL.
 - Allow Stream Deck UI to start, even if virtual keyboard won't work.
 - Improved troubleshooting messages.
+- Updated documentation and installation guides.
 ## 2.0.6 - 23 Sep 2022
 ### Fixes
 - Image drag/drop from external applications.
