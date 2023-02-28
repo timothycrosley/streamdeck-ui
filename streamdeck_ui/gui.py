@@ -1,9 +1,11 @@
 """Defines the QT powered interface for configuring Stream Decks"""
+import json
 import os
 import shlex
 import sys
 import time
 from functools import partial
+from signal import SIGUSR1, signal
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
 from typing import Dict, Optional
 
@@ -14,7 +16,7 @@ from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
-from streamdeck_ui.config import LOGO, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, LOGO, STATE_FILE
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
@@ -855,6 +857,39 @@ def start(_exit: bool = False) -> None:
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 
     api.start()
+
+    def reload_on_sigusr1(signal_received, frame):
+        # not very DRY, api.open_config would require refactoring to be reusable
+        with open(STATE_FILE) as state_file:
+            config = json.loads(state_file.read())
+            file_version = config.get("streamdeck_ui_version", 0)
+            if file_version != CONFIG_FILE_VERSION:
+                raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
+
+            new_state = {}
+            for deck_id, deck in config["state"].items():
+                deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
+                new_state[deck_id] = deck
+
+        changed = False
+        for deck_key, deck_value in api.state.items():
+            for page_key, page_value in deck_value["buttons"].items():
+                for button_key, button_value in page_value.items():
+                    if not button_value:
+                        continue
+                    new_button = new_state[deck_key]["buttons"][page_key][button_key]
+                    if str(button_value) == str(new_button):
+                        continue
+                    icon = new_button.get("icon")
+                    if icon:
+                        api.set_button_icon(deck_key, int(page_key), int(button_key), icon)
+                        changed = True
+
+        if changed:
+            api.state = new_state
+            redraw_buttons(ui)
+
+    signal(SIGUSR1, reload_on_sigusr1)
 
     tray.show()
     if show_ui:
