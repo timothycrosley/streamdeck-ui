@@ -1,6 +1,7 @@
 """Defines the QT powered interface for configuring Stream Decks"""
 import os
 import shlex
+import signal
 import sys
 import time
 from functools import partial
@@ -15,6 +16,7 @@ from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, Q
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
+from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
@@ -813,6 +815,11 @@ def streamdeck_detached(ui, serial_number):
         build_device(ui)
 
 
+def sigterm_handler(api, app, signal, frame):
+    api.stop()
+    app.quit()
+
+
 def start(_exit: bool = False) -> None:
     global api
     show_ui = True
@@ -830,41 +837,61 @@ def start(_exit: bool = False) -> None:
     except pkg_resources.DistributionNotFound:
         version = "devel"
 
-    api = StreamDeckServer()
-    if os.path.isfile(STATE_FILE):
-        api.open_config(STATE_FILE)
+    try:
+        with Semaphore("/tmp/streamdeck_ui.lock"):  # nosec - this file is only observed with advisory lock
+            # The semaphore was created, so this is the first instance
 
-    # The QApplication object holds the Qt event loop and you need one of these
-    # for your application
-    app = QApplication(sys.argv)
-    app.setApplicationName("Streamdeck UI")
-    app.setApplicationVersion(version)
-    logo = QIcon(LOGO)
-    app.setWindowIcon(logo)
-    main_window = create_main_window(logo, app)
-    ui = main_window.ui
-    tray = create_tray(logo, app, main_window)
+            api = StreamDeckServer()
+            if os.path.isfile(STATE_FILE):
+                api.open_config(STATE_FILE)
 
-    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+            # The QApplication object holds the Qt event loop and you need one of these
+            # for your application
+            app = QApplication(sys.argv)
+            app.setApplicationName("Streamdeck UI")
+            app.setApplicationVersion(version)
+            logo = QIcon(LOGO)
+            app.setWindowIcon(logo)
+            main_window = create_main_window(logo, app)
+            ui = main_window.ui
+            tray = create_tray(logo, app, main_window)
 
-    ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
-    ui.pages.currentChanged.connect(partial(change_page, ui))
+            api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
-    api.plugevents.attached.connect(partial(streamdeck_attached, ui))
-    api.plugevents.detached.connect(partial(streamdeck_detached, ui))
-    api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+            ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
+            ui.pages.currentChanged.connect(partial(change_page, ui))
 
-    api.start()
+            api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+            api.plugevents.detached.connect(partial(streamdeck_detached, ui))
+            api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 
-    tray.show()
-    if show_ui:
-        main_window.show()
+            api.start()
 
-    if _exit:
-        return
-    else:
-        app.exec_()
-        api.stop()
+            # Configure signal hanlders
+            # https://stackoverflow.com/a/4939113/192815
+            timer = QTimer()
+            timer.start(500)
+            timer.timeout.connect(lambda: None)  # type: ignore [attr-defined] # Let interpreter run to handle signal
+
+            # Handle SIGTERM so we release semaphore and shutdown API gracefully
+            signal.signal(signal.SIGTERM, partial(sigterm_handler, api, app))
+
+            # Handle <ctrl+c>
+            signal.signal(signal.SIGINT, partial(sigterm_handler, api, app))
+
+            tray.show()
+            if show_ui:
+                main_window.show()
+
+            if _exit:
+                return
+            else:
+                app.exec_()
+                api.stop()
+                sys.exit()
+
+    except SemaphoreAcquireError:
+        # The semaphore already exists, so another instance is running
         sys.exit()
 
 
