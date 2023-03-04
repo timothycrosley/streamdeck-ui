@@ -9,6 +9,11 @@ python -m pip install streamdeck-ui --user --upgrade
 > Note you may have to use `python3`, `python3.8` etc. depending on your operating system and Python version.
 
 # Change log
+## 2.0.x - TBD
+### Features
+- Ensure only one instance can run (prevents settings file corruption).
+- Press `Ctrl+c` in terminal to quit.
+- SIGABRT gracefully exits.
 
 ## 2.0.13 - 27 Feb 2023
 ### Fixes
