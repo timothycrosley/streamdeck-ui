@@ -818,6 +818,7 @@ def streamdeck_detached(ui, serial_number):
 def sigterm_handler(api, app, signal, frame):
     api.stop()
     app.quit()
+    sys.exit(1)
 
 
 def start(_exit: bool = False) -> None:
