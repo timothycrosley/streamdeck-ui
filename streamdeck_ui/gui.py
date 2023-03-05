@@ -886,7 +886,7 @@ def start(_exit: bool = False) -> None:
             if _exit:
                 return
             else:
-                app.exec_()
+                app.exec()
                 api.stop()
                 sys.exit()
 
