@@ -451,6 +451,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../docs/installation/systemd/" class="md-nav__link">
+        Systemd
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../docs/installation/ubuntu/" class="md-nav__link">
         Ubuntu
       </a>
@@ -512,13 +526,20 @@
 <p>Note you may have to use <code>python3</code>, <code>python3.8</code> etc. depending on your operating system and Python version.</p>
 </blockquote>
 <h1 id="change-log">Change log</h1>
+<h2 id="2014-4-mar-2023">2.0.14 - 4 Mar 2023</h2>
+<h3 id="features">Features</h3>
+<ul>
+<li>Ensure only one instance can run (prevents settings file corruption).</li>
+<li>Press <code>Ctrl+c</code> in terminal to quit.</li>
+<li>Supports systemd install and added documentation.</li>
+</ul>
 <h2 id="2013-27-feb-2023">2.0.13 - 27 Feb 2023</h2>
 <h3 id="fixes">Fixes</h3>
 <ul>
 <li>Requirement for Python &lt; 3.11 removed.</li>
 <li>Switched to pyside6.</li>
 </ul>
-<h3 id="features">Features</h3>
+<h3 id="features_1">Features</h3>
 <ul>
 <li>Added support for a new sub-variant of the StreamDeck XL.</li>
 <li>Allow Stream Deck UI to start, even if virtual keyboard won't work.</li>
@@ -532,7 +553,7 @@
 <li>Dimmer not working properly.</li>
 </ul>
 <h2 id="205-18-sep-2022">2.0.5 - 18 Sep 2022</h2>
-<h3 id="features_1">Features</h3>
+<h3 id="features_2">Features</h3>
 <ul>
 <li>Support for new Stream Deck Mini.</li>
 </ul>
@@ -541,7 +562,7 @@
 <li>Fix install under Fedora 36 (pillow dependency version bump).</li>
 </ul>
 <h2 id="204-29-apr-2022">2.0.4 - 29 Apr 2022</h2>
-<h3 id="features_2">Features</h3>
+<h3 id="features_3">Features</h3>
 <ul>
 <li>Recover from a suspend/resume cycle.</li>
 </ul>
@@ -551,7 +572,7 @@
 <li>Remove python3-xlib dependency.</li>
 </ul>
 <h2 id="203-6-mar-2022">2.0.3 - 6 Mar 2022</h2>
-<h3 id="features_3">Features</h3>
+<h3 id="features_4">Features</h3>
 <ul>
 <li>UI starts up even if no Stream Deck attached.</li>
 <li>SVG file type support.</li>
@@ -574,7 +595,7 @@
 <li>Tray context menu not interrupted by window activation.</li>
 </ul>
 <h2 id="113-2-feb-2022">1.1.3 - 2 Feb 2022</h2>
-<h3 id="features_4">Features</h3>
+<h3 id="features_5">Features</h3>
 <ul>
 <li>Support for Stream Deck MK.2 added.</li>
 <li>Remember previous image selection directory.</li>
@@ -592,7 +613,7 @@
 <li>Regression with multi-character keys.</li>
 </ul>
 <h2 id="111-april-29-2021">1.1.1 - April 29, 2021</h2>
-<h3 id="features_5">Features</h3>
+<h3 id="features_6">Features</h3>
 <ul>
 <li>Open main window from tray with Configure... menu item.</li>
 <li>Dim the display from tray.</li>
@@ -604,12 +625,12 @@
 <li>Documentation for Ubuntu 18.04 added.</li>
 </ul>
 <h2 id="110-april-20-2021">1.1.0 - April 20, 2021</h2>
-<h3 id="features_6">Features</h3>
+<h3 id="features_7">Features</h3>
 <ul>
 <li>Automatically dim the display after a configurable amount of time.</li>
 </ul>
 <h2 id="107-april-6-2021">1.0.7 - April 6, 2021</h2>
-<h3 id="features_7">Features</h3>
+<h3 id="features_8">Features</h3>
 <ul>
 <li>Drag and drop support for rearranging buttons around in UI.</li>
 <li>Launches minimized with <code>-n</code> or <code>--no-ui</code>.</li>

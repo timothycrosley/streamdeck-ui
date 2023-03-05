@@ -274,6 +274,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#start-without-showing-the-user-interface" class="md-nav__link">
+    Start without showing the user interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#command" class="md-nav__link">
     Command
   </a>
@@ -578,6 +585,20 @@
   
   
     <li class="md-nav__item">
+      <a href="docs/installation/systemd/" class="md-nav__link">
+        Systemd
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="docs/installation/ubuntu/" class="md-nav__link">
         Ubuntu
       </a>
@@ -650,6 +671,13 @@
   
     <nav class="md-nav" aria-label="Help">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-without-showing-the-user-interface" class="md-nav__link">
+    Start without showing the user interface
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#command" class="md-nav__link">
@@ -775,6 +803,7 @@
 <li><strong>Drag/Drop Image</strong>: Configure a button image by dragging it from your file manager onto the button.</li>
 <li><strong>Auto Dim</strong>: Configure the Stream Deck to automatically dim the display after a period of time. A button press wakes it up again.</li>
 <li><strong>Animated icons</strong>: Use an animated gif to liven things up a bit.</li>
+<li><strong>Runs under systemd</strong>: Run automatically in the background as a systemd --user service.</li>
 </ul>
 <p>Communication with the Stream Deck is powered by the <a href="https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library">Python Elgato Stream Deck Library</a>.</p>
 <h2 id="installation-guides">Installation Guides</h2>
@@ -785,12 +814,18 @@
 <li><a href="docs/installation/opensuse/">openSUSE</a></li>
 <li><a href="docs/installation/ubuntu/">Ubuntu/Mint</a></li>
 </ul>
+<p>Once you're up and running, consider installing a <a href="docs/installation/systemd/">systemd service</a>.</p>
 <blockquote>
 <p>Use the <a href="docs/troubleshooting/">troubleshooting</a> guide or <a href="https://github.com/timothycrosley/streamdeck-ui/issues?q=is%3Aissue">search</a> the issues for guidance.</p>
 </blockquote>
 <h3 id="precooked-scripts">Precooked Scripts</h3>
 <p>There are scripts for setting up streamdeck_ui on <a href="scripts/ubuntu_install.sh">Debian/Ubuntu</a> and <a href="scripts/fedora_install.sh">Fedora</a>.</p>
 <h2 id="help">Help</h2>
+<h3 id="start-without-showing-the-user-interface">Start without showing the user interface</h3>
+<p>Note you can start streamdeck_ui without showing the configuration user interface as follows:</p>
+<div class="codehilite"><pre><span></span><code>streamdeck -n
+</code></pre></div>
+
 <h3 id="command">Command</h3>
 <p>Enter a value in the command field to execute a command. For example, <code>gnome-terminal</code> will launch a new terminal on Ubuntu/Fedora or <code>obs</code> will launch OBS.</p>
 <h4 id="examples">Examples</h4>
