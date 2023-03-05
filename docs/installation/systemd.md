@@ -9,7 +9,7 @@ Create (an empty) configuration file.
 ``` bash
 touch $HOME/.local/share/systemd/user/streamdeck.service
 ```
-Use your favorite editor and paste the following content into the `streamdeck.service` file:
+Use your favorite editor and paste the following content into the `streamdeck.service` file (rembember replace `<yourusername>`):
 ```
 [Unit]
 Description=A Linux compatible UI for the Elgato Stream Deck.

@@ -44,7 +44,7 @@ Communication with the Stream Deck is powered by the [Python Elgato Stream Deck 
 * [openSUSE](docs/installation/opensuse.md)
 * [Ubuntu/Mint](docs/installation/ubuntu.md)
 
-Once you're up and running, consider installing a [systemd service](/docs/installation/systemd.md).
+Once you're up and running, consider installing a [systemd service](docs/installation/systemd.md).
 
 > Use the [troubleshooting](docs/troubleshooting.md) guide or [search](https://github.com/timothycrosley/streamdeck-ui/issues?q=is%3Aissue) the issues for guidance.
 
