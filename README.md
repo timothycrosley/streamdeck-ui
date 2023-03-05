@@ -34,6 +34,7 @@ _________________
 * **Drag/Drop Image**: Configure a button image by dragging it from your file manager onto the button.
 * **Auto Dim**: Configure the Stream Deck to automatically dim the display after a period of time. A button press wakes it up again.
 * **Animated icons**: Use an animated gif to liven things up a bit.
+* **Runs under systemd**: Run automatically in the background as a systemd --user service.
 
 Communication with the Stream Deck is powered by the [Python Elgato Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library).
 ## Installation Guides
@@ -43,12 +44,21 @@ Communication with the Stream Deck is powered by the [Python Elgato Stream Deck 
 * [openSUSE](docs/installation/opensuse.md)
 * [Ubuntu/Mint](docs/installation/ubuntu.md)
 
+Once you're up and running, consider installing a [systemd service](/docs/installation/systemd.md).
+
 > Use the [troubleshooting](docs/troubleshooting.md) guide or [search](https://github.com/timothycrosley/streamdeck-ui/issues?q=is%3Aissue) the issues for guidance.
 
 ### Precooked Scripts
 There are scripts for setting up streamdeck_ui on [Debian/Ubuntu](scripts/ubuntu_install.sh) and [Fedora](scripts/fedora_install.sh).
 
 ## Help
+
+### Start without showing the user interface
+
+Note you can start streamdeck_ui without showing the configuration user interface as follows:
+```
+streamdeck -n
+```
 ### Command
 Enter a value in the command field to execute a command. For example, `gnome-terminal` will launch a new terminal on Ubuntu/Fedora or `obs` will launch OBS.
 
