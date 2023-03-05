@@ -815,10 +815,16 @@ def streamdeck_detached(ui, serial_number):
         build_device(ui)
 
 
-def sigterm_handler(api, app, signal, frame):
+def sigterm_handler(api, app, signal_value, frame):
     api.stop()
     app.quit()
-    sys.exit(1)
+    if signal_value == signal.SIGTERM:
+        # Indicate to systemd that it was a clean termination
+        print("Exiting normally")
+        sys.exit()
+    else:
+        # Terminations for other reasons are treated as an error condition
+        sys.exit(1)
 
 
 def start(_exit: bool = False) -> None:
