@@ -92,7 +92,7 @@ class DraggableButton(QtWidgets.QToolButton):
         mimedata = QMimeData()
         drag = QDrag(self)
         drag.setMimeData(mimedata)
-        drag.exec_(Qt.MoveAction)
+        drag.exec(Qt.MoveAction)
 
     def dropEvent(self, e):  # noqa: N802 - Part of QT signature.
         global selected_button
@@ -363,7 +363,7 @@ def remove_image(window) -> None:
         confirm.setText("Are you sure you want to remove the image for this button?")
         confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         confirm.setIcon(QMessageBox.Icon.Question)
-        button = confirm.exec_()
+        button = confirm.exec()
         if button == QMessageBox.StandardButton.Yes:
             api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
             redraw_buttons(window.ui)
@@ -695,7 +695,7 @@ def show_settings(window: MainWindow) -> None:
     settings.ui.brightness.setValue(api.get_brightness(deck_id))
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
     settings.ui.dim.currentIndexChanged.connect(partial(disable_dim_settings, settings))
-    if settings.exec_():
+    if settings.exec():
         # Commit changes
         if existing_index != settings.ui.dim.currentIndex():
             # dimmers[deck_id].timeout = settings.ui.dim.currentData()
