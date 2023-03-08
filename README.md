@@ -35,6 +35,7 @@ _________________
 * **Auto Dim**: Configure the Stream Deck to automatically dim the display after a period of time. A button press wakes it up again.
 * **Animated icons**: Use an animated gif to liven things up a bit.
 * **Runs under systemd**: Run automatically in the background as a systemd --user service.
+* **Stream Deck Pedal**: Supports actions when pressing pedals.
 
 Communication with the Stream Deck is powered by the [Python Elgato Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck#python-elgato-stream-deck-library).
 ## Installation Guides
