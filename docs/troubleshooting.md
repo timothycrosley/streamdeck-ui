@@ -44,6 +44,7 @@ This application failed to start because no Qt platform plugin could be initiali
 ``` console
 sudo apt install libxcb-xinerama0
 ```
+> You may encounter a similar error where the cause is "libxcb-cursor.so.0: cannot open shared object file: No such file or directory". This can be resolved by installing the `libxcb-cursor0` package.
 
 On Arch, resolve this problem by installing:
 ```
