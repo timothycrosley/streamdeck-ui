@@ -19,6 +19,7 @@ from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
+from streamdeck_ui.cli.server import CLIStreamDeckServer
 
 pnput_supported: bool = True
 try:
@@ -874,6 +875,9 @@ def start(_exit: bool = False) -> None:
 
             api.start()
 
+            cli = CLIStreamDeckServer(api, ui)
+            cli.start()
+
             # Configure signal hanlders
             # https://stackoverflow.com/a/4939113/192815
             timer = QTimer()
@@ -895,6 +899,7 @@ def start(_exit: bool = False) -> None:
             else:
                 app.exec()
                 api.stop()
+                cli.stop()
                 sys.exit()
 
     except SemaphoreAcquireError:
