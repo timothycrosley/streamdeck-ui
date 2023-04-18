@@ -4,6 +4,7 @@ import json
 import socket
 from threading import Event, Thread
 
+from streamdeck_ui.cli.commands import create_command
 from streamdeck_ui.api import StreamDeckServer
 
 def read_json(sock: socket.socket) -> dict:
@@ -25,6 +26,9 @@ class CLIStreamDeckServer:
     def __init__(self, api: StreamDeckServer, ui):
         self.quit = Event()
         self.cli_thread = None
+        
+        self.api = api
+        self.ui = ui
 
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
@@ -54,7 +58,9 @@ class CLIStreamDeckServer:
         while not self.quit.is_set():
             try:
                 conn, _ = self.sock.accept()
-                data = read_json(conn)
+                cfg = read_json(conn)
+                cmd = create_command(cfg)
+                cmd.execute(self.api, self.ui)
                 conn.close()
             except:
                 pass
