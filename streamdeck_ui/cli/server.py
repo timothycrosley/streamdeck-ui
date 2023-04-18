@@ -4,13 +4,13 @@ import json
 import socket
 from threading import Event, Thread
 
-def read_json(sock: socket.socket):
+def read_json(sock: socket.socket) -> dict:
     header = sock.recv(4)
     num_bytes = int.from_bytes(header, "little")
 
     return json.loads(sock.recv(num_bytes))
 
-def write_json(sock: socket.socket, data: dict):
+def write_json(sock: socket.socket, data: dict) -> None:
     binary_data = json.dumps(data).encode("utf-8")
     num_bytes = len(binary_data)
 
