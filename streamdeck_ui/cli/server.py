@@ -1,7 +1,21 @@
 import os
 import sys
+import json
 import socket
 from threading import Event, Thread
+
+def read_json(sock: socket.socket):
+    header = sock.recv(4)
+    num_bytes = int.from_bytes(header, "little")
+
+    return json.loads(sock.recv(num_bytes))
+
+def write_json(sock: socket.socket, data: dict):
+    binary_data = json.dumps(data).encode("utf-8")
+    num_bytes = len(binary_data)
+
+    sock.send(num_bytes.to_bytes(4, "little"))
+    sock.send(binary_data)
 
 class CLIStreamDeckServer:
     SOCKET_CONNECTION_TIMEOUT_SECOND = 0.5
