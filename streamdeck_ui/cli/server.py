@@ -1,5 +1,6 @@
 import os
 import sys
+import optparse
 import json
 import socket
 from threading import Event, Thread
@@ -72,3 +73,20 @@ class CLIStreamDeckServer:
             os.remove("/tmp/streamdeck_ui.sock")
         except OSError:
             pass
+        
+def execute():
+    parser = optparse.OptionParser()
+    parser.add_option("-p", "--page", type="int", dest="page_index", help="change to specified page (indice is from 1)", metavar="INDEX")
+    (options, args) = parser.parse_args(sys.argv)
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect("/tmp/streamdeck_ui.sock")
+    data = None
+    if(hasattr(options, "page_index")):
+        data = {
+            "command": "page_change",
+            "page": options.page_index
+        }
+    
+    if data is not None:
+        write_json(sock, data)
+
