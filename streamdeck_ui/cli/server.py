@@ -4,6 +4,8 @@ import json
 import socket
 from threading import Event, Thread
 
+from streamdeck_ui.api import StreamDeckServer
+
 def read_json(sock: socket.socket) -> dict:
     header = sock.recv(4)
     num_bytes = int.from_bytes(header, "little")
@@ -20,7 +22,7 @@ def write_json(sock: socket.socket, data: dict) -> None:
 class CLIStreamDeckServer:
     SOCKET_CONNECTION_TIMEOUT_SECOND = 0.5
 
-    def __init__(self):
+    def __init__(self, api: StreamDeckServer, ui):
         self.quit = Event()
         self.cli_thread = None
 
@@ -45,6 +47,7 @@ class CLIStreamDeckServer:
             pass
 
     def _run(self):
+        self.sock.bind("/tmp/streamdeck.sock")
         self.sock.listen(1)
         self.sock.settimeout(CLIStreamDeckServer.SOCKET_CONNECTION_TIMEOUT_SECOND)
 
@@ -55,3 +58,7 @@ class CLIStreamDeckServer:
                 conn.close()
             except:
                 pass
+        try:
+            os.remove("/tmp/streamdeck.sock")
+        except OSError:
+            pass
