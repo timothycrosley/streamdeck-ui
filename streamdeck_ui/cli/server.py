@@ -51,7 +51,11 @@ class CLIStreamDeckServer:
             pass
 
     def _run(self):
-        self.sock.bind("/tmp/streamdeck.sock")
+        try: # If streamdeck.sock already exists, destroy it and bind a new one.
+            os.remove("/tmp/streamdeck_ui.sock")
+        except OSError:
+            pass
+        self.sock.bind("/tmp/streamdeck_ui.sock")
         self.sock.listen(1)
         self.sock.settimeout(CLIStreamDeckServer.SOCKET_CONNECTION_TIMEOUT_SECOND)
 
@@ -65,6 +69,6 @@ class CLIStreamDeckServer:
             except:
                 pass
         try:
-            os.remove("/tmp/streamdeck.sock")
+            os.remove("/tmp/streamdeck_ui.sock")
         except OSError:
             pass
