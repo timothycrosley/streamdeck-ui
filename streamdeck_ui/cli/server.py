@@ -45,9 +45,13 @@ class CLIStreamDeckServer:
             pass
 
     def _run(self):
+        self.sock.listen(1)
+        self.sock.settimeout(CLIStreamDeckServer.SOCKET_CONNECTION_TIMEOUT_SECOND)
+
         while not self.quit.is_set():
             try:
-                # handle cli request
-                pass
+                conn, _ = self.sock.accept()
+                data = read_json(conn)
+                conn.close()
             except:
                 pass
