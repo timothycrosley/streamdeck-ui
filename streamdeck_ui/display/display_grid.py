@@ -160,14 +160,14 @@ class DisplayGrid:
                     # used to cache the output. At the end of the pipeline the hash can
                     # be checked and final bytes will be ready to pipe to the device.
 
-                    # FIXME: This will be unbounded, old frames will need to be evicted
-                    if hashcode not in frame_cache:
-                        image = PILHelper.to_native_format(self.streamdeck, image)
-                        frame_cache[hashcode] = image
-                    else:
-                        image = frame_cache[hashcode]
-
                     if self.streamdeck.is_visual():
+                        # FIXME: This will be unbounded, old frames will need to be evicted
+                        if hashcode not in frame_cache:
+                            image = PILHelper.to_native_format(self.streamdeck, image)
+                            frame_cache[hashcode] = image
+                        else:
+                            image = frame_cache[hashcode]
+
                         try:
                             with self.lock:
                                 self.streamdeck.set_key_image(button, image)
