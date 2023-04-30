@@ -2,6 +2,7 @@ import itertools
 from fractions import Fraction
 from io import BytesIO
 from typing import Callable, Tuple
+import os
 
 import cairosvg
 import filetype
@@ -17,7 +18,7 @@ class ImageFilter(Filter):
 
     def __init__(self, file: str):
         super(ImageFilter, self).__init__()
-        self.file = file
+        self.file = os.path.expanduser(file)
 
     def initialize(self, size: Tuple[int, int]):
         # Each frame needs to have a unique hashcode. Start with file name as baseline.
