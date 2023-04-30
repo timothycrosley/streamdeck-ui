@@ -1,8 +1,8 @@
 import itertools
+import os
 from fractions import Fraction
 from io import BytesIO
 from typing import Callable, Tuple
-import os
 
 import cairosvg
 import filetype
