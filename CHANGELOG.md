@@ -9,6 +9,9 @@ python -m pip install streamdeck-ui --user --upgrade
 > Note you may have to use `python3`, `python3.8` etc. depending on your operating system and Python version.
 
 # Change log
+## 2.0.16 - TBD
+## Fixes
+- Fix error when pressing Streamdeck Pedal.
 ## 2.0.15 - 8 March 2023
 ### Features
 - Added support for Stream Deck Pedal.
