@@ -10,6 +10,8 @@ python -m pip install streamdeck-ui --user --upgrade
 
 # Change log
 ## 2.0.16 - TBD
+## Features
+- Added ~ path expansion for icons.
 ## Fixes
 - Fix error when pressing Streamdeck Pedal.
 ## 2.0.15 - 8 March 2023
