@@ -12,11 +12,11 @@ class TextFilter(Filter):
 
     image: Image
 
-    def __init__(self, text: str, font: str, vertical_align: str):
+    def __init__(self, text: str, font: str, font_size: int, vertical_align: str):
         super(TextFilter, self).__init__()
         self.text = text
         self.vertical_align = vertical_align
-        self.true_font = ImageFont.truetype(font, 14)
+        self.true_font = ImageFont.truetype(font, font_size)
         # fmt: off
         kernel = [
             0, 1, 2, 1, 0,
@@ -31,7 +31,7 @@ class TextFilter(Filter):
         self.image = None
 
         # Hashcode should be created for anything that makes this frame unique
-        self.hashcode = hash((self.__class__, text, font, vertical_align))
+        self.hashcode = hash((self.__class__, text, font, font_size, vertical_align))
 
     def initialize(self, size: Tuple[int, int]):
         self.image = Image.new("RGBA", size)
