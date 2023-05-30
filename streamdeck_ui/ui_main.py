@@ -208,20 +208,45 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.text = QLineEdit(self.groupBox)
+        self.text.setObjectName(u"text")
+
+        self.horizontalLayout_3.addWidget(self.text)
+
+        self.textButton = QPushButton(self.groupBox)
+        self.textButton.setObjectName(u"textButton")
+        self.textButton.setMinimumSize(QSize(30, 0))
+        self.textButton.setMaximumSize(QSize(30, 16777215))
+        icon2 = QIcon()
+        icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.textButton.setIcon(icon2)
+
+        self.horizontalLayout_3.addWidget(self.textButton)
+
+
+        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
+
+        self.label_4 = QLabel(self.groupBox)
+        self.label_4.setObjectName(u"label_4")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_4)
+
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_3)
 
         self.command = QLineEdit(self.groupBox)
         self.command.setObjectName(u"command")
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.command)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.command)
 
         self.label_5 = QLabel(self.groupBox)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_5)
 
         self.keys = QComboBox(self.groupBox)
         self.keys.addItem(u"")
@@ -243,12 +268,12 @@ class Ui_MainWindow(object):
         self.keys.setObjectName(u"keys")
         self.keys.setEditable(True)
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.keys)
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.keys)
 
         self.label_8 = QLabel(self.groupBox)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_8)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_8)
 
         self.switch_page = QSpinBox(self.groupBox)
         self.switch_page.setObjectName(u"switch_page")
@@ -256,48 +281,50 @@ class Ui_MainWindow(object):
         self.switch_page.setMaximum(10)
         self.switch_page.setValue(0)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.switch_page)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.switch_page)
 
         self.label_7 = QLabel(self.groupBox)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_7)
 
         self.change_brightness = QSpinBox(self.groupBox)
         self.change_brightness.setObjectName(u"change_brightness")
         self.change_brightness.setMinimum(-99)
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.change_brightness)
 
         self.label_6 = QLabel(self.groupBox)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(self.groupBox)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.write)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.write)
 
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.text = QLineEdit(self.groupBox)
-        self.text.setObjectName(u"text")
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.text_font = QComboBox(self.groupBox)
+        self.text_font.setObjectName(u"text_font")
 
-        self.horizontalLayout_3.addWidget(self.text)
+        self.horizontalLayout_4.addWidget(self.text_font)
 
-        self.textButton = QPushButton(self.groupBox)
-        self.textButton.setObjectName(u"textButton")
-        self.textButton.setMinimumSize(QSize(30, 0))
-        self.textButton.setMaximumSize(QSize(30, 16777215))
-        icon2 = QIcon()
-        icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.textButton.setIcon(icon2)
+        self.text_font_size = QSpinBox(self.groupBox)
+        self.text_font_size.setObjectName(u"text_font_size")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.text_font_size.sizePolicy().hasHeightForWidth())
+        self.text_font_size.setSizePolicy(sizePolicy4)
+        self.text_font_size.setMinimum(12)
+        self.text_font_size.setMaximum(72)
 
-        self.horizontalLayout_3.addWidget(self.textButton)
+        self.horizontalLayout_4.addWidget(self.text_font_size)
 
 
-        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
+        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_4)
 
 
         self.verticalLayout_3.addLayout(self.formLayout)
@@ -382,16 +409,17 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.removeButton.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Label:", None))
+#if QT_CONFIG(tooltip)
+        self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
+#endif // QT_CONFIG(tooltip)
+        self.textButton.setText("")
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Font:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
 
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
-#if QT_CONFIG(tooltip)
-        self.textButton.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
-#endif // QT_CONFIG(tooltip)
-        self.textButton.setText("")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi

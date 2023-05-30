@@ -289,24 +289,64 @@
                </property>
               </widget>
              </item>
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLineEdit" name="text"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="textButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>30</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>30</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Text vertical alignment</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/icons/icons/vertical-align.png</normaloff>:/icons/icons/vertical-align.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
              <item row="2" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Font:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
                 <string>Command:</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="3" column="1">
               <widget class="QLineEdit" name="command"/>
              </item>
-             <item row="3" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="label_5">
                <property name="text">
                 <string>Press Keys:</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="5" column="1">
               <widget class="QComboBox" name="keys">
                <property name="editable">
                 <bool>true</bool>
@@ -393,14 +433,14 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="label_8">
                <property name="text">
                 <string>Switch Page:</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="6" column="1">
               <widget class="QSpinBox" name="switch_page">
                <property name="minimum">
                 <number>0</number>
@@ -413,58 +453,48 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="label_7">
                <property name="text">
                 <string>Brightness +/-:</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="7" column="1">
               <widget class="QSpinBox" name="change_brightness">
                <property name="minimum">
                 <number>-99</number>
                </property>
               </widget>
              </item>
-             <item row="6" column="0">
+             <item row="8" column="0">
               <widget class="QLabel" name="label_6">
                <property name="text">
                 <string>Write Text:</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="8" column="1">
               <widget class="QPlainTextEdit" name="write"/>
              </item>
-             <item row="1" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QLineEdit" name="text"/>
+                <widget class="QComboBox" name="text_font"/>
                </item>
                <item>
-                <widget class="QPushButton" name="textButton">
-                 <property name="minimumSize">
-                  <size>
-                   <width>30</width>
-                   <height>0</height>
-                  </size>
+                <widget class="QSpinBox" name="text_font_size">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>16777215</height>
-                  </size>
+                 <property name="minimum">
+                  <number>12</number>
                  </property>
-                 <property name="toolTip">
-                  <string>Text vertical alignment</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="resources.qrc">
-                   <normaloff>:/icons/icons/vertical-align.png</normaloff>:/icons/icons/vertical-align.png</iconset>
+                 <property name="maximum">
+                  <number>72</number>
                  </property>
                 </widget>
                </item>
