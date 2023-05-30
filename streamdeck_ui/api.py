@@ -11,7 +11,7 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE, FONTS_PATH
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.filter import Filter
@@ -389,9 +389,21 @@ class StreamDeckServer:
             self._button_state(deck_id, page, button)["keys"] = keys
             self._save_state()
 
+    def set_button_font(self, deck_id: str, page: int, button: int, font: str) -> None:
+        if self.get_button_font(deck_id, page, button) != font:
+            self._button_state(deck_id, page, button)["font"] = font
+            self._save_state()
+            self.update_button_filters(deck_id, page, button)
+            display_handler = self.display_handlers[deck_id]
+            display_handler.synchronize()
+
     def get_button_keys(self, deck_id: str, page: int, button: int) -> str:
         """Returns the keys set for the specified button"""
         return self._button_state(deck_id, page, button).get("keys", "")
+
+    def get_button_font(self, deck_id: str, page: int, button: int) -> str:
+        """Returns the font set for the specified button"""
+        return self._button_state(deck_id, page, button).get("font", "")
 
     def set_button_write(self, deck_id: str, page: int, button: int, write: str) -> None:
         """Sets the text meant to be written when button is pressed"""
@@ -506,6 +518,9 @@ class StreamDeckServer:
 
         text = button_settings.get("text")
         font = button_settings.get("font", DEFAULT_FONT)
+        if font == "":
+            font = DEFAULT_FONT
+        font = os.path.join(FONTS_PATH, font)
         vertical_align = button_settings.get("text_vertical_align", "")
 
         if text:

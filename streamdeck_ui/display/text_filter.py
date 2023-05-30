@@ -1,10 +1,8 @@
-import os
 from fractions import Fraction
 from typing import Callable, Tuple
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from streamdeck_ui.config import FONTS_PATH
 from streamdeck_ui.display.filter import Filter
 
 
@@ -18,7 +16,7 @@ class TextFilter(Filter):
         super(TextFilter, self).__init__()
         self.text = text
         self.vertical_align = vertical_align
-        self.true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        self.true_font = ImageFont.truetype(font, 14)
         # fmt: off
         kernel = [
             0, 1, 2, 1, 0,
