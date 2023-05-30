@@ -11,7 +11,7 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE, FONTS_PATH, DEFAULT_FONT_SIZE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, DEFAULT_FONT_SIZE, FONTS_PATH, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.filter import Filter
@@ -151,13 +151,11 @@ class StreamDeckServer:
             config = json.loads(state_file.read())
             file_version = config.get("streamdeck_ui_version", 0)
             if file_version != CONFIG_FILE_VERSION:
-                raise ValueError(
-                    "Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
+                raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
 
             self.state = {}
             for deck_id, deck in config["state"].items():
-                deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for
-                                   page_id, buttons in deck.get("buttons", {}).items()}
+                deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
                 self.state[deck_id] = deck
 
     def import_config(self, config_file: str) -> None:
@@ -169,9 +167,7 @@ class StreamDeckServer:
     def export_config(self, output_file: str) -> None:
         try:
             with open(output_file + ".tmp", "w") as state_file:
-                state_file.write(
-                    json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state}, indent=4,
-                               separators=(",", ": ")))
+                state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state}, indent=4, separators=(",", ": ")))
         except Exception as error:
             print(f"The configuration file '{output_file}' was not updated. Error: {error}")
             raise
@@ -199,9 +195,7 @@ class StreamDeckServer:
         )
         self.dimmers[serial_number].reset()
 
-        self.plugevents.attached.emit(
-            {"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(),
-             "layout": streamdeck.key_layout()})
+        self.plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
 
     def initialize_state(self, serial_number: str, buttons: int):
         """Initializes the state for the given serial number. This allocates
@@ -269,8 +263,7 @@ class StreamDeckServer:
     def swap_buttons(self, deck_id: str, page: int, source_button: int, target_button: int) -> None:
         """Swaps the properties of the source and target buttons"""
         temp = cast(dict, self.state[deck_id]["buttons"])[page][source_button]
-        cast(dict, self.state[deck_id]["buttons"])[page][source_button] = \
-        cast(dict, self.state[deck_id]["buttons"])[page][target_button]
+        cast(dict, self.state[deck_id]["buttons"])[page][source_button] = cast(dict, self.state[deck_id]["buttons"])[page][target_button]
         cast(dict, self.state[deck_id]["buttons"])[page][target_button] = temp
         self._save_state()
 
@@ -501,8 +494,7 @@ class StreamDeckServer:
             # the type hinting is defined causes it to believe there *may* not be a list
             pages = len(deck_state["buttons"])  # type: ignore
 
-            display_handler = self.display_handlers.get(serial_number,
-                                                        DisplayGrid(self.lock, deck, pages, self.cpu_usage_callback))
+            display_handler = self.display_handlers.get(serial_number, DisplayGrid(self.lock, deck, pages, self.cpu_usage_callback))
             display_handler.set_page(self.get_page(deck_id))
             self.display_handlers[serial_number] = display_handler
 
@@ -538,7 +530,7 @@ class StreamDeckServer:
 
         text = button_settings.get("text")
         font = button_settings.get("font", DEFAULT_FONT)
-        font_size = button_settings.get('font_size', DEFAULT_FONT_SIZE)
+        font_size = button_settings.get("font_size", DEFAULT_FONT_SIZE)
         if font == "":
             font = DEFAULT_FONT
         font = os.path.join(FONTS_PATH, font)

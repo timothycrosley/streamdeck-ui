@@ -11,12 +11,11 @@ from typing import Dict, Optional
 import pkg_resources
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QFontDatabase
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, \
-    QSystemTrayIcon
+from PySide6.QtGui import QAction, QDesktopServices, QDrag, QFontDatabase, QIcon
+from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
-from streamdeck_ui.config import LOGO, STATE_FILE, FONTS_PATH
+from streamdeck_ui.config import FONTS_PATH, LOGO, STATE_FILE
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
@@ -69,8 +68,7 @@ selected_button: Optional[QtWidgets.QToolButton] = None
 text_update_timer: Optional[QTimer] = None
 "Timer used to delay updates to the button text"
 
-dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900,
-                  "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
+dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900, "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
 last_image_dir = ""
 
 
@@ -261,8 +259,7 @@ def update_button_text(ui, text: str) -> None:
         if deck_id:
             # There may be no decks attached
             api.set_button_text(deck_id, _page(ui), selected_button.index, text)  # type: ignore # Index property added
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui),
-                                              selected_button.index)  # type: ignore # Index property added
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)  # type: ignore # Index property added
             if icon:
                 selected_button.setIcon(icon)
 
@@ -270,8 +267,7 @@ def update_button_text(ui, text: str) -> None:
 def update_button_command(ui, command: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), selected_button.index,
-                               command)  # type: ignore # Index property added
+        api.set_button_command(deck_id, _page(ui), selected_button.index, command)  # type: ignore # Index property added
 
 
 def update_button_keys(ui, keys: str) -> None:
@@ -283,22 +279,19 @@ def update_button_keys(ui, keys: str) -> None:
 def update_button_write(ui) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), selected_button.index,
-                             ui.write.toPlainText())  # type: ignore # Index property added
+        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())  # type: ignore # Index property added
 
 
 def update_change_brightness(ui, amount: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index,
-                                         amount)  # type: ignore # Index property added
+        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)  # type: ignore # Index property added
 
 
 def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), selected_button.index,
-                                   page)  # type: ignore # Index property added
+        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)  # type: ignore # Index property added
 
 
 def change_page(ui, page: int) -> None:
@@ -328,27 +321,23 @@ def change_page(ui, page: int) -> None:
 def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
-    image_file = api.get_button_icon(deck_id, _page(window.ui),
-                                     selected_button.index)  # type: ignore # Index property added
+    image_file = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
     if not image_file:
         if not last_image_dir:
             image_file = os.path.expanduser("~")
         else:
             image_file = last_image_dir
-    file_name = \
-    QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
+    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), selected_button.index,
-                            file_name)  # type: ignore # Index property added
+        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)  # type: ignore # Index property added
         redraw_buttons(window.ui)
 
 
 def align_text_vertical(window) -> None:
     serial_number = _deck_id(window.ui)
-    position = api.get_text_vertical_align(serial_number, _page(window.ui),
-                                           selected_button.index)  # type: ignore # Index property added
+    position = api.get_text_vertical_align(serial_number, _page(window.ui), selected_button.index)  # type: ignore # Index property added
     if position == "bottom" or position == "":
         position = "middle-bottom"
     elif position == "middle-bottom":
@@ -360,8 +349,7 @@ def align_text_vertical(window) -> None:
     else:
         position = ""
 
-    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index,
-                                position)  # type: ignore # Index property added
+    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index, position)  # type: ignore # Index property added
     redraw_buttons(window.ui)
 
 
@@ -376,8 +364,7 @@ def remove_image(window) -> None:
         confirm.setIcon(QMessageBox.Icon.Question)
         button = confirm.exec()
         if button == QMessageBox.StandardButton.Yes:
-            api.set_button_icon(deck_id, _page(window.ui), selected_button.index,
-                                "")  # type: ignore # Index property added
+            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
             redraw_buttons(window.ui)
 
 
@@ -542,8 +529,7 @@ def build_buttons(ui, tab) -> None:
 
 
 def export_config(window) -> None:
-    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"),
-                                            "JSON (*.json)")[0]
+    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
     if not file_name:
         return
 
@@ -551,8 +537,7 @@ def export_config(window) -> None:
 
 
 def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[
-        0]
+    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
     if not file_name:
         return
 
@@ -668,8 +653,7 @@ def update_button_text_font_size(ui, font_size: int) -> None:
     deck_id = _deck_id(ui)
     if deck_id is None:
         return
-    api.set_button_font_size(deck_id, _page(ui), selected_button.index,
-                             font_size)  # type: ignore # Index property added
+    api.set_button_font_size(deck_id, _page(ui), selected_button.index, font_size)  # type: ignore # Index property added
     icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)  # type: ignore # Index property added
     if icon:
         selected_button.setIcon(icon)
