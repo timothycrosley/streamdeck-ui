@@ -270,8 +270,7 @@ def update_button_text(ui, text: str) -> None:
 def update_button_command(ui, command: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), selected_button.index,
-                               command)  # type: ignore # Index property added
+        api.set_button_command(deck_id, _page(ui), selected_button.index, command)  # type: ignore # Index property added
 
 
 def update_button_keys(ui, keys: str) -> None:
@@ -283,22 +282,19 @@ def update_button_keys(ui, keys: str) -> None:
 def update_button_write(ui) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), selected_button.index,
-                             ui.write.toPlainText())  # type: ignore # Index property added
+        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())  # type: ignore # Index property added
 
 
 def update_change_brightness(ui, amount: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index,
-                                         amount)  # type: ignore # Index property added
+        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)  # type: ignore # Index property added
 
 
 def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), selected_button.index,
-                                   page)  # type: ignore # Index property added
+        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)  # type: ignore # Index property added
 
 
 def change_page(ui, page: int) -> None:
