@@ -7,8 +7,13 @@ on:
       - beta
 
 jobs:
+  test:
+    uses: streamdeck-linux-gui/streamdeck-linux-gui/.github/workflows/test.yaml@main
+
   release:
+    needs: test
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
@@ -25,8 +30,9 @@ jobs:
         run: npx semantic-release
 
   publish:
+    needs: release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
       - uses: actions/checkout@v3
