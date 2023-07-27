@@ -1,1 +1,9 @@
 blank_issues_enabled: false
+contact_links:
+  - name: streamdeck-linux-gui Discussions
+    url: https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/discussions
+    about: Please ask and answer questions here.
+  - name: streamdeck-linux-gui Documentation
+    url: https://streamdeck-linux-gui.github.io/streamdeck-linux-gui/
+    about: Please read and review our documentation before opening an issue.
+

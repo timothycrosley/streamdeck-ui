@@ -1,0 +1,89 @@
+name: Bug report
+descripton: Create a bug report to help us improve
+title: '[BUG]: '
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+          # Bub report
+           Thank you for taking the time to report a bug. Please fill in as much of the template below as you're able.
+
+           If you are not entirely sure that this is a bug, please open a [discussion](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/discussions/new/choose)
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: In raising this issue I confirm that
+      options:
+        - label: I have fully completed the issue template
+          required: true
+        - label: I have searched open and closed issues for duplicates
+          required: true
+        - label: I have read the [Contribution Guidelines](https://streamdeck-linux-gui.github.io/streamdeck-linux-gui/contributing/contributing-guide/)
+          required: true
+        - label: I have read the [Code of Conduct](https://streamdeck-linux-gui.github.io/streamdeck-linux-gui/contributing/code-of-conduct/)
+          required: true
+        - label: I have read the [Documentation](https://streamdeck-linux-gui.github.io/streamdeck-linux-gui/)
+          required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: I was trying to [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce the behavior
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Configure the following action '...'
+        2. Press button x
+        3. Review console output
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: I expected [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
+
+#
+  - type: textarea
+    id: system-information
+    attributes:
+      label: System Information
+      description: Plese provide more information about your system
+      placeholder: |
+         * OS: [e.g. Ubuntu 20.04, Arch 2022.02.01]
+         * Desktop environment: [e.g. Gnome]
+         * Python version [e.g. Python 3.9]
+    validations:
+      required: true
+
+  - type: textarea
+    id: StreamDeck-version
+    attributes:
+      label: Stream Deck Version
+      description: Please provide the version of your Stream Deck
+      placehoder: Mini, Standard, Standard MK.2, XL
+    validations:
+      required: false
