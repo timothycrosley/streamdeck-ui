@@ -1,0 +1,29 @@
+{
+  "name": "streamdeck-linux-gui",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "./CHANGELOG.md"
+      }
+    ],
+    ["@semantic-release/github", {
+      "assets": [
+        {"path": "dist/asset.min.css", "label": "CSS distribution"},
+        {"path": "dist/asset.min.js", "label": "JS distribution"}
+      ]
+    }]
+  ],
+    "release": {
+    "branches": [ "main", "beta", "develop", "test" ]
+  },
+
+  "branches": [
+    {name: 'main'},
+    {name: 'beta', channel: 'beta', prerelease: true},
+    {name: 'test', channel: 'test', prerelease: true},
+    {name: 'develop', channel: 'develop', prerelease: true}
+  ]
+}

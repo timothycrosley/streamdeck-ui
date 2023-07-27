@@ -1,0 +1,27 @@
+name: Release
+on:
+  workflow_dispatch:
+    branches:
+      - main
+      - beta
+      - develop
+  push:
+    branches:
+      - main
+      - beta
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install semantic-release plugins
+        run: |
+          npm install @semantic-release/github -D
+          npm install @semantic-release/changelog -D
+          
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
