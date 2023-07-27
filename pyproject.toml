@@ -1,10 +1,15 @@
 [tool.poetry]
-name = "streamdeck_ui"
+name = "streamdeck-linux-gui"
 version = "2.0.16"
 description = "A service, Web Interface, and UI for interacting with your computer using a Stream Deck"
 authors = ["Timothy Crosley <timothy.crosley@gmail.com>"]
+maintainers = ["4s3ti <4s3ti@4s3ti.net>"]
 license = "MIT"
 readme = "README.md"
+packages = [
+  {include = "streamdeck_ui"}
+]
+
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -30,7 +35,6 @@ pytest-cov = ">=2.7"
 pytest-mock = ">=1.10"
 pep8-naming = ">=0.8.2"
 portray = ">=1.3.0"
-cruft = ">=2.2"
 jupyter = "^1.0"
 ipdb = "^0.12.2"
 hypothesis-auto = "^1.1"
@@ -56,5 +60,5 @@ include_reference_documentation = false
 extra_dirs = ["art", "images", "media", "scripts"]
 
 [tool.portray.mkdocs]
-repo_url = "https://github.com/timothycrosley/streamdeck-ui"
+repo_url = "https://github.com/streamdeck-linux-gui/streamdeck-linux-gui"
 edit_uri = "edit/master/"

@@ -163,7 +163,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         command = api.get_button_command(deck_id, page, key)
         if command:
             try:
-                Popen(shlex.split(command))
+                Popen(shlex.split(command))  # nosec, need to allow execution of arbitrary commands
             except Exception as error:
                 print(f"The command '{command}' failed: {error}")
 

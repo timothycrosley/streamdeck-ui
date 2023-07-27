@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
 
-poetry run cruft check
 poetry run mypy --ignore-missing-imports streamdeck_ui/ --exclude 'ui_main.py|resources_rc.py|ui_settings.py'
 poetry run isort --check --diff streamdeck_ui/ tests/ --skip ui_main.py --skip resources_rc.py --skip ui_settings.py --line-length 200
 poetry run black --check --diff streamdeck_ui/ tests/ --exclude 'ui_main.py|resources_rc.py|ui_settings.py' --line-length 200
