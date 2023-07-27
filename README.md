@@ -1,14 +1,15 @@
 [![streamdeck_ui - Linux compatible UI for the Elgato Stream Deck](docs/art/logo_large.png)](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui)
 _________________
 
-[![Test Status](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/workflows/Test/badge.svg?branch=master)](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/actions?query=workflow%3ATest)
+[![PyPI version](https://badge.fury.io/py/streamdeck-linux-gui.svg)](https://pypi.org/project/streamdeck-linux-gui/)
+[![Build Status](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/actions/workflows/test.yaml/badge.svg)](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/actions/workflows/test.yaml?query=branch%3Amain)
+[![Docs Status](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/actions/workflows/docs.yml/badge.svg)](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/gh/streamdeck-linux-gui/streamdeck-linux-gui/branch/main/graph/badge.svg?token=I4WC0MVVZ3)](https://codecov.io/gh/streamdeck-linux-gui/streamdeck-linux-gui)
 [![Join Discord](https://img.shields.io/badge/Join%20Discord-Discord-green?labelColor=Blue&style=flat&logo=discord&link=https://discord.gg/ZCZesnEj4)](https://discord.gg/ZCZesnEj4)
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://timothycrosley.github.io/isort/)
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
- 
 _________________
 
 **streamdeck-linux-gui** A Linux compatible UI for the Elgato Stream Deck.
