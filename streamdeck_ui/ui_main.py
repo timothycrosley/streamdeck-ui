@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout
     QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy,
     QSpinBox, QStatusBar, QTabWidget, QVBoxLayout,
     QWidget)
-from  . import resources_rc
+from . import resources_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
