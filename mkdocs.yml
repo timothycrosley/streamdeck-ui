@@ -1,0 +1,43 @@
+site_name: streamdeck-linux-gui
+copyright: Copyright &copy; 2023 streamdeck-linux-gui
+theme:
+  icon:
+    repo: fontawesome/brands/github
+  name: material
+  logo: art/logo.png
+  favicon: img/favicon.ico
+  palette:
+    primary: indigo
+  features:
+    - navigation.expand
+
+repo_name: streamdeck-linux-gui
+repo_url: https://github.com/streamdeck-linux-gui/streamdeck-linux-gui
+edit_uri: https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/docs
+
+markdown_extensions:
+  - admonition
+
+nav:
+  - Installation:
+    - Arch: installation/arch.md
+    - Centos: installation/centos.md
+    - Fedora: installation/fedora.md
+    - Opensuse: installation/opensuse.md
+    - Ubuntu: installation/ubuntu.md
+    - Systemd: installation/systemd.md
+  - troubleshooting.md 
+  - Contributing:
+    - contributing/contributing-guide.md
+    - Coding standard: contributing/coding-standard.md
+    - Code of conduct: contributing/code-of-conduct.md
+    - contributing/acknowledgements.md
+     
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/streamdeck-linux-gui/streamdeck-linux-gui
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ZCZesnEj4
+
