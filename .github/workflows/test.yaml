@@ -3,7 +3,7 @@ name: Test
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -11,11 +11,11 @@ jobs:
       #       check-out repo and set-up python     
       #----------------------------------------------
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up python 
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
       #----------------------------------------------
       #  -----  install & configure poetry  -----      
       #----------------------------------------------
