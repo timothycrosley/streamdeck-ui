@@ -63,7 +63,6 @@ There are scripts for setting up streamdeck_ui on [Debian/Ubuntu](scripts/ubuntu
 
 Documentation is powered by mkdocs-material, and its on the [docs](docs/) folder. Install it with `pip install mkdocs-material` and run `mkdocs serve` to see the changes locally, before submitting a PR.
 
-
 ## Development & Contributions
 
 Contributuions encouraged and very welcome, however some rules and guidelines must be followed! 
@@ -75,7 +74,19 @@ Contributuions encouraged and very welcome, however some rules and guidelines mu
 - Pull requests should be made against the `develop` branch, so please make sure you check out the `develop` branch.
 - Pull requests should include tests and documentation as appropriate.
 - When opening a pull request, if possible, attach a screenshot or GIF of the changes.
-- Please read the [contributing guide](https://www.notion.so/cfcolaco/docs/contributing.md) for more information and instructions on how to get started.
+- Please read the [contributing guide](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/blob/main/docs/contributing/contributing-guide.md) for more information and instructions on how to get started.
+
+### Feature Requests
+
+Open a new discussion with the `feature request` tag and describe the feature you would like to see implemented. If you have a screenshot or GIF of the feature, please attach it to the discussion.
+
+### Bug Reports
+
+Open a bug report [here](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/issues) and follow the template. Please include as much information as possible.
+
+### Have a Question?
+
+If you need any help, have a question, or just want to discuss something related to the project, please feel free to open a [discussion](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/discussions).
 
 ## Known issues
 
