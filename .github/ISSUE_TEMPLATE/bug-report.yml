@@ -1,5 +1,5 @@
 name: Bug report
-descripton: Create a bug report to help us improve
+description: Create a bug report to help us improve
 title: '[BUG]: '
 labels: ["bug", "needs triage"]
 body:
@@ -84,6 +84,6 @@ body:
     attributes:
       label: Stream Deck Version
       description: Please provide the version of your Stream Deck
-      placehoder: Mini, Standard, Standard MK.2, XL
+      placeholder: Mini, Standard, Standard MK.2, XL
     validations:
       required: false
