@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - beta
+      - develop
 
 jobs:
   test:
@@ -13,7 +14,6 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
@@ -32,7 +32,7 @@ jobs:
   publish:
     needs: release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     
     steps:
       - uses: actions/checkout@v3
