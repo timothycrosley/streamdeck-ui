@@ -31,12 +31,23 @@ sudo udevadm trigger
 If the software is having problems later to detect the Stream Deck, you can try unplugging/plugging it back in.
 
 ## Install Stream Deck UI
-```
+
+### From Pypi with pip
+```bash
 python3 -m pip install streamdeck-ui --user
 ```
 
+### From Surce 
+Please make sure you have followed the steps below untill the **Install Stream Deck UI section** before continuing.
+
+
+The steps to install from source can be found [here](source.md)
+
+
+### Launch the Streamdeck UI
 Launch with
-```
+```bash
 streamdeck
 ```
+
 See [troubleshooting](../troubleshooting.md) for tips if you're stuck.
