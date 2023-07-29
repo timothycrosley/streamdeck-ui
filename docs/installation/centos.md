@@ -48,7 +48,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 
 ### From Pypi with pip
 ```bash
-python3.8 -m pip install streamdeck-ui --user
+python3.8 -m pip install streamdeck-linux-gui --user
 ```
 
 ### From Surce 
