@@ -25,6 +25,7 @@ nav:
     - Fedora: installation/fedora.md
     - Opensuse: installation/opensuse.md
     - Ubuntu: installation/ubuntu.md
+    - From Source: installation/source.md
     - Systemd: installation/systemd.md
   - troubleshooting.md 
   - Contributing:

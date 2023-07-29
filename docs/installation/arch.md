@@ -36,7 +36,7 @@ sudo pacman -S python-pipx
 pipx install  streamdeck-linux-gui
 ```
 
-### From Surce 
+### From Source 
 Please make sure you have followed [install-dependencies](#install-dependencies) and [Configure access to Elgato devices](#Configure-accessto-Elgato-devices) before continuing.
 
 
