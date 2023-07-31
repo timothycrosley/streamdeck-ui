@@ -66,7 +66,7 @@ class StreamDeckMonitor:
             self.monitor_thread.join()
         except RuntimeError:
             pass
-        self.pipelmonitor_thread = None
+        self.monitor_thread = None
 
         for streamdeck_id in self.streamdecks:
             self.detached(streamdeck_id)
