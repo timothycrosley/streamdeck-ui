@@ -3,7 +3,7 @@ This has been tested on Tumbleweed.
 
 ## Install hidapi
 ``` console
-sudo zypper install libhidapi-libusb0 python310-devel kernel-devel
+sudo zypper install libhidapi-libusb0 python312-devel kernel-devel python311-evdev
 ```
  > `python310-devel` and `kernel-devel` are required because pip is going to have to build `evdev`.
 
