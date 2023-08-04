@@ -840,7 +840,7 @@ def start(_exit: bool = False) -> None:
         show_ui = False
 
     try:
-        version = pkg_resources.get_distribution("streamdeck_ui").version
+        version = pkg_resources.get_distribution("streamdeck-linux-gui").version
     except pkg_resources.DistributionNotFound:
         version = "devel"
 
