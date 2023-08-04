@@ -36,8 +36,12 @@ Congrats! You're now ready to make a contribution! Use the following as a guide 
         - If you're not sure if it's something that is good for the main streamdeck_ui project and want immediate feedback, you can discuss it on [Discord](https://discord.gg/ZCZesnEj4).
 2. Create an issue branch for your local work `git checkout -b issue/$ISSUE-NUMBER origin/develop`.
 3. Do your magic here.
-4. Ensure your code matches the [HOPE-8 Coding Standard](https://github.com/hugapi/HOPE/blob/master/all/HOPE-8--Style-Guide-for-Hug-Code.md#hope-8----style-guide-for-hug-code) used by the project.
-5. Submit a pull request to the main project repository via GitHub.
+4. Try to include tests for your code whenever its possible.
+5. Ensure your code matches the [HOPE-8 Coding Standard](https://github.com/hugapi/HOPE/blob/master/all/HOPE-8--Style-Guide-for-Hug-Code.md#hope-8----style-guide-for-hug-code) used by the project.
+    * You can use the `lint.sh` existing in the scripts directory: `bash scripts/lint.sh`. This will let you know if everything is okay before you commit it.
+6. Ensure all tests pass, you can use the `test.sh` script inside the scripts directory, `bash scripts/test.sh`
+7. When commiting your changes, please make sure you follow the [Angular commit message format](https://gist.github.com/brianclements/841ea7bffdb01346392c).
+8. Submit a pull request to the main project repository via GitHub.
     * Make sure your target branch is set to `develop`.
 
 Thanks for the contribution! It will quickly get reviewed, and, once accepted, will result in your name being added to the acknowledgments list :).
