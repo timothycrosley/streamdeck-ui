@@ -1,9 +1,9 @@
-# Installing on Ubuntu
-This has been tested on Ubuntu 2004, 2204, Linux Mint 20.
+# Installing on Debian and ubuntu derivatives
+This has been tested on Debian 12
 
-## Install hidapi
+## Install hidapi and pipx
 ``` console
-sudo apt install libhidapi-libusb0 python3-pip
+sudo apt install libhidapi-libusb0 pipx
 ```
 
 > Note that for version `2.0.6` and below, you also need to install `libxcb-xinerama0` (include it with apt in the line above). 
@@ -11,11 +11,6 @@ sudo apt install libhidapi-libusb0 python3-pip
 You need to add `~/.local/bin` to your path. Be sure to add this to your `.bashrc` (or equivalent) file so it automatically sets it for you in future.
 ``` console
 PATH=$PATH:$HOME/.local/bin
-```
-## Upgrade pip
-You need to upgrade pip, using pip. In my experience, old versions of pip may fail to properly install some of the required Python dependencies.
-```
-python3 -m pip install --upgrade pip
 ```
 
 
@@ -32,9 +27,9 @@ If the software is having problems later to detect the Stream Deck, you can try 
 
 ## Install Stream Deck UI
 
-### From Pypi with pip
+### From Pypi with pipx
 ```bash
-python3 -m pip install streamdeck-linux-gui --user
+python3 -m pipx install streamdeck-linux-gui
 ```
 
 ### From Surce 
