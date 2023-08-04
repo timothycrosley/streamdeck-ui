@@ -5,6 +5,7 @@ import sys
 import time
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from subprocess import check_output
 from typing import Dict, Optional
 
 import pkg_resources
@@ -54,6 +55,12 @@ text_update_timer: Optional[QTimer] = None
 
 dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900, "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
 last_image_dir = ""
+
+
+"""Define buttons behaviour here"""
+toggle_buttons = []
+mutex_buttons = ["PP", "SX", "DX", "HDMI", "DESK"]
+status_buttons = {"REC": "obs-ffmpeg-mux"}
 
 
 class DraggableButton(QtWidgets.QToolButton):
@@ -122,6 +129,11 @@ class DraggableButton(QtWidgets.QToolButton):
     def dragLeaveEvent(self, e):  # noqa: N802 - Part of QT signature.
         self.setStyleSheet(BUTTON_STYLE)
 
+def get_pid(process_name):
+    try:
+        return int(check_output(["pidof", process_name]))
+    except Exception:
+        return -1
 
 def _replace_special_keys(key):
     """Replaces special keywords the user can use with their character equivalent."""
@@ -133,12 +145,37 @@ def _replace_special_keys(key):
         return key.lower()
     return key
 
+def update_status_buttons(ui):
+    deck_id = _deck_id(ui)
+    page = api.get_page(deck_id)
+
+    for key in range(15): # TODO parametrize this
+        button_text = api.get_button_text(deck_id, page, key)
+        if button_text in status_buttons.keys():
+            processId = get_pid(status_buttons[button_text])
+            if processId > 0:
+                key_pressed = api.display_handlers[deck_id].get_keypress(key)
+                if not key_pressed:
+                    print("Process started:", status_buttons[button_text], "Pressing button:", button_text)
+                    api.display_handlers[deck_id].set_keypress(key, True)
+            else:
+                key_pressed = api.display_handlers[deck_id].get_keypress(key)
+                if key_pressed:
+                    print("Process stopped:", status_buttons[button_text], "Releasing button:", button_text)
+                    api.display_handlers[deck_id].set_keypress(key, True)
+
+
+def setup_status_checker(ui):
+    global status_update_timer 
+
+    status_update_timer = QTimer()
+    status_update_timer.setSingleShot(False)
+    status_update_timer.timeout.connect(partial(update_status_buttons, ui))
+    status_update_timer.start(500)
+
 
 def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
     page = api.get_page(deck_id)
-
-    toggle_buttons = ["REC"]
-    mutex_buttons = ["PP", "SX", "DX", "HDMI"]
 
     if not state:
         button_text = api.get_button_text(deck_id, page, key)
@@ -856,6 +893,8 @@ def start(_exit: bool = False) -> None:
     api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
 
     api.start()
+
+    setup_status_checker(ui)
 
     tray.show()
     if show_ui:
