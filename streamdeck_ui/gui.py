@@ -15,11 +15,11 @@ from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
+from streamdeck_ui.cli.server import CLIStreamDeckServer
 from streamdeck_ui.config import LOGO, STATE_FILE
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
-from streamdeck_ui.cli.server import CLIStreamDeckServer
 
 pnput_supported: bool = True
 try:

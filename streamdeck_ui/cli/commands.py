@@ -2,9 +2,11 @@ import typing as tp
 
 from streamdeck_ui.api import StreamDeckServer
 
+
 class Command(tp.Protocol):
     def execute(self, api: StreamDeckServer, ui: tp.Any) -> None:
         ...
+
 
 class SetPageCommand:
     def __init__(self, cfg):
@@ -18,6 +20,7 @@ class SetPageCommand:
         api.set_page(deck_id, self.page_index)
         ui.pages.setCurrentIndex(self.page_index)
 
+
 class SetBrightnessCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -26,6 +29,7 @@ class SetBrightnessCommand:
     def execute(self, api: StreamDeckServer, ui):
         deck_id = ui.device_list.itemData(ui.device_list.currentIndex()) if self.deck_index is None else self.deck_index
         api.set_brightness(deck_id, self.brightness)
+
 
 class SetButtonTextCommand:
     def __init__(self, cfg):
@@ -40,6 +44,7 @@ class SetButtonTextCommand:
             self.page_index = api.get_page(deck_id)
         api.set_button_text(deck_id, self.page_index, self.button_index, self.button_text)
 
+
 class SetButtonTextAlignmentCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -53,6 +58,7 @@ class SetButtonTextAlignmentCommand:
             self.page_index = api.get_page(deck_id)
         api.set_text_vertical_align(deck_id, self.page_index, self.button_index, self.button_text_alignment)
 
+
 class SetButtonWriteCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -65,6 +71,7 @@ class SetButtonWriteCommand:
         if self.page_index is None:
             self.page_index = api.get_page(deck_id)
         api.set_button_write(deck_id, self.page_index, self.button_index, self.button_write)
+
 
 class SetButtonCmdCommand:
     def __init__(self, cfg):
@@ -80,6 +87,7 @@ class SetButtonCmdCommand:
             self.page_index = api.get_page(deck_id)
         api.set_button_command(deck_id, self.page_index, self.button_index, self.button_cmd)
 
+
 class SetButtonKeysCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -94,6 +102,7 @@ class SetButtonKeysCommand:
             self.page_index = api.get_page(deck_id)
         api.set_button_keys(deck_id, self.page_index, self.button_index, self.button_keys)
 
+
 class SetButtonIconCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -107,6 +116,7 @@ class SetButtonIconCommand:
             self.page_index = api.get_page(deck_id)
         api.set_button_icon(deck_id, self.page_index, self.button_index, self.icon_path)
 
+
 class ClearButtonIconCommand:
     def __init__(self, cfg):
         self.deck_index = cfg["deck"]
@@ -117,17 +127,26 @@ class ClearButtonIconCommand:
         deck_id = ui.device_list.itemData(ui.device_list.currentIndex()) if self.deck_index is None else self.deck_index
         if self.page_index is None:
             self.page_index = api.get_page(deck_id)
-        api.set_button_icon(deck_id, self.page_index, self.button_index, None)
+        api.set_button_icon(deck_id, self.page_index, self.button_index, "")
 
-def create_command(cfg: dict) -> Command:
-    match cfg["command"]:
-        case "set_page": return SetPageCommand(cfg)
-        case "set_brightness": return SetBrightnessCommand(cfg)
-        case "set_button_text": return SetButtonTextCommand(cfg)
-        case "set_alignment": return SetButtonTextAlignmentCommand(cfg)
-        case "set_button_write": return SetButtonWriteCommand(cfg)
-        case "set_button_cmd": return SetButtonCmdCommand(cfg)
-        case "set_button_keys": return SetButtonKeysCommand(cfg)
-        case "set_button_icon": return SetButtonIconCommand(cfg)
-        case "clear_button_icon": return ClearButtonIconCommand(cfg)
+
+def create_command(cfg: dict) -> Command | None:
+    if cfg["command"] == "set_page":
+        return SetPageCommand(cfg)
+    elif cfg["command"] == "set_brightness":
+        return SetBrightnessCommand(cfg)
+    elif cfg["command"] == "set_button_text":
+        return SetButtonTextCommand(cfg)
+    elif cfg["command"] == "set_alignment":
+        return SetButtonTextAlignmentCommand(cfg)
+    elif cfg["command"] == "set_button_write":
+        return SetButtonWriteCommand(cfg)
+    elif cfg["command"] == "set_button_cmd":
+        return SetButtonCmdCommand(cfg)
+    elif cfg["command"] == "set_button_keys":
+        return SetButtonKeysCommand(cfg)
+    elif cfg["command"] == "set_button_icon":
+        return SetButtonIconCommand(cfg)
+    elif cfg["command"] == "clear_button_icon":
+        return ClearButtonIconCommand(cfg)
     return None
