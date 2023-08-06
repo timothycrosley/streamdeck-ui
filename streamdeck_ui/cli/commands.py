@@ -135,18 +135,18 @@ def create_command(cfg: dict) -> Command | None:
         return SetPageCommand(cfg)
     elif cfg["command"] == "set_brightness":
         return SetBrightnessCommand(cfg)
-    elif cfg["command"] == "set_button_text":
+    elif cfg["command"] == "set_text":
         return SetButtonTextCommand(cfg)
     elif cfg["command"] == "set_alignment":
         return SetButtonTextAlignmentCommand(cfg)
-    elif cfg["command"] == "set_button_write":
+    elif cfg["command"] == "set_write":
         return SetButtonWriteCommand(cfg)
-    elif cfg["command"] == "set_button_cmd":
+    elif cfg["command"] == "set_cmd":
         return SetButtonCmdCommand(cfg)
-    elif cfg["command"] == "set_button_keys":
+    elif cfg["command"] == "set_keys":
         return SetButtonKeysCommand(cfg)
-    elif cfg["command"] == "set_button_icon":
+    elif cfg["command"] == "set_icon":
         return SetButtonIconCommand(cfg)
-    elif cfg["command"] == "clear_button_icon":
+    elif cfg["command"] == "clear_icon":
         return ClearButtonIconCommand(cfg)
     return None
