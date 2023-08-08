@@ -62,11 +62,16 @@ class CLIStreamDeckServer:
 
             saved_umask = os.umask(0o077)
             path = os.path.join(tmpdir, filename)
+
+            if os.path.exists(path):
+                os.remove(path)
+
+            self.sock.bind(path)
+            self.sock.listen(1)
+            self.sock.settimeout(CLIStreamDeckServer.SOCKET_CONNECTION_TIMEOUT_SECOND)
         except OSError:
+            print("warning: for some reason, unable to utilize CLI commands.")
             pass
-        self.sock.bind(path)
-        self.sock.listen(1)
-        self.sock.settimeout(CLIStreamDeckServer.SOCKET_CONNECTION_TIMEOUT_SECOND)
 
         while not self.quit.is_set():
             try:
