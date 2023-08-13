@@ -103,6 +103,7 @@ Beachten sie auch die Anleitungen für
 * [Arch/Manjaro](docs/installation/arch.md)
 * [CentOS](docs/installation/centos.md)
 * [Fedora](docs/installation/fedora.md)
+* [NixOS](docs/installation/nixos.md)
 * [openSUSE](docs/installation/opensuse.md)
 * [Ubuntu/Mint](docs/installation/ubuntu.md)
 

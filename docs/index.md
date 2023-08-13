@@ -7,6 +7,7 @@ _________________
 * [Arch/Manjaro](installation/arch.md)
 * [CentOS](installation/centos.md)
 * [Fedora](installation/fedora.md)
+* [NixOS](installation/nixos.md)
 * [openSUSE](installation/opensuse.md)
 * [Ubuntu/Mint](installation/ubuntu.md)
 
