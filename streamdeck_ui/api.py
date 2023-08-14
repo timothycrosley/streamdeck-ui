@@ -11,7 +11,7 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.filter import Filter
@@ -167,7 +167,13 @@ class StreamDeckServer:
     def export_config(self, output_file: str) -> None:
         try:
             with open(output_file + ".tmp", "w") as state_file:
-                state_file.write(json.dumps({"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state}, indent=4, separators=(",", ": ")))
+                state_file.write(
+                    json.dumps(
+                        {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state},
+                        indent=4,
+                        separators=(",", ": "),
+                    )
+                )
         except Exception as error:
             print(f"The configuration file '{output_file}' was not updated. Error: {error}")
             raise
@@ -195,7 +201,14 @@ class StreamDeckServer:
         )
         self.dimmers[serial_number].reset()
 
-        self.plugevents.attached.emit({"id": streamdeck_id, "serial_number": serial_number, "type": streamdeck.deck_type(), "layout": streamdeck.key_layout()})
+        self.plugevents.attached.emit(
+            {
+                "id": streamdeck_id,
+                "serial_number": serial_number,
+                "type": streamdeck.deck_type(),
+                "layout": streamdeck.key_layout(),
+            }
+        )
 
     def initialize_state(self, serial_number: str, buttons: int):
         """Initializes the state for the given serial number. This allocates
@@ -310,6 +323,39 @@ class StreamDeckServer:
         """
         return self._button_state(serial_number, page, button).get("text_vertical_align", "")
 
+    def get_text_horizontal_align(self, serial_number: str, page: int, button: int) -> str:
+        """Gets the vertical text alignment. Values are bottom, middle-bottom, middle, middle-top, top
+
+        :param serial_number: The Stream Deck serial number.
+        :type serial_number: str
+        :param page: The page the button is on
+        :type page: int
+        :param button: The button index
+        :type button: int
+        :return: The vertical alignment setting
+        :rtype: str
+        """
+        return self._button_state(serial_number, page, button).get("text_horizontal_align", "")
+
+    def set_text_horizontal_align(self, serial_number: str, page: int, button: int, alignment: str) -> None:
+        """Gets the vertical text alignment. Values are top, middle, bottom
+
+        :param serial_number: The Stream Deck serial number.
+        :type serial_number: str
+        :param page: The page the button is on
+        :type page: int
+        :param button: The button index
+        :type button: int
+        :return: The vertical alignment setting
+        :rtype: str
+        """
+        if self.get_text_horizontal_align(serial_number, page, button) != alignment:
+            self._button_state(serial_number, page, button)["text_horizontal_align"] = alignment
+            self._save_state()
+            self.update_button_filters(serial_number, page, button)
+            display_handler = self.display_handlers[serial_number]
+            display_handler.synchronize()
+
     def set_text_vertical_align(self, serial_number: str, page: int, button: int, alignment: str) -> None:
         """Gets the vertical text alignment. Values are top, middle, bottom
 
@@ -328,6 +374,23 @@ class StreamDeckServer:
             self.update_button_filters(serial_number, page, button)
             display_handler = self.display_handlers[serial_number]
             display_handler.synchronize()
+
+    def set_font_color(self, serial_number: str, page: int, button: int, color: str) -> None:
+        """Sets the text color associated with a button"""
+        if self.get_font_color(serial_number, page, button) != color:
+            self._button_state(serial_number, page, button)["font_color"] = color
+            self._save_state()
+            self.update_button_filters(serial_number, page, button)
+
+            try:
+                display_handler = self.display_handlers[serial_number]
+                display_handler.synchronize()
+            except KeyError:
+                raise ValueError(f"Invalid serial number: {serial_number}")
+
+    def get_font_color(self, serial_number: str, page: int, button: int) -> str:
+        """Returns the text color set for the specified button"""
+        return self._button_state(serial_number, page, button).get("font_color", "")
 
     def get_button_icon_pixmap(self, deck_id: str, page: int, button: int) -> Optional[QPixmap]:
         """Returns the QPixmap value for the given button (streamdeck, page, button)
@@ -389,9 +452,33 @@ class StreamDeckServer:
             self._button_state(deck_id, page, button)["keys"] = keys
             self._save_state()
 
+    def set_button_font(self, deck_id: str, page: int, button: int, font: str) -> None:
+        if self.get_button_font(deck_id, page, button) != font:
+            self._button_state(deck_id, page, button)["font"] = font
+            self._save_state()
+            self.update_button_filters(deck_id, page, button)
+            display_handler = self.display_handlers[deck_id]
+            display_handler.synchronize()
+
+    def get_button_font_size(self, deck_id: str, page: int, button: int) -> str:
+        """Returns the font size set for the specified button"""
+        return self._button_state(deck_id, page, button).get("font_size", DEFAULT_FONT_SIZE)
+
+    def set_button_font_size(self, deck_id: str, page: int, button: int, font_size: int) -> None:
+        if self.get_button_font_size(deck_id, page, button) != font_size:
+            self._button_state(deck_id, page, button)["font_size"] = font_size
+            self._save_state()
+            self.update_button_filters(deck_id, page, button)
+            display_handler = self.display_handlers[deck_id]
+            display_handler.synchronize()
+
     def get_button_keys(self, deck_id: str, page: int, button: int) -> str:
         """Returns the keys set for the specified button"""
         return self._button_state(deck_id, page, button).get("keys", "")
+
+    def get_button_font(self, deck_id: str, page: int, button: int) -> str:
+        """Returns the font set for the specified button"""
+        return self._button_state(deck_id, page, button).get("font", "")
 
     def set_button_write(self, deck_id: str, page: int, button: int, write: str) -> None:
         """Sets the text meant to be written when button is pressed"""
@@ -506,9 +593,15 @@ class StreamDeckServer:
 
         text = button_settings.get("text")
         font = button_settings.get("font", DEFAULT_FONT)
+        font_size = button_settings.get("font_size", DEFAULT_FONT_SIZE)
+        font_color = button_settings.get("font_color", DEFAULT_FONT_COLOR)
+        if font == "":
+            font = DEFAULT_FONT
+        font = os.path.join(FONTS_PATH, font)
         vertical_align = button_settings.get("text_vertical_align", "")
+        horizontal_align = button_settings.get("text_horizontal_align", "")
 
         if text:
-            filters.append(TextFilter(text, font, vertical_align))
+            filters.append(TextFilter(text, font, font_size, font_color, vertical_align, horizontal_align))
 
         display_handler.replace(page, button, filters)

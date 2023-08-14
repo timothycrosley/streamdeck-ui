@@ -11,12 +11,12 @@ from typing import Dict, Optional
 import pkg_resources
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QPalette
+from PySide6.QtWidgets import QApplication, QColorDialog, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.cli.server import CLIStreamDeckServer
-from streamdeck_ui.config import LOGO, STATE_FILE
+from streamdeck_ui.config import DEFAULT_FONT_COLOR, FONTS_PATH, LOGO, STATE_FILE
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
@@ -36,7 +36,6 @@ except ImportError as pynput_error:
     print("and your operating system uses Wayland.")
     print("")
     print(f"For troubleshooting purposes, the actual error is: \n{pynput_error}")
-
 
 api: StreamDeckServer
 
@@ -70,7 +69,18 @@ selected_button: Optional[QtWidgets.QToolButton] = None
 text_update_timer: Optional[QTimer] = None
 "Timer used to delay updates to the button text"
 
-dimmer_options = {"Never": 0, "10 Seconds": 10, "1 Minute": 60, "5 Minutes": 300, "10 Minutes": 600, "15 Minutes": 900, "30 Minutes": 1800, "1 Hour": 3600, "5 Hours": 7200, "10 Hours": 36000}
+dimmer_options = {
+    "Never": 0,
+    "10 Seconds": 10,
+    "1 Minute": 60,
+    "5 Minutes": 300,
+    "10 Minutes": 600,
+    "15 Minutes": 900,
+    "30 Minutes": 1800,
+    "1 Hour": 3600,
+    "5 Hours": 7200,
+    "10 Hours": 36000,
+}
 last_image_dir = ""
 
 
@@ -102,12 +112,14 @@ class DraggableButton(QtWidgets.QToolButton):
         serial_number = _deck_id(self.ui)
         page = _page(self.ui)
 
+        index = self.property("index")
         if e.source():
+            source_index = e.source().property("index")
             # Ignore drag and drop on yourself
-            if e.source().index == self.index:
+            if source_index == index:
                 return
 
-            self.api.swap_buttons(serial_number, page, e.source().index, self.index)
+            self.api.swap_buttons(serial_number, page, source_index, index)
             # In the case that we've dragged the currently selected button, we have to
             # check the target button instead so it appears that it followed the drag/drop
             if e.source().isChecked():
@@ -118,14 +130,15 @@ class DraggableButton(QtWidgets.QToolButton):
             # Handle drag and drop from outside the application
             if e.mimeData().hasUrls:
                 file_name = e.mimeData().urls()[0].toLocalFile()
-                self.api.set_button_icon(serial_number, page, self.index, file_name)
+                self.api.set_button_icon(serial_number, page, index, file_name)
 
         if e.source():
-            icon = self.api.get_button_icon_pixmap(serial_number, page, e.source().index)
+            source_index = e.source().property("index")
+            icon = self.api.get_button_icon_pixmap(serial_number, page, source_index)
             if icon:
                 e.source().setIcon(icon)
 
-        icon = self.api.get_button_icon_pixmap(serial_number, page, self.index)
+        icon = self.api.get_button_icon_pixmap(serial_number, page, index)
         if icon:
             self.setIcon(icon)
 
@@ -240,7 +253,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 ui.pages.setCurrentIndex(switch_page - 1)
 
 
-def _deck_id(ui) -> str:
+def _deck_id(ui: Ui_MainWindow) -> str:
     """Returns the currently selected Stream Deck serial number
 
     :param ui: A reference to the ui object
@@ -251,8 +264,16 @@ def _deck_id(ui) -> str:
     return ui.device_list.itemData(ui.device_list.currentIndex())
 
 
-def _page(ui) -> int:
+def _page(ui: Ui_MainWindow) -> int:
     return ui.pages.currentIndex()
+
+
+def _button(_ui: Ui_MainWindow) -> int:
+    if selected_button is not None:
+        index = selected_button.property("index")
+        print(f"Button index: {index}")
+        return index
+    return -1
 
 
 def update_button_text(ui, text: str) -> None:
@@ -260,8 +281,8 @@ def update_button_text(ui, text: str) -> None:
         deck_id = _deck_id(ui)
         if deck_id:
             # There may be no decks attached
-            api.set_button_text(deck_id, _page(ui), selected_button.index, text)  # type: ignore # Index property added
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), selected_button.index)  # type: ignore # Index property added
+            api.set_button_text(deck_id, _page(ui), _button(ui), text)
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
             if icon:
                 selected_button.setIcon(icon)
 
@@ -269,31 +290,31 @@ def update_button_text(ui, text: str) -> None:
 def update_button_command(ui, command: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), selected_button.index, command)  # type: ignore # Index property added
+        api.set_button_command(deck_id, _page(ui), _button(ui), command)
 
 
 def update_button_keys(ui, keys: str) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_keys(deck_id, _page(ui), selected_button.index, keys)  # type: ignore # Index property added
+        api.set_button_keys(deck_id, _page(ui), _button(ui), keys)
 
 
 def update_button_write(ui) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), selected_button.index, ui.write.toPlainText())  # type: ignore # Index property added
+        api.set_button_write(deck_id, _page(ui), _button(ui), ui.write.toPlainText())
 
 
 def update_change_brightness(ui, amount: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), selected_button.index, amount)  # type: ignore # Index property added
+        api.set_button_change_brightness(deck_id, _page(ui), _button(ui), amount)
 
 
 def update_switch_page(ui, page: int) -> None:
     if selected_button:
         deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), selected_button.index, page)  # type: ignore # Index property added
+        api.set_button_switch_page(deck_id, _page(ui), _button(ui), page)
 
 
 def change_page(ui, page: int) -> None:
@@ -323,7 +344,7 @@ def change_page(ui, page: int) -> None:
 def select_image(window) -> None:
     global last_image_dir
     deck_id = _deck_id(window.ui)
-    image_file = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
+    image_file = api.get_button_icon(deck_id, _page(window.ui), _button(window.ui))
     if not image_file:
         if not last_image_dir:
             image_file = os.path.expanduser("~")
@@ -333,13 +354,13 @@ def select_image(window) -> None:
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), selected_button.index, file_name)  # type: ignore # Index property added
+        api.set_button_icon(deck_id, _page(window.ui), _button(window.ui), file_name)
         redraw_buttons(window.ui)
 
 
 def align_text_vertical(window) -> None:
     serial_number = _deck_id(window.ui)
-    position = api.get_text_vertical_align(serial_number, _page(window.ui), selected_button.index)  # type: ignore # Index property added
+    position = api.get_text_vertical_align(serial_number, _page(window.ui), _button(window.ui))
     if position == "bottom" or position == "":
         position = "middle-bottom"
     elif position == "middle-bottom":
@@ -351,13 +372,27 @@ def align_text_vertical(window) -> None:
     else:
         position = ""
 
-    api.set_text_vertical_align(serial_number, _page(window.ui), selected_button.index, position)  # type: ignore # Index property added
+    api.set_text_vertical_align(serial_number, _page(window.ui), _button(window.ui), position)
+    redraw_buttons(window.ui)
+
+
+def align_text_horizontal(window) -> None:
+    serial_number = _deck_id(window.ui)
+    position = api.get_text_horizontal_align(serial_number, _page(window.ui), _button(window.ui))
+    if position == "center" or position == "":
+        position = "left"
+    elif position == "left":
+        position = "right"
+    elif position == "right":
+        position = ""
+
+    api.set_text_horizontal_align(serial_number, _page(window.ui), _button(window.ui), position)
     redraw_buttons(window.ui)
 
 
 def remove_image(window) -> None:
     deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), selected_button.index)  # type: ignore # Index property added
+    image = api.get_button_icon(deck_id, _page(window.ui), _button(window.ui))
     if image:
         confirm = QMessageBox(window)
         confirm.setWindowTitle("Remove image")
@@ -366,7 +401,7 @@ def remove_image(window) -> None:
         confirm.setIcon(QMessageBox.Icon.Question)
         button = confirm.exec()
         if button == QMessageBox.StandardButton.Yes:
-            api.set_button_icon(deck_id, _page(window.ui), selected_button.index, "")  # type: ignore # Index property added
+            api.set_button_icon(deck_id, _page(window.ui), _button(window.ui), "")
             redraw_buttons(window.ui)
 
 
@@ -379,7 +414,7 @@ def redraw_buttons(ui) -> None:
             # When rebuilding the buttons, we hide the old ones
             # and mark for deletion. They still hang around so
             # ignore them here
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.index)
+            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.property("index"))
             if icon:
                 button.setIcon(icon)
 
@@ -405,13 +440,20 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         button.setChecked(False)
 
     deck_id = _deck_id(ui)
-    button_id = selected_button.index  # type: ignore # Index property added
+    button_id = _button(ui)
     if selected_button.isChecked():  # type: ignore # False positive mypy
         enable_button_configuration(ui, True)
         ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
         ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
         ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
+        ui.text_font.setCurrentText(api.get_button_font(deck_id, _page(ui), button_id))
+        ui.text_font_size.setValue(api.get_button_font_size(deck_id, _page(ui), button_id))
+        color = api.get_font_color(deck_id, _page(ui), button_id)
+        if color:
+            ui.text_color.setPalette(QPalette(color))
+        else:
+            ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
         ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         api.reset_dimmer(deck_id)
@@ -424,12 +466,16 @@ def enable_button_configuration(ui, enabled: bool):
     ui.text.setEnabled(enabled)
     ui.command.setEnabled(enabled)
     ui.keys.setEnabled(enabled)
+    ui.text_font.setEnabled(enabled)
+    ui.text_font_size.setEnabled(enabled)
     ui.write.setEnabled(enabled)
     ui.change_brightness.setEnabled(enabled)
     ui.switch_page.setEnabled(enabled)
     ui.imageButton.setEnabled(enabled)
     ui.removeButton.setEnabled(enabled)
-    ui.textButton.setEnabled(enabled)
+    ui.text_h_align.setEnabled(enabled)
+    ui.text_v_align.setEnabled(enabled)
+    ui.text_color.setEnabled(enabled)
     ui.label_5.setVisible(pnput_supported)
     ui.keys.setVisible(pnput_supported)
     ui.label_6.setVisible(pnput_supported)
@@ -443,6 +489,9 @@ def reset_button_configuration(ui):
     ui.text.clear()
     ui.command.clear()
     ui.keys.clearEditText()
+    ui.text_font.clearEditText()
+    ui.text_font_size.setValue(0)
+    ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
     ui.write.clear()
     ui.change_brightness.setValue(0)
     ui.switch_page.setValue(0)
@@ -506,7 +555,7 @@ def build_buttons(ui, tab) -> None:
         for _column in range(deck["layout"][1]):  # type: ignore
             button = DraggableButton(base_widget, ui, api)
             button.setCheckable(True)
-            button.index = index
+            button.setProperty("index", index)
             button.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
             button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
             button.setIconSize(QSize(80, 80))
@@ -631,6 +680,30 @@ class MainWindow(QMainWindow):
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
 
+def update_button_text_font(ui, font: str) -> None:
+    if not selected_button:
+        return
+    deck_id = _deck_id(ui)
+    if deck_id is None:
+        return
+    api.set_button_font(deck_id, _page(ui), _button(ui), font)
+    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
+    if icon:
+        selected_button.setIcon(icon)
+
+
+def update_button_text_font_size(ui, font_size: int) -> None:
+    if not selected_button:
+        return
+    deck_id = _deck_id(ui)
+    if deck_id is None:
+        return
+    api.set_button_font_size(deck_id, _page(ui), _button(ui), font_size)
+    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
+    if icon:
+        selected_button.setIcon(icon)
+
+
 def queue_update_button_text(ui, text: str) -> None:
     """Instead of directly updating the text (label) associated with
     the button, add a small delay. If this is called before the
@@ -737,9 +810,13 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
     ui.write.textChanged.connect(partial(update_button_write, ui))
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
+    ui.text_font_size.valueChanged.connect(partial(update_button_text_font_size, ui))
+    set_button_text_font_list(ui)
+    ui.text_color.clicked.connect(partial(show_color_dialog, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.textButton.clicked.connect(partial(align_text_vertical, main_window))
+    ui.text_h_align.clicked.connect(partial(align_text_horizontal, main_window))
+    ui.text_v_align.clicked.connect(partial(align_text_vertical, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
     ui.actionExport.triggered.connect(partial(export_config, main_window))
@@ -751,6 +828,29 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.settingsButton.setEnabled(False)
     enable_button_configuration(ui, False)
     return main_window
+
+
+def set_button_text_font_list(ui: Ui_MainWindow) -> None:
+    """Prepares the font selection combo box with all available fonts"""
+    ui.text_font.currentTextChanged.connect(partial(update_button_text_font, ui))
+    ui.text_font.clear()
+    font_files = [f for f in os.listdir(os.path.join(FONTS_PATH)) if f.endswith(".ttf")]
+
+    ui.text_font.addItem("")
+    for font_file in font_files:
+        # remove extension from font_file
+        ui.text_font.addItem(font_file)
+
+
+def show_color_dialog(ui: Ui_MainWindow) -> None:
+    current_color = ui.text_color.palette().color(QPalette.ColorRole.Button)
+    color = QColorDialog.getColor(current_color, ui.text_color, "Select text color")
+
+    if color.isValid():
+        ui.text_color.setPalette(QPalette(color))
+        color_hex = color.name()
+        api.set_font_color(_deck_id(ui), _page(ui), _button(ui), color_hex)
+        redraw_buttons(ui)
 
 
 def create_tray(logo: QIcon, app: QApplication, main_window: MainWindow) -> QSystemTrayIcon:
