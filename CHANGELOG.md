@@ -2,57 +2,84 @@
 
 To upgrade to the latest version, run:
 
-```
+```bash
 python -m pip install streamdeck-ui --user --upgrade
 ```
 
 > Note you may have to use `python3`, `python3.8` etc. depending on your operating system and Python version.
 
 # Change log
+
 ## 2.0.16 - TBD
+
 ## Features
+
 - Added ~ path expansion for icons.
+
 ## Fixes
+
 - Fix error when pressing Streamdeck Pedal.
-## 2.0.15 - 8 March 2023
+
+## 2.0.15 – 8 March 2023
+
 ### Features
+
 - Added support for Stream Deck Pedal.
 
-## 2.0.14 - 4 Mar 2023
+## 2.0.14 – 4 Mar 2023
+
 ### Features
+
 - Ensure only one instance can run (prevents settings file corruption).
 - Press `Ctrl+c` in terminal to quit.
 - Supports systemd install and added documentation.
 
-## 2.0.13 - 27 Feb 2023
+## 2.0.13 – 27 Feb 2023
+
 ### Fixes
+
 - Requirement for Python < 3.11 removed.
 - Switched to pyside6.
+
 ### Features
+
 - Added support for a new sub-variant of the StreamDeck XL.
 - Allow Stream Deck UI to start, even if virtual keyboard won't work.
 - Improved troubleshooting messages.
 - Updated documentation and installation guides.
-## 2.0.6 - 23 Sep 2022
+
+## 2.0.6 – 23 Sep 2022
+
 ### Fixes
+
 - Image drag/drop from external applications.
 - Dimmer not working properly.
-## 2.0.5 - 18 Sep 2022
+
+## 2.0.5 – 18 Sep 2022
+
 ### Features
+
 - Support for new Stream Deck Mini.
+
 ### Fixes
+
 - Fix install under Fedora 36 (pillow dependency version bump).
-## 2.0.4 - 29 Apr 2022
+
+## 2.0.4 – 29 Apr 2022
+
 ### Features
+
 - Recover from a suspend/resume cycle.
 
 ### Fixes
+
 - Button icon stuck in pushed state when changing from page 1.
 - Remove python3-xlib dependency.
 
-## 2.0.3 - 6 Mar 2022
+## 2.0.3 – 6 Mar 2022
 
 ### Features
+
 - UI starts up even if no Stream Deck attached.
 - SVG file type support.
 - Keys widget now has examples built in.
@@ -61,17 +88,20 @@ python -m pip install streamdeck-ui --user --upgrade
 - Support hex key codes in Key Press. For example, 0x74.
 - Support vertical text alignment.
 - New display system:
-    - User interface shows same image as Stream Deck.
-    - Text overlay on top of image, with automatic font outline.
-    - Buttons image change when pressed (visual feedback).
-    - Animated GIF support.
-    - CPU indicator for display processing.
+  - User interface shows same image as Stream Deck.
+  - Text overlay on top of image, with automatic font outline.
+  - Buttons image change when pressed (visual feedback).
+  - Animated GIF support.
+  - CPU indicator for display processing.
 
 ### Fixes
+
 - Tray context menu not interrupted by window activation.
-## 1.1.3 - 2 Feb 2022
+
+## 1.1.3 – 2 Feb 2022
 
 ### Features
+
 - Support for Stream Deck MK.2 added.
 - Remember previous image selection directory.
 - Auto dim to a configurable percentage.
@@ -79,25 +109,38 @@ python -m pip install streamdeck-ui --user --upgrade
 - Follow the settings file location if symbolic link.
 
 ### Fixes
+
 - Works with Python 3.10 (resolves Fedora 35 install).
-## 1.1.2 - April 30, 2021
+
+## 1.1.2 – April 30, 2021
+
 ### Fixes
+
 - Regression with multi-character keys.
-## 1.1.1 - April 29, 2021
+
+## 1.1.1 – April 29, 2021
+
 ### Features
-- Open main window from tray with Configure... menu item.
+
+- Open main window from tray with Configure… menu item.
 - Dim the display from tray.
 - Supports variable delay duration in Key press action.
+
 ### Fixes
+
 - On exit, reset the display to 50% brightness.
 - Documentation for Ubuntu 18.04 added.
 
-## 1.1.0 - April 20, 2021
+## 1.1.0 – April 20, 2021
+
 ### Features
+
 - Automatically dim the display after a configurable amount of time.
 
-## 1.0.7 - April 6, 2021
+## 1.0.7 – April 6, 2021
+
 ### Features
+
 - Drag and drop support for rearranging buttons around in UI.
 - Launches minimized with `-n` or `--no-ui`.
 - Window title has been updated to `Stream Deck UI`.
@@ -109,11 +152,13 @@ python -m pip install streamdeck-ui --user --upgrade
 - Separator added between Exit and other menu items.
 - Avoid unnecessary writes to settings file.
 - Improved parsing of command line arguments for launching programs.
+
 ### Fixes
+
 - Missing button image error handling added.
 - Avoid losing configuration if there is an exception while writing file.
 - Updated to streamdeck 0.8.4 to improve stability.
-- Updated to Pillow 8.2 to improve stability and fixes jpeg artifacts.
+- Updated to Pillow 8.2 to improve stability and fixes JPEG artifacts.
 - Fixed race condition where streamdeck buttons get scrambled.
 - Fixed `core dumped` error when exiting.
 - Improved error handling for invalid command or key press actions.
@@ -121,8 +166,10 @@ python -m pip install streamdeck-ui --user --upgrade
 - Removed requirement for plugdev group.
 - Waits for Stream Deck to be attached on start up.
 
-## 1.0.2 - November 25, 2019
+## 1.0.2 – November 25, 2019
+
 - Updated driver requirement to enable full compatibility with XL.
 
-## 1.0.1 - October 8, 2019
+## 1.0.1 – October 8, 2019
+
 - Initial API stable release.

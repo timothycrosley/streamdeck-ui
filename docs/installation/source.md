@@ -2,7 +2,7 @@
 
 To install from source, you first need to install the dependencies and configure the udev rules (access to Elgato devices) according to your distribution guide.
 
-## Follow the steps below to install the application from source:
+## Follow the steps below to install the application from source
 
 Clone the repository:
 
@@ -36,7 +36,7 @@ streamdeck
 
 # Uninstall
 
-## Follow the steps below to uninstall the application:
+## Follow the steps below to uninstall the application
 
 Remove the application:
 

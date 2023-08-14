@@ -1,0 +1,9 @@
+{
+    "MD002": false, # Deprecated therefore disabled.
+    "MD006": false, # Deprecated therefore disabled.
+    "MD013": false, # Lines over 80 characters, disabled by default.
+    "default": true,
+    "MD024": false, # Duplicate headings, fine in most cases, for example CHANGELOG.md
+    "MD025": false, # Multiple top-level headings, seems fine if the author things that looks alright.
+    "MD041": false, # First line should be a top-level heading, also not really necessary, sometimes icons and images are used first.
+}

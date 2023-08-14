@@ -28,10 +28,11 @@ There is no perfect number: but for Hug, we've decided to cap the lines at 100 c
 ## Descriptive Variable names
 
 Naming things is hard. Hug has a few strict guidelines on the usage of variable names, which hopefully will reduce some of the guesswork:
+
 - No one character variable names.
-    - Except for x, y, and z as coordinates.
+  - Except for x, y, and z as coordinates.
 - It's not okay to override built-in functions.
-    - Except for `id`. Guido himself thought that shouldn't have been moved to the system module. It's too commonly used, and alternatives feel very artificial.
+  - Except for `id`. Guido himself thought that shouldn't have been moved to the system module. It's too commonly used, and alternatives feel very artificial.
 - Avoid Acronyms, Abbreviations, or any other short forms - unless they are almost universally understand.
 
 ## Adding new modules
@@ -50,7 +51,7 @@ All code submitted to hug should run through the following tools:
 
 - Black and isort verification.
 - Flake8
-   - flake8-bugbear
+  - flake8-bugbear
 - Bandit
 - pep8-naming
 - vulture

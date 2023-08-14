@@ -1,17 +1,20 @@
-Contributors
-===================
+# Contributors
 
 ## Core Developers
+
 - Pieter Venter (@dodgyrabbit)
 - Timothy Crosley (@timothycrosley)
 
 ## Notable Bug Reporters
+
 -
 
 ## Code Contributors
+
 -
 
 ## Documenters
+
 - @xorbital
 - Chris Rogers (@chrisprad)
 - @simonCor

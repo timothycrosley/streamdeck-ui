@@ -18,7 +18,7 @@ touch $HOME/.local/share/systemd/user/streamdeck.service
 
 Use your favorite editor and paste the following content into the `streamdeck.service` file (rembember replace `<yourusername>`):
 
-```
+```ini
 [Unit]
 Description=A Linux compatible UI for the Elgato Stream Deck.
 
@@ -33,7 +33,7 @@ WantedBy=default.target
 
 To make the configuration take effect and install the service into systemd, run the following commands:
 
-```
+```bash
 systemctl --user daemon-reload
 systemctl --user enable streamdeck
 ```
@@ -42,7 +42,7 @@ systemctl --user enable streamdeck
 
 You are now all set. To start the service, run the following command:
 
-```
+```bash
 systemctl --user start streamdeck
 ```
 
@@ -50,19 +50,19 @@ There are some additional commands that may be useful.
 
 To see the status of the service, run:
 
-```
+```bash
 systemctl --user status streamdeck
 ```
 
 To review the service log file (newest entries at the top) for troubleshooting, run:
 
-```
+```bash
 journalctl --user -r
 ```
 
 To stop the service, run:
 
-```
+```bash
 systemctl --user stop streamdeck
 ```
 
@@ -72,20 +72,20 @@ If you have installed streamdeck-linux-gui in a virtual environment, you can sti
 
 Assume you are in the following directory:
 
-```
+```bash
 /home/johnsmith/streamdeck-linux-gui
 ```
 
 You create a virtual environment, called `.venv` and activate it as follows:
 
-```
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 and finally install streamdeck-linux-gui like this:
 
-```
+```bash
 python3 -m pip install streamdeck-linux-gui
 ```
 
@@ -93,7 +93,7 @@ python3 -m pip install streamdeck-linux-gui
 
 The steps for installing the systemd service is exactly the same. The only difference is you have to point the `ExecStart=` to the streamdeck executable inside the virtual environment, like so:
 
-```
+```ini
 ExecStart=/home/johnsmith/streamdeck-linux-gui/.venv/bin/streamdeck -n
 ```
 
@@ -101,7 +101,7 @@ ExecStart=/home/johnsmith/streamdeck-linux-gui/.venv/bin/streamdeck -n
 
 The following steps will stop, disable, remove the configuration file and finally reload the settings:
 
-```
+```bash
 systemctl --user stop streamdeck
 systemctl --user disable streamdeck
 rm $HOME/.local/share/systemd/user/streamdeck.service

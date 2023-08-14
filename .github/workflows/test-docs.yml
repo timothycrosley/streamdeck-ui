@@ -1,0 +1,17 @@
+name: Test Docs
+
+on: [pull_request, workflow_dispatch, workflow_call]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        
+      - uses: DavidAnson/markdownlint-cli2-action@v11
+        with:
+          globs: '**/*.md'
+          config: '.markdownlint.yml'
+ 

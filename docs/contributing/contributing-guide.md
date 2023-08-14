@@ -1,11 +1,11 @@
-Contributing to streamdeck_ui
-========
+# Contributing to streamdeck_ui
 
 Looking for a useful open source project to contribute to?
 Want your contributions to be warmly welcomed and acknowledged?
 Welcome! You have found the right place.
 
 ## Getting streamdeck_ui set up for local development
+
 The first step when contributing to any project is getting it set up on your local machine. streamdeck_ui aims to make this as simple as possible.
 
 Account Requirements:
@@ -21,13 +21,14 @@ Base System Requirements:
 Once you have verified that you system matches the base requirements you can start to get the project working by following these steps:
 
 1. [Fork the project on GitHub](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/fork).
-    * Make sure you untick the "copy the main branch only" option. This will ensure you have a full copy of the project to work with.
+    - Make sure you untick the "copy the main branch only" option. This will ensure you have a full copy of the project to work with.
 2. Clone your fork to your local file system:
     `git clone https://github.com/$GITHUB_ACCOUNT/streamdeck_ui.git`
 3. `cd streamdeck_ui`
 4. `poetry install`
 
 ## Making a contribution
+
 Congrats! You're now ready to make a contribution! Use the following as a guide to help you reach a successful pull-request:
 
 1. Check the [issues page](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/issues) or [discussions](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/discussions) on GitHub to see if the task you want to complete is listed there.
@@ -38,15 +39,16 @@ Congrats! You're now ready to make a contribution! Use the following as a guide 
 3. Do your magic here.
 4. Try to include tests for your code whenever its possible.
 5. Ensure your code matches the [HOPE-8 Coding Standard](https://github.com/hugapi/HOPE/blob/master/all/HOPE-8--Style-Guide-for-Hug-Code.md#hope-8----style-guide-for-hug-code) used by the project.
-    * You can use the `lint.sh` existing in the scripts directory: `bash scripts/lint.sh`. This will let you know if everything is okay before you commit it.
+    - You can use the `lint.sh` existing in the scripts directory: `bash scripts/lint.sh`. This will let you know if everything is okay before you commit it.
 6. Ensure all tests pass, you can use the `test.sh` script inside the scripts directory, `bash scripts/test.sh`
 7. When commiting your changes, please make sure you follow the [Angular commit message format](https://gist.github.com/brianclements/841ea7bffdb01346392c).
 8. Submit a pull request to the main project repository via GitHub.
-    * Make sure your target branch is set to `develop`.
+    - Make sure your target branch is set to `develop`.
 
 Thanks for the contribution! It will quickly get reviewed, and, once accepted, will result in your name being added to the acknowledgments list :).
 
-## Thank you!
+## Thank you
+
 I can not tell you how thankful we are for the hard work done by streamdeck-linux-gui contributors like *you*.
 
 Thank you!
