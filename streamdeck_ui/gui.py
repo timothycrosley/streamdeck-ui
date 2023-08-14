@@ -499,12 +499,12 @@ def reset_button_configuration(ui):
 
 
 def browse_documentation():
-    url = QUrl("https://timothycrosley.github.io/streamdeck-ui/")
+    url = QUrl("https://streamdeck-linux-gui.github.io/streamdeck-linux-gui/")
     QDesktopServices.openUrl(url)
 
 
 def browse_github():
-    url = QUrl("https://github.com/timothycrosley/streamdeck-ui")
+    url = QUrl("https://github.com/streamdeck-linux-gui/streamdeck-linux-gui")
     QDesktopServices.openUrl(url)
 
 
