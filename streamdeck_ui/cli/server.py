@@ -143,7 +143,7 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_button_text", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "text": options.button_text}
+            data = {"command": "set_text", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "text": options.button_text}
         elif action_name == "set_write":
             if options.button_write is None:
                 print("error: --write not set...")
@@ -151,7 +151,7 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_button_write", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "write": options.button_write}
+            data = {"command": "set_write", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "write": options.button_write}
         elif action_name == "set_alignment":
             if options.button_text_alignment is None:
                 print("error: --alignment not set...")
@@ -167,7 +167,7 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_button_cmd", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_cmd": options.button_cmd}
+            data = {"command": "set_cmd", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_cmd": options.button_cmd}
         elif action_name == "set_keys":
             if options.button_keys is None:
                 print("error: --keys not set...")
@@ -175,7 +175,7 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_button_keys", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_keys": options.button_keys}
+            data = {"command": "set_keys", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_keys": options.button_keys}
         elif action_name == "set_icon":
             if options.icon_path is None:
                 print("error: --icon not set...")
@@ -183,12 +183,12 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_button_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "icon": options.icon_path}
+            data = {"command": "set_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "icon": options.icon_path}
         elif action_name == "clear_icon":
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "clear_button_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index}
+            data = {"command": "clear_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index}
 
     if data is not None:
         write_json(sock, data)
