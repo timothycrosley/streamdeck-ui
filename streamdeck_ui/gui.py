@@ -704,7 +704,7 @@ def update_button_text_font_size(ui, font_size: int) -> None:
         selected_button.setIcon(icon)
 
 
-def queue_update_button_text(ui, text: str) -> None:
+def queue_update_button_text(ui) -> None:
     """Instead of directly updating the text (label) associated with
     the button, add a small delay. If this is called before the
     timer fires, delay it again. Effectively this creates an update
@@ -713,9 +713,9 @@ def queue_update_button_text(ui, text: str) -> None:
 
     :param ui: Reference to the ui
     :type ui: _type_
-    :param text: The new text value
-    :type text: str
     """
+    text = ui.text.toPlainText()
+
     global text_update_timer
 
     if text_update_timer:

@@ -18,7 +18,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
     QGroupBox, QHBoxLayout, QLabel, QLayout,
-    QLineEdit, QMainWindow, QMenu, QMenuBar,
+    QLineEdit, QTextEdit, QMainWindow, QMenu, QMenuBar,
     QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy,
     QSpinBox, QStatusBar, QTabWidget, QVBoxLayout,
     QWidget)
@@ -210,11 +210,16 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.text = QLineEdit(self.groupBox)
+        self.text = QTextEdit(self.groupBox)
         self.text.setObjectName(u"text")
 
         self.horizontalLayout_3.addWidget(self.text)
 
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
+        
         self.text_v_align = QPushButton(self.groupBox)
         self.text_v_align.setObjectName(u"text_v_align")
         self.text_v_align.setMinimumSize(QSize(30, 0))
@@ -223,7 +228,7 @@ class Ui_MainWindow(object):
         icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
         self.text_v_align.setIcon(icon2)
 
-        self.horizontalLayout_3.addWidget(self.text_v_align)
+        self.verticalLayout_4.addWidget(self.text_v_align)
 
         self.text_h_align = QPushButton(self.groupBox)
         self.text_h_align.setObjectName(u"text_h_align")
@@ -231,7 +236,7 @@ class Ui_MainWindow(object):
         icon3.addFile(u":/icons/icons/horizontal-align.png", QSize(), QIcon.Normal, QIcon.Off)
         self.text_h_align.setIcon(icon3)
 
-        self.horizontalLayout_3.addWidget(self.text_h_align)
+        self.verticalLayout_4.addWidget(self.text_h_align)
 
 
         self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
