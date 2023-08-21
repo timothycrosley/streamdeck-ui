@@ -1,3 +1,7 @@
+## DEPRECTATED 
+## This test has been deprecated and left as a reference for future tests
+## It depends on hypotesis_auto which is not a maintained package
+
 import sys
 from unittest.mock import MagicMock
 
