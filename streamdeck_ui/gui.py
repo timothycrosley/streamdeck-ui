@@ -153,6 +153,28 @@ class DraggableButton(QtWidgets.QToolButton):
         self.setStyleSheet(BUTTON_STYLE)
 
 
+def _replace_special_keys_numpad(key):
+    number_base = int(0xFFB0)
+    # if numpad_{code} is a number
+    if key[7:].isdigit():
+        return f"{hex(int(key[7:], 16) + number_base)}"
+    if key[7:] == "enter":
+        return "0xff8d"
+    if key[7:] == "decimal":
+        return "0xffae"
+    if key[7:] == "divide":
+        return "0xffaf"
+    if key[7:] == "multiply":
+        return "0xffaa"
+    if key[7:] == "subtract":
+        return "0xffad"
+    if key[7:] == "add":
+        return "0xffab"
+    if key[7:] == "equal":
+        return "0xffbd"
+    return key
+
+
 def _replace_special_keys(key):
     """Replaces special keywords the user can use with their character equivalent."""
     if key.lower() == "plus":
@@ -161,6 +183,8 @@ def _replace_special_keys(key):
         return ","
     if key.lower().startswith("delay"):
         return key.lower()
+    if key.lower().startswith("numpad_"):
+        return _replace_special_keys_numpad(key)
     return key
 
 
