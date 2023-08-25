@@ -12,11 +12,12 @@ import pkg_resources
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QPalette
-from PySide6.QtWidgets import QApplication, QColorDialog, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QColorDialog, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, \
+    QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.cli.server import CLIStreamDeckServer
-from streamdeck_ui.config import DEFAULT_FONT_COLOR, FONTS_PATH, LOGO, STATE_FILE
+from streamdeck_ui.config import DEFAULT_FONT_COLOR, FONTS_PATH, LOGO, STATE_FILE, DEFAULT_BACKGROUND_COLOR
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
@@ -374,7 +375,8 @@ def select_image(window) -> None:
             image_file = os.path.expanduser("~")
         else:
             image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
+    file_name = \
+    QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
@@ -478,6 +480,11 @@ def button_clicked(ui, clicked_button, buttons) -> None:
             ui.text_color.setPalette(QPalette(color))
         else:
             ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
+        background_color = api.get_background_color(deck_id, _page(ui), button_id)
+        if background_color:
+            ui.background_color.setPalette(QPalette(background_color))
+        else:
+            ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
         ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
         ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
         api.reset_dimmer(deck_id)
@@ -500,6 +507,7 @@ def enable_button_configuration(ui, enabled: bool):
     ui.text_h_align.setEnabled(enabled)
     ui.text_v_align.setEnabled(enabled)
     ui.text_color.setEnabled(enabled)
+    ui.background_color.setEnabled(enabled)
     ui.label_5.setVisible(pnput_supported)
     ui.keys.setVisible(pnput_supported)
     ui.label_6.setVisible(pnput_supported)
@@ -516,6 +524,7 @@ def reset_button_configuration(ui):
     ui.text_font.clearEditText()
     ui.text_font_size.setValue(0)
     ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
+    ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
     ui.write.clear()
     ui.change_brightness.setValue(0)
     ui.switch_page.setValue(0)
@@ -598,7 +607,8 @@ def build_buttons(ui, tab) -> None:
 
 
 def export_config(window) -> None:
-    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
+    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"),
+                                            "JSON (*.json)")[0]
     if not file_name:
         return
 
@@ -606,7 +616,8 @@ def export_config(window) -> None:
 
 
 def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
+    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[
+        0]
     if not file_name:
         return
 
@@ -836,7 +847,8 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.text_font_size.valueChanged.connect(partial(update_button_text_font_size, ui))
     set_button_text_font_list(ui)
-    ui.text_color.clicked.connect(partial(show_color_dialog, ui))
+    ui.text_color.clicked.connect(partial(show_color_dialog_font, ui))
+    ui.background_color.clicked.connect(partial(show_color_dialog_background, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
     ui.imageButton.clicked.connect(partial(select_image, main_window))
     ui.text_h_align.clicked.connect(partial(align_text_horizontal, main_window))
@@ -866,7 +878,7 @@ def set_button_text_font_list(ui: Ui_MainWindow) -> None:
         ui.text_font.addItem(font_file)
 
 
-def show_color_dialog(ui: Ui_MainWindow) -> None:
+def show_color_dialog_font(ui: Ui_MainWindow) -> None:
     current_color = ui.text_color.palette().color(QPalette.ColorRole.Button)
     color = QColorDialog.getColor(current_color, ui.text_color, "Select text color")
 
@@ -874,6 +886,17 @@ def show_color_dialog(ui: Ui_MainWindow) -> None:
         ui.text_color.setPalette(QPalette(color))
         color_hex = color.name()
         api.set_font_color(_deck_id(ui), _page(ui), _button(ui), color_hex)
+        redraw_buttons(ui)
+
+
+def show_color_dialog_background(ui: Ui_MainWindow) -> None:
+    current_color = ui.background_color.palette().color(QPalette.ColorRole.Button)
+    color = QColorDialog.getColor(current_color, ui.background_color, "Select background color")
+
+    if color.isValid():
+        ui.background_color.setPalette(QPalette(color))
+        color_hex = color.name()
+        api.set_background_color(_deck_id(ui), _page(ui), _button(ui), color_hex)
         redraw_buttons(ui)
 
 

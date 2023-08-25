@@ -18,10 +18,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
     QGroupBox, QHBoxLayout, QLabel, QLayout,
-    QLineEdit, QTextEdit, QMainWindow, QMenu, QMenuBar,
+    QLineEdit, QMainWindow, QMenu, QMenuBar,
     QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy,
-    QSpinBox, QStatusBar, QTabWidget, QVBoxLayout,
-    QWidget)
+    QSpinBox, QStatusBar, QTabWidget, QTextEdit,
+    QVBoxLayout, QWidget)
 from . import resources_rc
 
 class Ui_MainWindow(object):
@@ -206,7 +206,7 @@ class Ui_MainWindow(object):
         self.label_2 = QLabel(self.groupBox)
         self.label_2.setObjectName(u"label_2")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_2)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -217,9 +217,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
-        
         self.text_v_align = QPushButton(self.groupBox)
         self.text_v_align.setObjectName(u"text_v_align")
         self.text_v_align.setMinimumSize(QSize(30, 0))
@@ -239,27 +236,30 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.addWidget(self.text_h_align)
 
 
-        self.formLayout.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_3)
+        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
+
+
+        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_3)
 
         self.label_4 = QLabel(self.groupBox)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_4)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4)
 
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_3)
 
         self.command = QLineEdit(self.groupBox)
         self.command.setObjectName(u"command")
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.command)
+        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.command)
 
         self.label_5 = QLabel(self.groupBox)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_5)
 
         self.keys = QComboBox(self.groupBox)
         self.keys.addItem(u"")
@@ -281,12 +281,12 @@ class Ui_MainWindow(object):
         self.keys.setObjectName(u"keys")
         self.keys.setEditable(True)
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.keys)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.keys)
 
         self.label_8 = QLabel(self.groupBox)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_8)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_8)
 
         self.switch_page = QSpinBox(self.groupBox)
         self.switch_page.setObjectName(u"switch_page")
@@ -294,28 +294,28 @@ class Ui_MainWindow(object):
         self.switch_page.setMaximum(10)
         self.switch_page.setValue(0)
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.switch_page)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.switch_page)
 
         self.label_7 = QLabel(self.groupBox)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_7)
 
         self.change_brightness = QSpinBox(self.groupBox)
         self.change_brightness.setObjectName(u"change_brightness")
         self.change_brightness.setMinimum(-99)
 
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.change_brightness)
 
         self.label_6 = QLabel(self.groupBox)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(self.groupBox)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.write)
+        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.write)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -416,7 +416,76 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.text_color)
 
 
-        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_4)
+        self.formLayout.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout_4)
+
+        self.label_9 = QLabel(self.groupBox)
+        self.label_9.setObjectName(u"label_9")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_9)
+
+        self.background_color = QPushButton(self.groupBox)
+        self.background_color.setObjectName(u"background_color")
+        sizePolicy5.setHeightForWidth(self.background_color.sizePolicy().hasHeightForWidth())
+        self.background_color.setSizePolicy(sizePolicy5)
+        self.background_color.setMaximumSize(QSize(16777215, 16777215))
+        palette1 = QPalette()
+        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette1.setBrush(QPalette.Active, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Light, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Midlight, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Dark, brush2)
+        palette1.setBrush(QPalette.Active, QPalette.Mid, brush3)
+        palette1.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Active, QPalette.BrightText, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Shadow, brush)
+        palette1.setBrush(QPalette.Active, QPalette.AlternateBase, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.ToolTipBase, brush4)
+        palette1.setBrush(QPalette.Active, QPalette.ToolTipText, brush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush5)
+#endif
+        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Light, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Midlight, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Dark, brush2)
+        palette1.setBrush(QPalette.Inactive, QPalette.Mid, brush3)
+        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.BrightText, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Shadow, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush4)
+        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush5)
+#endif
+        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Light, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Midlight, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Dark, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.Mid, brush3)
+        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.BrightText, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush2)
+        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Shadow, brush)
+        palette1.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush4)
+        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush5)
+#endif
+        self.background_color.setPalette(palette1)
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.background_color)
 
 
         self.verticalLayout_3.addLayout(self.formLayout)
@@ -433,7 +502,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 940, 33))
+        self.menubar.setGeometry(QRect(0, 0, 940, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menubar)
@@ -520,6 +589,11 @@ class Ui_MainWindow(object):
         self.text_color.setToolTip(QCoreApplication.translate("MainWindow", u"Text Color", None))
 #endif // QT_CONFIG(tooltip)
         self.text_color.setText("")
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Background", None))
+#if QT_CONFIG(tooltip)
+        self.background_color.setToolTip(QCoreApplication.translate("MainWindow", u"Text Color", None))
+#endif // QT_CONFIG(tooltip)
+        self.background_color.setText("")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi

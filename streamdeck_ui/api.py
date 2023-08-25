@@ -11,8 +11,10 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, \
+    STATE_FILE, DEFAULT_BACKGROUND_COLOR
 from streamdeck_ui.dimmer import Dimmer
+from streamdeck_ui.display.background_color_filter import BackgroundColorFilter
 from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.filter import Filter
 from streamdeck_ui.display.image_filter import ImageFilter
@@ -392,6 +394,23 @@ class StreamDeckServer:
         """Returns the text color set for the specified button"""
         return self._button_state(serial_number, page, button).get("font_color", "")
 
+    def set_background_color(self, serial_number: str, page: int, button: int, color: str) -> None:
+        """Sets the background color associated with a button"""
+        if self.get_background_color(serial_number, page, button) != color:
+            self._button_state(serial_number, page, button)["background_color"] = color
+            self._save_state()
+            self.update_button_filters(serial_number, page, button)
+
+            try:
+                display_handler = self.display_handlers[serial_number]
+                display_handler.synchronize()
+            except KeyError:
+                raise ValueError(f"Invalid serial number: {serial_number}")
+
+    def get_background_color(self, serial_number: str, page: int, button: int) -> str:
+        """Returns the background color set for the specified button"""
+        return self._button_state(serial_number, page, button).get("background_color", "")
+
     def get_button_icon_pixmap(self, deck_id: str, page: int, button: int) -> Optional[QPixmap]:
         """Returns the QPixmap value for the given button (streamdeck, page, button)
 
@@ -582,6 +601,9 @@ class StreamDeckServer:
         display_handler = self.display_handlers[serial_number]
         button_settings = self._button_state(serial_number, page, button)
         filters: List[Filter] = []
+
+        background = button_settings.get("background_color", DEFAULT_BACKGROUND_COLOR)
+        filters.append(BackgroundColorFilter(background))
 
         icon = button_settings.get("icon")
         if icon:
