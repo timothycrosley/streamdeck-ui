@@ -11,8 +11,7 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, \
-    STATE_FILE, DEFAULT_BACKGROUND_COLOR
+from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_BACKGROUND_COLOR, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, STATE_FILE
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.background_color_filter import BackgroundColorFilter
 from streamdeck_ui.display.display_grid import DisplayGrid
