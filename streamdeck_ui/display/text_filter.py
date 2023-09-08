@@ -37,19 +37,20 @@ class TextFilter(Filter):
 
     def initialize(self, size: Tuple[int, int]):
         self.image = Image.new("RGBA", size)
-        backdrop_draw = ImageDraw.Draw(self.image)
+        foreground_draw = ImageDraw.Draw(self.image)
         # Split the text by newline to determine label height
         # then grab the longest word to determine label width
         text_split_newline = sorted(self.text.split("\n"), key=len)
-        text_longest_word = text_split_newline[-1]
         # Calculate the height and width of the text we're drawing, using the font itself
-        label_w = backdrop_draw.textlength(text_longest_word, font=self.true_font)
+        # Previously we counted the number of characters to determine the width, but if the font wasn't a fixed width
+        # the horizontal alignment would be off.
+        _, _, label_w, _ = foreground_draw.textbbox((0, 0), self.text, font=self.true_font)
         # Calculate dimensions for text that include ascender (above the line)
         # and below the line  (descender) characters. This is used to adjust the
         # font placement and should allow for button text to horizontally align
         # across buttons. Basically we want to figure out what is the tallest
         # text we will need to draw.
-        _, _, _, label_h = backdrop_draw.textbbox((0, 0), "\n".join(["lLpgyL|"] * len(text_split_newline)), font=self.true_font)
+        _, _, _, label_h = foreground_draw.textbbox((0, 0), "\n".join(["lLpgyL|"] * len(text_split_newline)), font=self.true_font)
 
         gap = (size[1] - 5 * label_h) // 4
 
@@ -76,11 +77,7 @@ class TextFilter(Filter):
 
         label_pos = (label_x, label_y)
 
-        backdrop_draw.text(label_pos, text=self.text, font=self.true_font, fill="black")
-        self.image = self.image.filter(TextFilter.font_blur)
-
-        foreground_draw = ImageDraw.Draw(self.image)
-        foreground_draw.multiline_text(label_pos, text=self.text, font=self.true_font, fill=self.font_color, align=self.horizontal_align)
+        foreground_draw.multiline_text(label_pos, text=self.text, font=self.true_font, fill=self.font_color, align=self.horizontal_align, spacing=0, stroke_fill="black", stroke_width=2)
 
     def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
         """
