@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streamdeck-linux-gui"
-version = "3.1.0"
+version = "3.1.1"
 description = "A service, Web Interface, and UI for interacting with your computer using a Stream Deck"
 authors = ["Timothy Crosley <timothy.crosley@gmail.com>"]
 maintainers = ["4s3ti <4s3ti@4s3ti.net>"]
