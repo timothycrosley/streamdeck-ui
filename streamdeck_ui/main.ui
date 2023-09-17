@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>940</width>
-    <height>639</height>
+    <height>766</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,7 +45,7 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QVBoxLayout" name="left_verticalLayout" stretch="0,1">
+       <layout class="QVBoxLayout" name="left_verticalLayout" stretch="0,0,1">
         <property name="spacing">
          <number>6</number>
         </property>
@@ -139,6 +139,72 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="pageActions">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="add_page">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Add new page</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/icons/icons/add_page.png</normaloff>:/icons/icons/add_page.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="remove_page">
+            <property name="toolTip">
+             <string>Delete current page</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/icons/icons/remove_page.png</normaloff>:/icons/icons/remove_page.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QTabWidget" name="pages">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -157,63 +223,9 @@
           </property>
           <widget class="QWidget" name="page_1">
            <attribute name="title">
-            <string>Page 1</string>
+            <string>1</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2"/>
-          </widget>
-          <widget class="QWidget" name="page_2">
-           <attribute name="title">
-            <string>2</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_3"/>
-          </widget>
-          <widget class="QWidget" name="page_3">
-           <attribute name="title">
-            <string>3</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_11"/>
-          </widget>
-          <widget class="QWidget" name="page_4">
-           <attribute name="title">
-            <string>4</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_10"/>
-          </widget>
-          <widget class="QWidget" name="page_5">
-           <attribute name="title">
-            <string>5</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_9"/>
-          </widget>
-          <widget class="QWidget" name="page_6">
-           <attribute name="title">
-            <string>6</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_8"/>
-          </widget>
-          <widget class="QWidget" name="page_7">
-           <attribute name="title">
-            <string>7</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_7"/>
-          </widget>
-          <widget class="QWidget" name="page_8">
-           <attribute name="title">
-            <string>8</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_6"/>
-          </widget>
-          <widget class="QWidget" name="page_9">
-           <attribute name="title">
-            <string>9</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_5"/>
-          </widget>
-          <widget class="QWidget" name="tab_10">
-           <attribute name="title">
-            <string>10</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_4"/>
           </widget>
          </widget>
         </item>
@@ -1470,7 +1482,7 @@
      <x>0</x>
      <y>0</y>
      <width>940</width>
-     <height>22</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

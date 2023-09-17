@@ -39,6 +39,8 @@ class StreamDeckServer:
     managing multiple Stream Decks.
     """
 
+    at_least_one: bool = False
+
     def __init__(self) -> None:
         self.decks: Dict[str, StreamDeck.StreamDeck] = {}
         "Lookup with serial number -> StreamDeck"
@@ -99,7 +101,7 @@ class StreamDeckServer:
         """If at least one Deck is still "on", all will be dimmed off. Otherwise
         toggles displays on.
         """
-        at_least_one: bool = False
+        at_least_one = False
         for _serial_number, dimmer in self.dimmers.items():
             if not dimmer.dimmed:
                 at_least_one = True
@@ -168,6 +170,11 @@ class StreamDeckServer:
     def export_config(self, output_file: str) -> None:
         try:
             with open(output_file + ".tmp", "w") as state_file:
+                # sort pages of buttons before saving
+                for deck_id, deck in self.state.items():
+                    deck["buttons"] = {k: deck["buttons"][k] for k in sorted(deck["buttons"].keys())}  # type: ignore
+                    self.state[deck_id] = deck
+
                 state_file.write(
                     json.dumps(
                         {"streamdeck_ui_version": CONFIG_FILE_VERSION, "state": self.state},
@@ -190,7 +197,9 @@ class StreamDeckServer:
         # The detached event only knows about the id that got detached
         self.deck_ids[streamdeck_id] = serial_number
         self.decks[serial_number] = streamdeck
-        self.initialize_state(serial_number, streamdeck.key_count())
+        # initialize the first page
+        self.initialize_state(serial_number, 0, streamdeck.key_count())
+
         streamdeck.set_key_callback(partial(self._key_change_callback, serial_number))
         self.update_streamdeck_filters(serial_number)
 
@@ -211,18 +220,55 @@ class StreamDeckServer:
             }
         )
 
-    def initialize_state(self, serial_number: str, buttons: int):
+    def initialize_state(self, serial_number: str, page: int, buttons: int):
         """Initializes the state for the given serial number. This allocates
         buttons and pages based on the layout.
 
         :param serial_number: The Stream Deck serial number
         :type serial_number: str
-        :param layout: The button layout for this Stream Deck
-        :type layout: Tuple[int, int]
+        :param page: The page of the Stream Deck
+        :type page: int
+        :param buttons: The total number of buttons on the Stream Deck
+        :type buttons: int
         """
-        for page in range(10):
-            for button in range(buttons):
-                self._button_state(serial_number, page, button)
+        for button in range(buttons):
+            self._button_state(serial_number, page, button)
+
+    def add_new_page(self, serial_number: str):
+        """Adds a new page to the Stream Deck
+
+        :param serial_number: The Stream Deck serial number
+        :type serial_number: str
+        :return: The new page index
+        :rtype: int
+        """
+        new_page_index = self._calculate_new_index(serial_number)
+        self.initialize_state(serial_number, new_page_index, self.decks[serial_number].key_count())
+        self.display_handlers[serial_number].initialize_page(new_page_index)
+        self.display_handlers[serial_number].synchronize()
+
+        return new_page_index
+
+    def _calculate_new_index(self, serial_number: str) -> int:
+        pages = self.get_pages(serial_number)
+        pages_set = set(pages)
+        max_page = max(pages) if pages else 0
+
+        for page_index in range(1, max_page + 2):
+            if page_index not in pages_set:
+                return page_index
+        return max_page + 2
+
+    def remove_page(self, serial_number: str, page: int):
+        """Removes a page from the Stream Deck
+
+        :param serial_number: The Stream Deck serial number
+        :type serial_number: str
+        :param page: The page index
+        :type page: int
+        """
+        del self.state[serial_number]["buttons"][page]  # type: ignore
+        self.display_handlers[serial_number].remove_page(page)
 
     def detached(self, id: str):
         serial_number = self.deck_ids.get(id, None)
@@ -536,6 +582,10 @@ class StreamDeckServer:
         self.dimmers[deck_id].brightness = brightness
         self.dimmers[deck_id].reset()
 
+    def get_pages(self, deck_id: str) -> List[int]:
+        """Returns pages for the specified stream deck"""
+        return sorted(list(self.state.get(deck_id, {}).get("buttons", {}).keys()))  # type: ignore
+
     def get_page(self, deck_id: str) -> int:
         """Gets the current page shown on the stream deck"""
         return self.state.get(deck_id, {}).get("page", 0)  # type: ignore
@@ -571,9 +621,7 @@ class StreamDeckServer:
             if deck_id != serial_number:
                 continue
 
-            # FIXME: Debug this - linter says there should not be a length. Issue is the way
-            # the type hinting is defined causes it to believe there *may* not be a list
-            pages = len(deck_state["buttons"])  # type: ignore
+            pages = list(deck_state["buttons"].keys())  # type: ignore
 
             display_handler = self.display_handlers.get(serial_number, DisplayGrid(self.lock, deck, pages, self.cpu_usage_callback))
             display_handler.set_page(self.get_page(deck_id))
@@ -594,8 +642,6 @@ class StreamDeckServer:
         :type page: int
         :param button: The button to update
         :type button: int
-        :param size: The size of the image. This will be refactored out. defaults to (72, 72)
-        :type size: tuple, optional
         """
         display_handler = self.display_handlers[serial_number]
         button_settings = self._button_state(serial_number, page, button)

@@ -23,7 +23,9 @@ class DisplayGrid:
     _empty_filter: EmptyFilter = EmptyFilter()
     "Static instance of EmptyFilter shared by all pipelines"
 
-    def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: int, cpu_callback: Callable[[str, int], None], fps: int = 25):
+    lock: threading.Lock
+
+    def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: List[int], cpu_callback: Callable[[str, int], None], fps: int = 25):
         """Creates a new display instance
 
         :param lock: A lock object that will be used to get exclusive access while enumerating
@@ -53,12 +55,6 @@ class DisplayGrid:
         # A dictionary of lists of pipelines. Each page has
         # a list, corresponding to each button.
 
-        # Initialize with a pipeline per key for all pages
-        for page in range(pages):
-            self.pages[page] = {}
-            for button in range(self.streamdeck.key_count()):
-                self.pages[page][button] = Pipeline()
-
         self.current_page: int = -1
         self.pipeline_thread: Optional[threading.Thread] = None
         self.quit = threading.Event()
@@ -68,16 +64,30 @@ class DisplayGrid:
         self.lock = lock
         self.sync = threading.Event()
         self.cpu_callback = cpu_callback
+
+        # Initialize with a pipeline per key for all pages
+        for page in pages:
+            self.initialize_page(page)
         # The sync event allows a caller to wait until all the buttons have been processed
         DisplayGrid._empty_filter.initialize(self.size)
+
+    def initialize_page(self, page: int):
+        with self.lock:
+            self.pages[page] = {}
+            for button in range(self.streamdeck.key_count()):
+                self.pages[page][button] = Pipeline()
+
+    def remove_page(self, page: int):
+        with self.lock:
+            del self.pages[page]
 
     def replace(self, page: int, button: int, filters: List[Filter]):
         with self.lock:
             pipeline = Pipeline()
             pipeline.add(DisplayGrid._empty_filter)
-            for filter in filters:
-                filter.initialize(self.size)
-                pipeline.add(filter)
+            for pipeline_filter in filters:
+                pipeline_filter.initialize(self.size)
+                pipeline.add(pipeline_filter)
             keypress = KeypressFilter()
             keypress.initialize(self.size)
             pipeline.add(keypress)

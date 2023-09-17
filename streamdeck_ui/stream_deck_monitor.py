@@ -18,6 +18,10 @@ class StreamDeckMonitor:
     monitor_thread: Optional[Thread]
     "The thread the monitors Stream Decks"
 
+    showed_open_help: bool = False
+    showed_enumeration_help: bool = False
+    showed_libusb_help: bool = False
+
     def __init__(self, lock: Lock, attached: Callable[[str, StreamDeck], None], detached: Callable[[str], None]):
         """Creates a new StreamDeckMonitor instance
 
@@ -75,9 +79,9 @@ class StreamDeckMonitor:
 
     def _run(self):
         """Runs the internal monitor thread until completion"""
-        showed_open_help: bool = False
-        showed_enumeration_help: bool = False
-        showed_libusb_help: bool = False
+        showed_open_help = False
+        showed_enumeration_help = False
+        showed_libusb_help = False
         while not self.quit.is_set():
             with self.lock:
                 attached_streamdecks = []

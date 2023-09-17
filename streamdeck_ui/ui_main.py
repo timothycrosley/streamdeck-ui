@@ -20,15 +20,15 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout
     QGroupBox, QHBoxLayout, QLabel, QLayout,
     QLineEdit, QMainWindow, QMenu, QMenuBar,
     QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy,
-    QSpinBox, QStatusBar, QTabWidget, QTextEdit,
-    QVBoxLayout, QWidget)
+    QSpacerItem, QSpinBox, QStatusBar, QTabWidget,
+    QTextEdit, QVBoxLayout, QWidget)
 from . import resources_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(940, 639)
+        MainWindow.resize(940, 766)
         self.actionImport = QAction(MainWindow)
         self.actionImport.setObjectName(u"actionImport")
         self.actionExport = QAction(MainWindow)
@@ -98,6 +98,35 @@ class Ui_MainWindow(object):
 
         self.left_verticalLayout.addLayout(self.deviceSettings_horizontalLayout)
 
+        self.pageActions = QHBoxLayout()
+        self.pageActions.setObjectName(u"pageActions")
+        self.pageActions.setContentsMargins(0, 0, 0, -1)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.pageActions.addItem(self.horizontalSpacer)
+
+        self.add_page = QPushButton(self.centralwidget)
+        self.add_page.setObjectName(u"add_page")
+        sizePolicy.setHeightForWidth(self.add_page.sizePolicy().hasHeightForWidth())
+        self.add_page.setSizePolicy(sizePolicy)
+        self.add_page.setMaximumSize(QSize(16777215, 16777215))
+        icon1 = QIcon()
+        icon1.addFile(u":/icons/icons/add_page.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.add_page.setIcon(icon1)
+
+        self.pageActions.addWidget(self.add_page)
+
+        self.remove_page = QPushButton(self.centralwidget)
+        self.remove_page.setObjectName(u"remove_page")
+        icon2 = QIcon()
+        icon2.addFile(u":/icons/icons/remove_page.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.remove_page.setIcon(icon2)
+
+        self.pageActions.addWidget(self.remove_page)
+
+
+        self.left_verticalLayout.addLayout(self.pageActions)
+
         self.pages = QTabWidget(self.centralwidget)
         self.pages.setObjectName(u"pages")
         sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -112,55 +141,10 @@ class Ui_MainWindow(object):
         self.gridLayout_2 = QGridLayout(self.page_1)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.pages.addTab(self.page_1, "")
-        self.page_2 = QWidget()
-        self.page_2.setObjectName(u"page_2")
-        self.gridLayout_3 = QGridLayout(self.page_2)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.pages.addTab(self.page_2, "")
-        self.page_3 = QWidget()
-        self.page_3.setObjectName(u"page_3")
-        self.gridLayout_11 = QGridLayout(self.page_3)
-        self.gridLayout_11.setObjectName(u"gridLayout_11")
-        self.pages.addTab(self.page_3, "")
-        self.page_4 = QWidget()
-        self.page_4.setObjectName(u"page_4")
-        self.gridLayout_10 = QGridLayout(self.page_4)
-        self.gridLayout_10.setObjectName(u"gridLayout_10")
-        self.pages.addTab(self.page_4, "")
-        self.page_5 = QWidget()
-        self.page_5.setObjectName(u"page_5")
-        self.gridLayout_9 = QGridLayout(self.page_5)
-        self.gridLayout_9.setObjectName(u"gridLayout_9")
-        self.pages.addTab(self.page_5, "")
-        self.page_6 = QWidget()
-        self.page_6.setObjectName(u"page_6")
-        self.gridLayout_8 = QGridLayout(self.page_6)
-        self.gridLayout_8.setObjectName(u"gridLayout_8")
-        self.pages.addTab(self.page_6, "")
-        self.page_7 = QWidget()
-        self.page_7.setObjectName(u"page_7")
-        self.gridLayout_7 = QGridLayout(self.page_7)
-        self.gridLayout_7.setObjectName(u"gridLayout_7")
-        self.pages.addTab(self.page_7, "")
-        self.page_8 = QWidget()
-        self.page_8.setObjectName(u"page_8")
-        self.gridLayout_6 = QGridLayout(self.page_8)
-        self.gridLayout_6.setObjectName(u"gridLayout_6")
-        self.pages.addTab(self.page_8, "")
-        self.page_9 = QWidget()
-        self.page_9.setObjectName(u"page_9")
-        self.gridLayout_5 = QGridLayout(self.page_9)
-        self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.pages.addTab(self.page_9, "")
-        self.tab_10 = QWidget()
-        self.tab_10.setObjectName(u"tab_10")
-        self.gridLayout_4 = QGridLayout(self.tab_10)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.pages.addTab(self.tab_10, "")
 
         self.left_verticalLayout.addWidget(self.pages)
 
-        self.left_verticalLayout.setStretch(1, 1)
+        self.left_verticalLayout.setStretch(2, 1)
 
         self.main_horizontalLayout.addLayout(self.left_verticalLayout)
 
@@ -194,9 +178,9 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
         self.removeButton.setSizePolicy(sizePolicy3)
         self.removeButton.setMaximumSize(QSize(30, 16777215))
-        icon1 = QIcon()
-        icon1.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.removeButton.setIcon(icon1)
+        icon3 = QIcon()
+        icon3.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.removeButton.setIcon(icon3)
 
         self.horizontalLayout_2.addWidget(self.removeButton)
 
@@ -221,17 +205,17 @@ class Ui_MainWindow(object):
         self.text_v_align.setObjectName(u"text_v_align")
         self.text_v_align.setMinimumSize(QSize(30, 0))
         self.text_v_align.setMaximumSize(QSize(30, 16777215))
-        icon2 = QIcon()
-        icon2.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.text_v_align.setIcon(icon2)
+        icon4 = QIcon()
+        icon4.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.text_v_align.setIcon(icon4)
 
         self.verticalLayout_4.addWidget(self.text_v_align)
 
         self.text_h_align = QPushButton(self.groupBox)
         self.text_h_align.setObjectName(u"text_h_align")
-        icon3 = QIcon()
-        icon3.addFile(u":/icons/icons/horizontal-align.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.text_h_align.setIcon(icon3)
+        icon5 = QIcon()
+        icon5.addFile(u":/icons/icons/horizontal-align.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.text_h_align.setIcon(icon5)
 
         self.verticalLayout_4.addWidget(self.text_h_align)
 
@@ -502,7 +486,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 940, 22))
+        self.menubar.setGeometry(QRect(0, 0, 940, 33))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menubar)
@@ -552,16 +536,15 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About...", None))
         self.settingsButton.setText("")
         self.cpu_usage.setFormat("")
-        self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"Page 1", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_2), QCoreApplication.translate("MainWindow", u"2", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_3), QCoreApplication.translate("MainWindow", u"3", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_4), QCoreApplication.translate("MainWindow", u"4", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_5), QCoreApplication.translate("MainWindow", u"5", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_6), QCoreApplication.translate("MainWindow", u"6", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_7), QCoreApplication.translate("MainWindow", u"7", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_8), QCoreApplication.translate("MainWindow", u"8", None))
-        self.pages.setTabText(self.pages.indexOf(self.page_9), QCoreApplication.translate("MainWindow", u"9", None))
-        self.pages.setTabText(self.pages.indexOf(self.tab_10), QCoreApplication.translate("MainWindow", u"10", None))
+#if QT_CONFIG(tooltip)
+        self.add_page.setToolTip(QCoreApplication.translate("MainWindow", u"Add new page", None))
+#endif // QT_CONFIG(tooltip)
+        self.add_page.setText("")
+#if QT_CONFIG(tooltip)
+        self.remove_page.setToolTip(QCoreApplication.translate("MainWindow", u"Delete current page", None))
+#endif // QT_CONFIG(tooltip)
+        self.remove_page.setText("")
+        self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"1", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Configure Button", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Image:", None))
         self.imageButton.setText(QCoreApplication.translate("MainWindow", u"Image...", None))

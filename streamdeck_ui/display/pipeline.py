@@ -66,4 +66,6 @@ class Pipeline:
         """
         Returns the last known output of the pipeline
         """
+        if not self.filters:
+            return None
         return self.filters[-1][1]

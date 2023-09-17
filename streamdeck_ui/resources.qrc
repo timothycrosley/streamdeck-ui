@@ -4,5 +4,7 @@
     <file>icons/cross.png</file>
     <file>icons/gear.png</file>
     <file>icons/vertical-align.png</file>
+    <file>icons/add_page.png</file>
+    <file>icons/remove_page.png</file>
   </qresource>
 </RCC>

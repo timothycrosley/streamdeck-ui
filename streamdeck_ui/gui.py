@@ -5,17 +5,17 @@ import signal
 import sys
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import pkg_resources
 from PySide6 import QtWidgets
-from PySide6.QtCore import QMimeData, QSignalBlocker, QSize, Qt, QTimer, QUrl
+from PySide6.QtCore import QMimeData, QSettings, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QPalette
 from PySide6.QtWidgets import QApplication, QColorDialog, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.cli.server import CLIStreamDeckServer
-from streamdeck_ui.config import DEFAULT_BACKGROUND_COLOR, DEFAULT_FONT_COLOR, FONTS_PATH, LOGO, STATE_FILE
+from streamdeck_ui.config import APP_LOGO, APP_NAME, DEFAULT_BACKGROUND_COLOR, DEFAULT_FONT_COLOR, FONTS_PATH, STATE_FILE
 from streamdeck_ui.modules.keyboard import Keyboard, pynput_supported
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
@@ -45,6 +45,10 @@ BUTTON_DRAG_STYLE = """
     border-radius: 8px;
     background-color: #000000;
     border-style: outset;}
+"""
+
+DEVICE_PAGE_STYLE = """
+background-color: black
 """
 
 selected_button: Optional[QtWidgets.QToolButton] = None
@@ -193,7 +197,9 @@ def _deck_id(ui: Ui_MainWindow) -> str:
 
 
 def _page(ui: Ui_MainWindow) -> int:
-    return ui.pages.currentIndex()
+    tab_index = ui.pages.currentIndex()
+    page = ui.pages.widget(tab_index)
+    return page.property("page_id")
 
 
 def _button(_ui: Ui_MainWindow) -> int:
@@ -244,28 +250,95 @@ def update_switch_page(ui, page: int) -> None:
         api.set_button_switch_page(deck_id, _page(ui), _button(ui), page)
 
 
-def change_page(ui, page: int) -> None:
-    global selected_button
-
+def handle_change_page(ui) -> None:
     """Change the Stream Deck to the desired page and update
     the on-screen buttons.
-
-    :param ui: Reference to the ui
-    :type ui: _type_
-    :param page: The page number to switch to
-    :type page: int
     """
+    global selected_button
+
     if selected_button:
         selected_button.setChecked(False)
         selected_button = None
 
     deck_id = _deck_id(ui)
+    page = _page(ui)
     if deck_id:
         api.set_page(deck_id, page)
         redraw_buttons(ui)
         api.reset_dimmer(deck_id)
 
     reset_button_configuration(ui)
+
+
+def handle_new_page(ui) -> None:
+    deck_id = _deck_id(ui)
+    if not deck_id:
+        return
+
+    # Add the new page to the api
+    new_page_index = api.add_new_page(deck_id)
+    build_device(ui)
+
+    # look for the new page in the ui
+    for page in range(ui.pages.count()):
+        if ui.pages.widget(page).property("page_id") == new_page_index:
+            ui.pages.setCurrentIndex(page)
+            break
+    ui.remove_page.setEnabled(True)
+
+
+def handle_delete_page_with_confirmation(main_window, ui) -> None:
+    confirm = QMessageBox(main_window)
+    confirm.setWindowTitle("Delete Page")
+    confirm.setText("Are you sure you want to delete this page?")
+    confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    confirm.setIcon(QMessageBox.Icon.Question)
+    button = confirm.exec()
+    if button == QMessageBox.StandardButton.Yes:
+        handle_delete_page(ui)
+
+
+def handle_delete_page(ui) -> None:
+    deck_id = _deck_id(ui)
+    if not deck_id:
+        return
+    pages = api.get_pages(deck_id)
+    if len(pages) == 1:
+        return
+
+    page = _page(ui)
+    new_page = _closest_page(page, pages)
+    tab_index_to_move = -1
+    tab_index_to_remove = -1
+    for tab_index in range(ui.pages.count()):
+        tab = ui.pages.widget(tab_index)
+        if tab.property("page_id") == new_page:
+            tab_index_to_move = tab_index
+        if tab.property("page_id") == page:
+            tab_index_to_remove = tab_index
+
+    ui.pages.setCurrentIndex(tab_index_to_move)
+    api.remove_page(deck_id, page)
+    ui.pages.removeTab(tab_index_to_remove)
+    if ui.pages.count() == 1:
+        ui.remove_page.setEnabled(False)
+
+
+def _closest_page(page: int, pages: List[int]) -> int:
+    if page not in pages:
+        return -1
+    page_index = pages.index(page)
+    if page_index == 0:
+        return pages[1]
+    elif page_index == len(pages) - 1:
+        return pages[page_index - 1]
+    else:
+        prev_page = pages[page_index - 1]
+        next_page = pages[page_index + 1]
+        if abs(page - prev_page) <= abs(page - next_page):
+            return prev_page
+        else:
+            return next_page
 
 
 def select_image(window) -> None:
@@ -524,6 +597,10 @@ def import_config(window) -> None:
     redraw_buttons(window.ui)
 
 
+def _build_tab_label(page_id: int) -> str:
+    return f"Page {page_id + 1}" if page_id == 0 else f"{page_id + 1}"
+
+
 def build_device(ui, _device_index=None) -> None:
     """This method builds the device configuration user interface.
     It is called if you switch to a different Stream Deck,
@@ -536,25 +613,51 @@ def build_device(ui, _device_index=None) -> None:
     :param _device_index: Not used, defaults to None
     :type _device_index: _type_, optional
     """
-    style = ""
-    if ui.device_list.count() > 0:
-        style = "background-color: black"
+    blocker = QSignalBlocker(ui.pages)
+    try:
+        deck_id = _deck_id(ui)
+        style = DEVICE_PAGE_STYLE if ui.device_list.count() > 0 else ""
 
-    for page_id in range(ui.pages.count()):
-        page = ui.pages.widget(page_id)
-        page.setStyleSheet(style)
-        build_buttons(ui, page)
+        # clear the pages
+        if ui.pages.count() > 0:
+            ui.pages.clear()
 
-    if ui.device_list.count() > 0:
-        ui.settingsButton.setEnabled(True)
-        # Set the active page for this device
-        ui.pages.setCurrentIndex(api.get_page(_deck_id(ui)))
+        current_page = api.get_page(deck_id)
+        active_tab_index = 0
 
-        # Draw the buttons for the active page
-        redraw_buttons(ui)
-    else:
-        ui.settingsButton.setEnabled(False)
-        reset_button_configuration(ui)
+        # Add the pages
+        for page_id in api.get_pages(deck_id):
+            page = QtWidgets.QWidget()
+            page.setLayout(QtWidgets.QGridLayout())
+            page.setProperty("deck_id", deck_id)
+            page.setProperty("page_id", page_id)
+            page.setStyleSheet(style)
+            label = _build_tab_label(page_id)
+            tab_index = ui.pages.addTab(page, label)
+            page_tab = ui.pages.widget(tab_index)
+            build_buttons(ui, page_tab)
+            if page_id == current_page:
+                active_tab_index = tab_index
+
+        if ui.pages.count() > 1:
+            ui.remove_page.setEnabled(True)
+        else:
+            ui.remove_page.setEnabled(False)
+
+        if ui.device_list.count() > 0:
+            ui.settingsButton.setEnabled(True)
+            ui.add_page.setEnabled(True)
+            # Set the active page for this device
+            ui.pages.setCurrentIndex(active_tab_index)
+
+            # Draw the buttons for the active page
+            redraw_buttons(ui)
+        else:
+            ui.settingsButton.setEnabled(False)
+            ui.add_page.setEnabled(False)
+            reset_button_configuration(ui)
+    finally:
+        blocker.unblock()
 
 
 class MainWindow(QMainWindow):
@@ -572,13 +675,19 @@ class MainWindow(QMainWindow):
     ui: Ui_MainWindow
     "A reference to all the UI objects for the main window"
 
+    window_shown: bool
+    settings: QSettings
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.window_shown: bool = True
+        self.window_shown = True
+        self.settings = QSettings("streamdeck-ui", "streamdeck-ui")
+        self.restoreGeometry(self.settings.value("geometry", self.saveGeometry()))
 
     def closeEvent(self, event) -> None:  # noqa: N802 - Part of QT signature.
+        self.settings.setValue("geometry", self.saveGeometry())
         self.window_shown = False
         self.hide()
         event.ignore()
@@ -668,9 +777,11 @@ def change_brightness(deck_id: str, brightness: int):
 
 
 class SettingsDialog(QDialog):
+    ui: Ui_SettingsDialog
+
     def __init__(self, parent):
         super().__init__(parent)
-        self.ui: Ui_SettingsDialog = Ui_SettingsDialog()
+        self.ui = Ui_SettingsDialog()
         self.ui.setupUi(self)
         self.show()
 
@@ -754,6 +865,8 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.text_v_align.clicked.connect(partial(align_text_vertical, main_window))
     ui.removeButton.clicked.connect(partial(remove_image, main_window))
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
+    ui.add_page.clicked.connect(partial(handle_new_page, ui))
+    ui.remove_page.clicked.connect(partial(handle_delete_page_with_confirmation, main_window, ui))
     ui.actionExport.triggered.connect(partial(export_config, main_window))
     ui.actionImport.triggered.connect(partial(import_config, main_window))
     ui.actionExit.triggered.connect(app.exit)
@@ -853,7 +966,7 @@ def streamdeck_detached(ui, serial_number):
     index = ui.device_list.findData(serial_number)
     if index != -1:
         # Should not be (how can you remove a device that was never attached?)
-        # Check anyways
+        # Check anyway
         blocker = QSignalBlocker(ui.device_list)
         try:
             ui.device_list.removeItem(index)
@@ -902,9 +1015,9 @@ def start(_exit: bool = False) -> None:
             # The QApplication object holds the Qt event loop and you need one of these
             # for your application
             app = QApplication(sys.argv)
-            app.setApplicationName("Streamdeck UI")
+            app.setApplicationName(APP_NAME)
             app.setApplicationVersion(version)
-            logo = QIcon(LOGO)
+            logo = QIcon(APP_LOGO)
             app.setWindowIcon(logo)
             main_window = create_main_window(logo, app)
             ui = main_window.ui
@@ -913,7 +1026,7 @@ def start(_exit: bool = False) -> None:
             api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
 
             ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
-            ui.pages.currentChanged.connect(partial(change_page, ui))
+            ui.pages.currentChanged.connect(lambda: handle_change_page(ui))
 
             api.plugevents.attached.connect(partial(streamdeck_attached, ui))
             api.plugevents.detached.connect(partial(streamdeck_detached, ui))

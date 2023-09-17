@@ -9,9 +9,15 @@ from streamdeck_ui.display.filter import Filter
 class KeypressFilter(Filter):
     """This filter is applied whenever a key is being pressed"""
 
+    last_time: Fraction
+    pulse_delay: float
+    brightness: float
+    dim_brightness: float
+    filter_hash: int
+
     def __init__(self):
         super(KeypressFilter, self).__init__()
-        self.last_time: Fraction = Fraction()
+        self.last_time = Fraction()
         self.brightness = 1
         self.dim_brightness = 0.5
         self.filter_hash = hash(self.__class__)
