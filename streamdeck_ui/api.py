@@ -267,6 +267,9 @@ class StreamDeckServer:
         :param page: The page index
         :type page: int
         """
+        if len(self.get_pages(serial_number)) == 1:
+            return
+
         del self.state[serial_number]["buttons"][page]  # type: ignore
         self.display_handlers[serial_number].remove_page(page)
 
