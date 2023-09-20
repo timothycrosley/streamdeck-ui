@@ -275,7 +275,7 @@ class Ui_MainWindow(object):
         self.switch_page = QSpinBox(self.groupBox)
         self.switch_page.setObjectName(u"switch_page")
         self.switch_page.setMinimum(0)
-        self.switch_page.setMaximum(10)
+        self.switch_page.setMaximum(999999999)
         self.switch_page.setValue(0)
 
         self.formLayout.setWidget(8, QFormLayout.FieldRole, self.switch_page)
