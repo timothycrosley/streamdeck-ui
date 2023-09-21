@@ -52,7 +52,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
-line-length = 100
+line-length = 120
 
 [tool.isort]
 profile = "hug"
