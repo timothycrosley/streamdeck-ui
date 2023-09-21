@@ -76,7 +76,13 @@ class ImageFilter(Filter):
         self.current_frame = next(self.frame_cycle)
         self.frame_time = Fraction()
 
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Image.Image, int]:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """

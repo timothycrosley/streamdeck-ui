@@ -11,7 +11,15 @@ from PySide6.QtGui import QImage, QPixmap
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.Transport.Transport import TransportError
 
-from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_BACKGROUND_COLOR, DEFAULT_FONT, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import (
+    CONFIG_FILE_VERSION,
+    DEFAULT_BACKGROUND_COLOR,
+    DEFAULT_FONT,
+    DEFAULT_FONT_COLOR,
+    DEFAULT_FONT_SIZE,
+    FONTS_PATH,
+    STATE_FILE,
+)
 from streamdeck_ui.dimmer import Dimmer
 from streamdeck_ui.display.background_color_filter import BackgroundColorFilter
 from streamdeck_ui.display.display_grid import DisplayGrid
@@ -154,11 +162,18 @@ class StreamDeckServer:
             config = json.loads(state_file.read())
             file_version = config.get("streamdeck_ui_version", 0)
             if file_version != CONFIG_FILE_VERSION:
-                raise ValueError("Incompatible version of config file found: " f"{file_version} does not match required version " f"{CONFIG_FILE_VERSION}.")
+                raise ValueError(
+                    "Incompatible version of config file found: "
+                    f"{file_version} does not match required version "
+                    f"{CONFIG_FILE_VERSION}."
+                )
 
             self.state = {}
             for deck_id, deck in config["state"].items():
-                deck["buttons"] = {int(page_id): {int(button_id): button for button_id, button in buttons.items()} for page_id, buttons in deck.get("buttons", {}).items()}
+                deck["buttons"] = {
+                    int(page_id): {int(button_id): button for button_id, button in buttons.items()}
+                    for page_id, buttons in deck.get("buttons", {}).items()
+                }
                 self.state[deck_id] = deck
 
     def import_config(self, config_file: str) -> None:
@@ -326,7 +341,9 @@ class StreamDeckServer:
     def swap_buttons(self, deck_id: str, page: int, source_button: int, target_button: int) -> None:
         """Swaps the properties of the source and target buttons"""
         temp = cast(dict, self.state[deck_id]["buttons"])[page][source_button]
-        cast(dict, self.state[deck_id]["buttons"])[page][source_button] = cast(dict, self.state[deck_id]["buttons"])[page][target_button]
+        cast(dict, self.state[deck_id]["buttons"])[page][source_button] = cast(dict, self.state[deck_id]["buttons"])[
+            page
+        ][target_button]
         cast(dict, self.state[deck_id]["buttons"])[page][target_button] = temp
         self._save_state()
 
@@ -626,7 +643,9 @@ class StreamDeckServer:
 
             pages = list(deck_state["buttons"].keys())  # type: ignore
 
-            display_handler = self.display_handlers.get(serial_number, DisplayGrid(self.lock, deck, pages, self.cpu_usage_callback))
+            display_handler = self.display_handlers.get(
+                serial_number, DisplayGrid(self.lock, deck, pages, self.cpu_usage_callback)
+            )
             display_handler.set_page(self.get_page(deck_id))
             self.display_handlers[serial_number] = display_handler
 

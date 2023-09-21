@@ -19,7 +19,13 @@ class BackgroundColorFilter(Filter):
         self.image = Image.new("RGB", size)
         self.image.paste(self.color, (0, 0, size[0], size[1]))
 
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Optional[Image.Image], int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Optional[Image.Image], int]:
         if not input_changed:
             return None, self.hashcode
         return self.image, self.hashcode

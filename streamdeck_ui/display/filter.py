@@ -34,7 +34,13 @@ class Filter(ABC):
         pass
 
     @abstractmethod
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Image.Image, int]:
         """
         Transforms the given input image to the desired output image.
         The default behaviour is to return the orignal image.

@@ -11,11 +11,28 @@ import pkg_resources
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSettings, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QPalette
-from PySide6.QtWidgets import QApplication, QColorDialog, QDialog, QFileDialog, QMainWindow, QMenu, QMessageBox, QSizePolicy, QSystemTrayIcon
+from PySide6.QtWidgets import (
+    QApplication,
+    QColorDialog,
+    QDialog,
+    QFileDialog,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QSizePolicy,
+    QSystemTrayIcon,
+)
 
 from streamdeck_ui.api import StreamDeckServer
 from streamdeck_ui.cli.server import CLIStreamDeckServer
-from streamdeck_ui.config import APP_LOGO, APP_NAME, DEFAULT_BACKGROUND_COLOR, DEFAULT_FONT_COLOR, FONTS_PATH, STATE_FILE
+from streamdeck_ui.config import (
+    APP_LOGO,
+    APP_NAME,
+    DEFAULT_BACKGROUND_COLOR,
+    DEFAULT_FONT_COLOR,
+    FONTS_PATH,
+    STATE_FILE,
+)
 from streamdeck_ui.modules.keyboard import Keyboard, pynput_supported
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
@@ -350,7 +367,9 @@ def select_image(window) -> None:
             image_file = os.path.expanduser("~")
         else:
             image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)")[0]
+    file_name = QFileDialog.getOpenFileName(
+        window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)"
+    )[0]
     if file_name:
         last_image_dir = os.path.dirname(file_name)
         deck_id = _deck_id(window.ui)
@@ -581,7 +600,9 @@ def build_buttons(ui, tab) -> None:
 
 
 def export_config(window) -> None:
-    file_name = QFileDialog.getSaveFileName(window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)")[0]
+    file_name = QFileDialog.getSaveFileName(
+        window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)"
+    )[0]
     if not file_name:
         return
 
@@ -589,7 +610,9 @@ def export_config(window) -> None:
 
 
 def import_config(window) -> None:
-    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[0]
+    file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[
+        0
+    ]
     if not file_name:
         return
 

@@ -29,7 +29,13 @@ class KeypressFilter(Filter):
         self.size = size
         pass
 
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Image.Image, int]:
         frame_hash = hash((self.filter_hash, self.active))
         if input_changed or self.active != self.last_state:
             self.last_state = self.active

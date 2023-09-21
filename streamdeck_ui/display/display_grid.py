@@ -25,7 +25,14 @@ class DisplayGrid:
 
     lock: threading.Lock
 
-    def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: List[int], cpu_callback: Callable[[str, int], None], fps: int = 25):
+    def __init__(
+        self,
+        lock: threading.Lock,
+        streamdeck: StreamDeck,
+        pages: List[int],
+        cpu_callback: Callable[[str, int], None],
+        fps: int = 25,
+    ):
         """Creates a new display instance
 
         :param lock: A lock object that will be used to get exclusive access while enumerating

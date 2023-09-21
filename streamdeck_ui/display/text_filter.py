@@ -12,7 +12,9 @@ class TextFilter(Filter):
 
     image: Image
 
-    def __init__(self, text: str, font: str, font_size: int, font_color: str, vertical_align: str, horizontal_align: str):
+    def __init__(
+        self, text: str, font: str, font_size: int, font_color: str, vertical_align: str, horizontal_align: str
+    ):
         super(TextFilter, self).__init__()
         self.text = text
         self.vertical_align = vertical_align
@@ -50,7 +52,9 @@ class TextFilter(Filter):
         # font placement and should allow for button text to horizontally align
         # across buttons. Basically we want to figure out what is the tallest
         # text we will need to draw.
-        _, _, _, label_h = foreground_draw.textbbox((0, 0), "\n".join(["lLpgyL|"] * len(text_split_newline)), font=self.true_font)
+        _, _, _, label_h = foreground_draw.textbbox(
+            (0, 0), "\n".join(["lLpgyL|"] * len(text_split_newline)), font=self.true_font
+        )
 
         gap = (size[1] - 5 * label_h) // 4
 
@@ -77,9 +81,24 @@ class TextFilter(Filter):
 
         label_pos = (label_x, label_y)
 
-        foreground_draw.multiline_text(label_pos, text=self.text, font=self.true_font, fill=self.font_color, align=self.horizontal_align, spacing=0, stroke_fill="black", stroke_width=2)
+        foreground_draw.multiline_text(
+            label_pos,
+            text=self.text,
+            font=self.true_font,
+            fill=self.font_color,
+            align=self.horizontal_align,
+            spacing=0,
+            stroke_fill="black",
+            stroke_width=2,
+        )
 
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Image.Image, int]:
         """
         The transformation returns the loaded image, ando overwrites whatever came before.
         """

@@ -25,7 +25,13 @@ class EmptyFilter(filter.Filter):
     def initialize(self, size: Tuple[int, int]):
         self.image = Image.new("RGB", size)
 
-    def transform(self, get_input: Callable[[], Image.Image], get_output: Callable[[int], Image.Image], input_changed: bool, time: Fraction) -> Tuple[Image.Image, int]:
+    def transform(
+        self,
+        get_input: Callable[[], Image.Image],
+        get_output: Callable[[int], Image.Image],
+        input_changed: bool,
+        time: Fraction,
+    ) -> Tuple[Image.Image, int]:
         """
         Returns an empty Image object.
 

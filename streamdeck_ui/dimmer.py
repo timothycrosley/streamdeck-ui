@@ -5,7 +5,9 @@ from StreamDeck.Transport.Transport import TransportError
 
 
 class Dimmer:
-    def __init__(self, timeout: int, brightness: int, brightness_dimmed: int, brightness_callback: Callable[[int], None]):
+    def __init__(
+        self, timeout: int, brightness: int, brightness_dimmed: int, brightness_callback: Callable[[int], None]
+    ):
         """Constructs a new Dimmer instance
 
         :param int timeout: The time in seconds before the dimmer starts.

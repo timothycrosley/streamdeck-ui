@@ -98,22 +98,63 @@ def execute():
         "--action",
         type="string",
         dest="action",
-        help="the action to be performed. valid options (case-insensitive): " + "SET_PAGE, SET_BRIGHTNESS, SET_TEXT, SET_ALIGNMENT, SET_CMD, SET_KEYS, SET_WRITE, SET_ICON, CLEAR_ICON",
+        help="the action to be performed. valid options (case-insensitive): "
+        + "SET_PAGE, SET_BRIGHTNESS, SET_TEXT, SET_ALIGNMENT, SET_CMD, SET_KEYS, SET_WRITE, SET_ICON, CLEAR_ICON",
         metavar="NAME",
     )
 
-    parser.add_option("-d", "--deck", type="int", dest="deck_index", help="the deck to be manipulated. defaults to the currently selected deck in the ui", metavar="INDEX")
-    parser.add_option("-p", "--page", type="int", dest="page_index", help="the page to be manipulated. defaults to the currently active page", metavar="INDEX")
-    parser.add_option("-b", "--button", type="int", dest="button_index", help="the button to be manipulated", metavar="INDEX")
-
-    parser.add_option("--icon", type="string", dest="icon_path", help="path to an icon. used with SET_ICON", metavar="PATH")
-    parser.add_option("--brightness", type="int", dest="brightness", help="brightness to set, 0-100. used with SET_BRIGHTNESS", metavar="VALUE")
-    parser.add_option("--text", type="string", dest="button_text", help="button text to set. used with SET_TEXT", metavar="VALUE")
-    parser.add_option("--write", type="string", dest="button_write", help="text to be written when the button is pressed. used with SET_WRITE", metavar="VALUE")
-    parser.add_option("--command", type="string", dest="button_cmd", help="button command to set. used with SET_CMD", metavar="VALUE")
-    parser.add_option("--keys", type="string", dest="button_keys", help="button keys to set. used with SET_KEYS", metavar="VALUE")
     parser.add_option(
-        "--alignment", type="string", dest="button_text_alignment", help="button text alignment. used with SET_ALIGNMENT. valid values: top, middle-top, middle, middle-bottom, bottom", metavar="VALUE"
+        "-d",
+        "--deck",
+        type="int",
+        dest="deck_index",
+        help="the deck to be manipulated. defaults to the currently selected deck in the ui",
+        metavar="INDEX",
+    )
+    parser.add_option(
+        "-p",
+        "--page",
+        type="int",
+        dest="page_index",
+        help="the page to be manipulated. defaults to the currently active page",
+        metavar="INDEX",
+    )
+    parser.add_option(
+        "-b", "--button", type="int", dest="button_index", help="the button to be manipulated", metavar="INDEX"
+    )
+
+    parser.add_option(
+        "--icon", type="string", dest="icon_path", help="path to an icon. used with SET_ICON", metavar="PATH"
+    )
+    parser.add_option(
+        "--brightness",
+        type="int",
+        dest="brightness",
+        help="brightness to set, 0-100. used with SET_BRIGHTNESS",
+        metavar="VALUE",
+    )
+    parser.add_option(
+        "--text", type="string", dest="button_text", help="button text to set. used with SET_TEXT", metavar="VALUE"
+    )
+    parser.add_option(
+        "--write",
+        type="string",
+        dest="button_write",
+        help="text to be written when the button is pressed. used with SET_WRITE",
+        metavar="VALUE",
+    )
+    parser.add_option(
+        "--command", type="string", dest="button_cmd", help="button command to set. used with SET_CMD", metavar="VALUE"
+    )
+    parser.add_option(
+        "--keys", type="string", dest="button_keys", help="button keys to set. used with SET_KEYS", metavar="VALUE"
+    )
+    parser.add_option(
+        "--alignment",
+        type="string",
+        dest="button_text_alignment",
+        help="button text alignment. used with SET_ALIGNMENT. valid values: top, middle-top, middle, middle-bottom, bottom",
+        metavar="VALUE",
     )
 
     (options, args) = parser.parse_args(sys.argv)
@@ -143,7 +184,13 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_text", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "text": options.button_text}
+            data = {
+                "command": "set_text",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "text": options.button_text,
+            }
         elif action_name == "set_write":
             if options.button_write is None:
                 print("error: --write not set...")
@@ -151,7 +198,13 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_write", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "write": options.button_write}
+            data = {
+                "command": "set_write",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "write": options.button_write,
+            }
         elif action_name == "set_alignment":
             if options.button_text_alignment is None:
                 print("error: --alignment not set...")
@@ -159,7 +212,13 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_alignment", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "alignment": options.button_text_alignment}
+            data = {
+                "command": "set_alignment",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "alignment": options.button_text_alignment,
+            }
         elif action_name == "set_cmd":
             if options.button_cmd is None:
                 print("error: --command not set...")
@@ -167,7 +226,13 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_cmd", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_cmd": options.button_cmd}
+            data = {
+                "command": "set_cmd",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "button_cmd": options.button_cmd,
+            }
         elif action_name == "set_keys":
             if options.button_keys is None:
                 print("error: --keys not set...")
@@ -175,7 +240,13 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_keys", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "button_keys": options.button_keys}
+            data = {
+                "command": "set_keys",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "button_keys": options.button_keys,
+            }
         elif action_name == "set_icon":
             if options.icon_path is None:
                 print("error: --icon not set...")
@@ -183,12 +254,23 @@ def execute():
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "set_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index, "icon": options.icon_path}
+            data = {
+                "command": "set_icon",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "icon": options.icon_path,
+            }
         elif action_name == "clear_icon":
             if options.button_index is None:
                 print("error: --button not set...")
                 return
-            data = {"command": "clear_icon", "deck": options.deck_index, "page": options.page_index, "button": options.button_index}
+            data = {
+                "command": "clear_icon",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+            }
 
     if data is not None:
         write_json(sock, data)
