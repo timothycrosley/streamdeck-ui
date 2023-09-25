@@ -17,7 +17,6 @@ from streamdeck_ui.config import (
     DEFAULT_FONT,
     DEFAULT_FONT_COLOR,
     DEFAULT_FONT_SIZE,
-    FONTS_PATH,
     STATE_FILE,
 )
 from streamdeck_ui.dimmer import Dimmer
@@ -538,7 +537,14 @@ class StreamDeckServer:
 
     def set_button_font(self, deck_id: str, page: int, button: int, font: str) -> None:
         if self.get_button_font(deck_id, page, button) != font:
-            self._button_state(deck_id, page, button)["font"] = font
+            # Don't pollute .streamdeck_ui.json with entries of the default font if there isn't any text
+            if font.endswith(DEFAULT_FONT) and "text" not in self._button_state(deck_id, page, button).keys():
+                if "font" in self._button_state(deck_id, page, button).keys():
+                    del self._button_state(deck_id, page, button)["font"]
+                else:
+                    pass
+            else:
+                self._button_state(deck_id, page, button)["font"] = font
             self._save_state()
             self.update_button_filters(deck_id, page, button)
             display_handler = self.display_handlers[deck_id]
@@ -686,7 +692,6 @@ class StreamDeckServer:
         font_color = button_settings.get("font_color", DEFAULT_FONT_COLOR)
         if font == "":
             font = DEFAULT_FONT
-        font = os.path.join(FONTS_PATH, font)
         vertical_align = button_settings.get("text_vertical_align", "")
         horizontal_align = button_settings.get("text_horizontal_align", "")
 

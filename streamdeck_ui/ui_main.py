@@ -305,8 +305,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.text_font = QComboBox(self.groupBox)
         self.text_font.setObjectName(u"text_font")
-
         self.horizontalLayout_4.addWidget(self.text_font)
+
+        self.text_font_style = QComboBox(self.groupBox)
+        self.text_font_style.setObjectName(u"text_font_style")
+        self.horizontalLayout_4.addWidget(self.text_font_style)
 
         self.text_font_size = QSpinBox(self.groupBox)
         self.text_font_size.setObjectName(u"text_font_size")

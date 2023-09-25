@@ -513,6 +513,9 @@
                 <widget class="QComboBox" name="text_font"/>
                </item>
                <item>
+                <widget class="QComboBox" name="text_font_style"/>
+               </item>
+               <item>
                 <widget class="QSpinBox" name="text_font_size">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

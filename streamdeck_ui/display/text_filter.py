@@ -3,6 +3,7 @@ from typing import Callable, Tuple
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+from streamdeck_ui.config import DEFAULT_FONT_FALLBACK_PATH
 from streamdeck_ui.display.filter import Filter
 
 
@@ -20,6 +21,7 @@ class TextFilter(Filter):
         self.vertical_align = vertical_align
         self.horizontal_align = horizontal_align
         self.font_color = font_color
+        self.fallback_font = ImageFont.truetype(DEFAULT_FONT_FALLBACK_PATH, font_size)
         self.true_font = ImageFont.truetype(font, font_size)
         # fmt: off
         kernel = [
@@ -81,16 +83,29 @@ class TextFilter(Filter):
 
         label_pos = (label_x, label_y)
 
-        foreground_draw.multiline_text(
-            label_pos,
-            text=self.text,
-            font=self.true_font,
-            fill=self.font_color,
-            align=self.horizontal_align,
-            spacing=0,
-            stroke_fill="black",
-            stroke_width=2,
-        )
+        try:
+            foreground_draw.multiline_text(
+                label_pos,
+                text=self.text,
+                font=self.true_font,
+                fill=self.font_color,
+                align=self.horizontal_align,
+                spacing=0,
+                stroke_fill="black",
+                stroke_width=2,
+            )
+        except OSError:
+            print("Font does not render with pillow, falling back to default font.")
+            foreground_draw.multiline_text(
+                label_pos,
+                text=self.text,
+                font=self.fallback_font,
+                fill=self.font_color,
+                align=self.horizontal_align,
+                spacing=0,
+                stroke_fill="black",
+                stroke_width=2,
+            )
 
     def transform(
         self,

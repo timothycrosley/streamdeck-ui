@@ -4,8 +4,9 @@ import os
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "StreamDeck UI"
 APP_LOGO = os.path.join(PROJECT_PATH, "logo.png")
-FONTS_PATH = os.path.join(PROJECT_PATH, "fonts", "roboto")
+FONTS_FALLBACK_PATH = os.path.join(PROJECT_PATH, "fonts", "roboto")
 DEFAULT_FONT = "Roboto-Regular.ttf"
+DEFAULT_FONT_FALLBACK_PATH = os.path.join(FONTS_FALLBACK_PATH, DEFAULT_FONT)
 DEFAULT_FONT_SIZE = 14
 DEFAULT_FONT_COLOR = "white"
 DEFAULT_BACKGROUND_COLOR = "#000000"

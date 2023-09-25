@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 import pkg_resources
 from PySide6 import QtWidgets
 from PySide6.QtCore import QMimeData, QSettings, QSignalBlocker, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QAction, QDesktopServices, QDrag, QIcon, QPalette
+from PySide6.QtGui import QAction, QDesktopServices, QDrag, QFont, QIcon, QPalette
 from PySide6.QtWidgets import (
     QApplication,
     QColorDialog,
@@ -29,10 +29,11 @@ from streamdeck_ui.config import (
     APP_LOGO,
     APP_NAME,
     DEFAULT_BACKGROUND_COLOR,
+    DEFAULT_FONT,
     DEFAULT_FONT_COLOR,
-    FONTS_PATH,
     STATE_FILE,
 )
+from streamdeck_ui.fonts import FONTS_DICT
 from streamdeck_ui.modules.keyboard import Keyboard, pynput_supported
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_main import Ui_MainWindow
@@ -449,6 +450,19 @@ def set_brightness_dimmed(ui, value: int) -> None:
     api.reset_dimmer(deck_id)
 
 
+def find_font_info(fonts, target_font_file):
+    """Returns the font family and font style for a given font file path"""
+    # The font file path is the font attribute that is stored in the .streamdeck_ui.json
+    # we need the family/style for selecting the appropriate items in the comboboxes
+    if target_font_file == "":
+        target_font_file = DEFAULT_FONT
+    for font_family, font_styles in fonts.items():
+        for font_style, font_file in font_styles.items():
+            if font_file.endswith(target_font_file):
+                return font_family, font_style
+    return find_font_info(fonts, DEFAULT_FONT)
+
+
 def button_clicked(ui, clicked_button, buttons) -> None:
     global selected_button
     selected_button = clicked_button
@@ -466,7 +480,13 @@ def button_clicked(ui, clicked_button, buttons) -> None:
         ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
         ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
         ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
-        ui.text_font.setCurrentText(api.get_button_font(deck_id, _page(ui), button_id))
+        # Update the font family and font style combo boxes to match the font file stored in .streamdeck_ui.json
+        font_family, font_style = find_font_info(FONTS_DICT, api.get_button_font(deck_id, _page(ui), button_id))
+        ui.text_font.setCurrentText(font_family)
+        set_button_text_font_style_list(ui, font_family)
+        ui.text_font_style.setCurrentText(font_style)
+        update_button_text_font_style(ui, font_style)
+
         ui.text_font_size.setValue(api.get_button_font_size(deck_id, _page(ui), button_id))
         color = api.get_font_color(deck_id, _page(ui), button_id)
         if color:
@@ -491,6 +511,7 @@ def enable_button_configuration(ui, enabled: bool):
     ui.command.setEnabled(enabled)
     ui.keys.setEnabled(enabled)
     ui.text_font.setEnabled(enabled)
+    ui.text_font_style.setEnabled(enabled)
     ui.text_font_size.setEnabled(enabled)
     ui.write.setEnabled(enabled)
     ui.change_brightness.setEnabled(enabled)
@@ -514,7 +535,8 @@ def reset_button_configuration(ui):
     ui.text.clear()
     ui.command.clear()
     ui.keys.clearEditText()
-    ui.text_font.clearEditText()
+    ui.text_font.setCurrentIndex(-1)
+    ui.text_font_style.setCurrentIndex(-1)
     ui.text_font_size.setValue(0)
     ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
     ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
@@ -746,13 +768,40 @@ class MainWindow(QMainWindow):
         QtWidgets.QMessageBox.about(self, title, "\n".join(body))
 
 
-def update_button_text_font(ui, font: str) -> None:
+def update_button_text_font(ui, _) -> None:
     if not selected_button:
         return
     deck_id = _deck_id(ui)
     if deck_id is None:
         return
-    api.set_button_font(deck_id, _page(ui), _button(ui), font)
+
+    font_family = ui.text_font.currentText()
+    # when the font combobox is updated the font style list needs to be updated with the available styles
+    set_button_text_font_style_list(ui, font_family)
+    font_style = ui.text_font_style.currentText()
+    font_file = FONTS_DICT[font_family][font_style]
+    # set the button's font using the font file path
+    api.set_button_font(deck_id, _page(ui), _button(ui), font_file)
+    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
+    if icon:
+        selected_button.setIcon(icon)
+
+
+def update_button_text_font_style(ui, _) -> None:
+    if not selected_button:
+        return
+    deck_id = _deck_id(ui)
+    if deck_id is None:
+        return
+    # set valid index if using placeholdertext
+    if ui.text_font_style.currentIndex() < 0:
+        ui.text_font_style.setCurrentIndex(0)
+    # get font file to save to json
+    font_family = ui.text_font.currentText()
+    font_style = ui.text_font_style.currentText()
+    font_file = FONTS_DICT[font_family][font_style]
+    # set the button's font using the font file path
+    api.set_button_font(deck_id, _page(ui), _button(ui), font_file)
     icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
     if icon:
         selected_button.setIcon(icon)
@@ -880,6 +929,8 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
     ui.text_font_size.valueChanged.connect(partial(update_button_text_font_size, ui))
     set_button_text_font_list(ui)
+    ui.text_font.currentTextChanged.connect(partial(update_button_text_font, ui))
+    ui.text_font_style.textActivated.connect(partial(update_button_text_font_style, ui))
     ui.text_color.clicked.connect(partial(show_color_dialog_font, ui))
     ui.background_color.clicked.connect(partial(show_color_dialog_background, ui))
     ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
@@ -901,16 +952,24 @@ def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
     return main_window
 
 
-def set_button_text_font_list(ui: Ui_MainWindow) -> None:
+def set_button_text_font_list(ui) -> None:
     """Prepares the font selection combo box with all available fonts"""
-    ui.text_font.currentTextChanged.connect(partial(update_button_text_font, ui))
     ui.text_font.clear()
-    font_files = [f for f in os.listdir(os.path.join(FONTS_PATH)) if f.endswith(".ttf")]
+    ui.text_font.setPlaceholderText("")
+    # the font list should only need to be set once
+    for i, font_family in enumerate(FONTS_DICT.keys()):
+        ui.text_font.addItem(font_family)
+        font = QFont(font_family)
+        ui.text_font.setItemData(i, font, Qt.FontRole)  # type: ignore [attr-defined]
 
-    ui.text_font.addItem("")
-    for font_file in font_files:
-        # remove extension from font_file
-        ui.text_font.addItem(font_file)
+
+def set_button_text_font_style_list(ui, font_family) -> None:
+    """Prepares the font style selection combo box with available font styles for this font_family"""
+    ui.text_font_style.clear()
+    ui.text_font.setPlaceholderText("")
+    for font_style in FONTS_DICT[font_family]:
+        ui.text_font_style.addItem(font_style)
+    ui.text_font_style.setCurrentIndex(0)
 
 
 def show_color_dialog_font(ui: Ui_MainWindow) -> None:
