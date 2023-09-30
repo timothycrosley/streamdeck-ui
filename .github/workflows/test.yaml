@@ -72,6 +72,19 @@ jobs:
       #----------------------------------------------
       - name: Lint
         run: ./scripts/lint.sh
+      # Install required libraries for pytest-qt
+      # This avoids:
+      # qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
+      # https://pytest-qt.readthedocs.io/en/latest/troubleshooting.html#github-actions
+      #----------------------------------------------
+      #              install qt libraries
+      #----------------------------------------------
+      - uses: tlambert03/setup-qt-libs@v1
+      #----------------------------------------------
+      #  Add pytest-xvfb to run pytest-qt in headless mode
+      #----------------------------------------------
+      - name: Add pytest-xvfb
+        run: poetry add pytest-xvfb
       #----------------------------------------------
       #    run test suite and output coverage file   
       #----------------------------------------------

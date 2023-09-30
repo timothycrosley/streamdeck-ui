@@ -112,7 +112,7 @@ def test_set_alignment():
 
     cmd.execute(api, ui)
 
-    api.set_text_vertical_align.assert_called_once_with(0, 0, 0, "test")
+    api.set_button_text_vertical_align.assert_called_once_with(0, 0, 0, "test")
 
 
 def test_set_button_cmd():
@@ -207,6 +207,30 @@ def test_clear_button_icon():
     cmd.execute(api, ui)
 
     api.set_button_icon.assert_called_once_with(0, 0, 0, "")
+
+
+def test_set_state():
+    cfg = {
+        "command": "set_state",
+        "deck": 0,
+        "page": 0,
+        "button": 0,
+        "state": 0,
+    }
+    cmd = commands.create_command(cfg)
+
+    assert isinstance(cmd, commands.SetButtonStateCommand)
+    assert cmd.deck_index == 0
+    assert cmd.page_index == 0
+    assert cmd.button_index == 0
+    assert cmd.button_state_index == 0
+
+    api = MagicMock()
+    ui = MagicMock()
+
+    cmd.execute(api, ui)
+
+    api.set_button_state.assert_called_once_with(0, 0, 0, 0)
 
 
 def test_unknown_command():

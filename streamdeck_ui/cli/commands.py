@@ -1,6 +1,7 @@
 import typing as tp
 
 from streamdeck_ui.api import StreamDeckServer
+from streamdeck_ui.ui_main import Ui_MainWindow
 
 
 class Command(tp.Protocol):
@@ -19,6 +20,23 @@ class SetPageCommand:
             return
         api.set_page(deck_id, self.page_index)
         ui.pages.setCurrentIndex(self.page_index)
+
+
+class SetButtonStateCommand:
+    def __init__(self, cfg):
+        self.deck_index = cfg["deck"]
+        self.page_index = cfg["page"]
+        self.button_index = cfg["button"]
+        self.button_state_index = cfg["state"]
+
+    def execute(self, api: StreamDeckServer, ui: Ui_MainWindow):
+        deck_id = ui.device_list.itemData(ui.device_list.currentIndex()) if self.deck_index is None else self.deck_index
+        page_id = api.get_page(deck_id) if self.page_index is None else self.page_index
+        if api.get_button_state(deck_id, page_id, self.button_index) == self.button_state_index:
+            return
+        api.set_button_state(deck_id, page_id, self.button_index, self.button_state_index)
+        ui.button_states.setCurrentIndex(self.button_state_index)
+        ui.redraw_button(self.button_index)  # type: ignore [attr-defined]
 
 
 class SetBrightnessCommand:
@@ -56,7 +74,7 @@ class SetButtonTextAlignmentCommand:
         deck_id = ui.device_list.itemData(ui.device_list.currentIndex()) if self.deck_index is None else self.deck_index
         if self.page_index is None:
             self.page_index = api.get_page(deck_id)
-        api.set_text_vertical_align(deck_id, self.page_index, self.button_index, self.button_text_alignment)
+        api.set_button_text_vertical_align(deck_id, self.page_index, self.button_index, self.button_text_alignment)
 
 
 class SetButtonWriteCommand:
@@ -149,4 +167,6 @@ def create_command(cfg: dict) -> Command | None:
         return SetButtonIconCommand(cfg)
     elif cfg["command"] == "clear_icon":
         return ClearButtonIconCommand(cfg)
+    elif cfg["command"] == "set_state":
+        return SetButtonStateCommand(cfg)
     return None

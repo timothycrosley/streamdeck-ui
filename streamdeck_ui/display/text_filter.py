@@ -127,3 +127,11 @@ class TextFilter(Filter):
             input.paste(self.image, self.image)
             return (input, self.hashcode)
         return (None, self.hashcode)
+
+
+def is_a_valid_text_filter_font(font) -> bool:
+    try:
+        TextFilter("", font, 12, "white", "top", "left")
+        return True
+    except BaseException:
+        return False

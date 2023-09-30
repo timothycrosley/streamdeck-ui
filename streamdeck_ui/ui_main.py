@@ -16,12 +16,11 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
-    QGroupBox, QHBoxLayout, QLabel, QLayout,
-    QLineEdit, QMainWindow, QMenu, QMenuBar,
-    QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QStatusBar, QTabWidget,
-    QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QGridLayout, QGroupBox,
+    QHBoxLayout, QLayout, QMainWindow, QMenu,
+    QMenuBar, QProgressBar, QPushButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QTabWidget, QVBoxLayout,
+    QWidget)
 from . import resources_rc
 
 class Ui_MainWindow(object):
@@ -44,10 +43,10 @@ class Ui_MainWindow(object):
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.centralwidget.setAutoFillBackground(False)
-        self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
-        self.verticalLayout_2.setSpacing(6)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(9, -1, -1, 3)
+        self.horizontalLayout = QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setSpacing(6)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(9, -1, -1, 3)
         self.main_horizontalLayout = QHBoxLayout()
         self.main_horizontalLayout.setSpacing(12)
         self.main_horizontalLayout.setObjectName(u"main_horizontalLayout")
@@ -154,328 +153,40 @@ class Ui_MainWindow(object):
         self.groupBox.setObjectName(u"groupBox")
         self.groupBox.setMinimumSize(QSize(250, 0))
         self.verticalLayout_3 = QVBoxLayout(self.groupBox)
+        self.verticalLayout_3.setSpacing(10)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.formLayout = QFormLayout()
-        self.formLayout.setObjectName(u"formLayout")
-        self.label = QLabel(self.groupBox)
-        self.label.setObjectName(u"label")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.button_actions = QHBoxLayout()
+        self.button_actions.setObjectName(u"button_actions")
+        self.button_actions.setContentsMargins(-1, 10, -1, 0)
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
+        self.button_actions.addItem(self.horizontalSpacer_2)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setSpacing(6)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.imageButton = QPushButton(self.groupBox)
-        self.imageButton.setObjectName(u"imageButton")
+        self.add_button_state = QPushButton(self.groupBox)
+        self.add_button_state.setObjectName(u"add_button_state")
+        self.add_button_state.setIcon(icon1)
 
-        self.horizontalLayout_2.addWidget(self.imageButton)
+        self.button_actions.addWidget(self.add_button_state)
 
-        self.removeButton = QPushButton(self.groupBox)
-        self.removeButton.setObjectName(u"removeButton")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
-        self.removeButton.setSizePolicy(sizePolicy3)
-        self.removeButton.setMaximumSize(QSize(30, 16777215))
-        icon3 = QIcon()
-        icon3.addFile(u":/icons/icons/cross.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.removeButton.setIcon(icon3)
+        self.remove_button_state = QPushButton(self.groupBox)
+        self.remove_button_state.setObjectName(u"remove_button_state")
+        self.remove_button_state.setIcon(icon2)
 
-        self.horizontalLayout_2.addWidget(self.removeButton)
+        self.button_actions.addWidget(self.remove_button_state)
 
 
-        self.formLayout.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_2)
+        self.verticalLayout_3.addLayout(self.button_actions)
 
-        self.label_2 = QLabel(self.groupBox)
-        self.label_2.setObjectName(u"label_2")
+        self.button_states = QTabWidget(self.groupBox)
+        self.button_states.setObjectName(u"button_states")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.verticalLayout = QVBoxLayout(self.tab)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.button_states.addTab(self.tab, "")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_2)
-
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.text = QTextEdit(self.groupBox)
-        self.text.setObjectName(u"text")
-
-        self.horizontalLayout_3.addWidget(self.text)
-
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.text_v_align = QPushButton(self.groupBox)
-        self.text_v_align.setObjectName(u"text_v_align")
-        self.text_v_align.setMinimumSize(QSize(30, 0))
-        self.text_v_align.setMaximumSize(QSize(30, 16777215))
-        icon4 = QIcon()
-        icon4.addFile(u":/icons/icons/vertical-align.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.text_v_align.setIcon(icon4)
-
-        self.verticalLayout_4.addWidget(self.text_v_align)
-
-        self.text_h_align = QPushButton(self.groupBox)
-        self.text_h_align.setObjectName(u"text_h_align")
-        icon5 = QIcon()
-        icon5.addFile(u":/icons/icons/horizontal-align.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.text_h_align.setIcon(icon5)
-
-        self.verticalLayout_4.addWidget(self.text_h_align)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
-
-
-        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_3)
-
-        self.label_4 = QLabel(self.groupBox)
-        self.label_4.setObjectName(u"label_4")
-
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4)
-
-        self.label_3 = QLabel(self.groupBox)
-        self.label_3.setObjectName(u"label_3")
-
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_3)
-
-        self.command = QLineEdit(self.groupBox)
-        self.command.setObjectName(u"command")
-
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.command)
-
-        self.label_5 = QLabel(self.groupBox)
-        self.label_5.setObjectName(u"label_5")
-
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_5)
-
-        self.keys = QComboBox(self.groupBox)
-        self.keys.addItem(u"")
-        self.keys.addItem(u"F11")
-        self.keys.addItem(u"alt+F4")
-        self.keys.addItem(u"ctrl+w")
-        self.keys.addItem(u"cmd+left")
-        self.keys.addItem(u"alt+plus")
-        self.keys.addItem(u"alt+delay+F3")
-        self.keys.addItem(u"backspace")
-        self.keys.addItem(u"right")
-        self.keys.addItem(u"page_up")
-        self.keys.addItem(u"media_volume_up")
-        self.keys.addItem(u"media_volume_down")
-        self.keys.addItem(u"media_volume_mute")
-        self.keys.addItem(u"media_previous")
-        self.keys.addItem(u"media_next")
-        self.keys.addItem(u"media_play_pause")
-        self.keys.setObjectName(u"keys")
-        self.keys.setEditable(True)
-
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.keys)
-
-        self.label_8 = QLabel(self.groupBox)
-        self.label_8.setObjectName(u"label_8")
-
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_8)
-
-        self.switch_page = QSpinBox(self.groupBox)
-        self.switch_page.setObjectName(u"switch_page")
-        self.switch_page.setMinimum(0)
-        self.switch_page.setMaximum(999999999)
-        self.switch_page.setValue(0)
-
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.switch_page)
-
-        self.label_7 = QLabel(self.groupBox)
-        self.label_7.setObjectName(u"label_7")
-
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_7)
-
-        self.change_brightness = QSpinBox(self.groupBox)
-        self.change_brightness.setObjectName(u"change_brightness")
-        self.change_brightness.setMinimum(-99)
-
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.change_brightness)
-
-        self.label_6 = QLabel(self.groupBox)
-        self.label_6.setObjectName(u"label_6")
-
-        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_6)
-
-        self.write = QPlainTextEdit(self.groupBox)
-        self.write.setObjectName(u"write")
-
-        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.write)
-
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.text_font = QComboBox(self.groupBox)
-        self.text_font.setObjectName(u"text_font")
-        self.horizontalLayout_4.addWidget(self.text_font)
-
-        self.text_font_style = QComboBox(self.groupBox)
-        self.text_font_style.setObjectName(u"text_font_style")
-        self.horizontalLayout_4.addWidget(self.text_font_style)
-
-        self.text_font_size = QSpinBox(self.groupBox)
-        self.text_font_size.setObjectName(u"text_font_size")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.text_font_size.sizePolicy().hasHeightForWidth())
-        self.text_font_size.setSizePolicy(sizePolicy4)
-        self.text_font_size.setMinimum(12)
-        self.text_font_size.setMaximum(72)
-
-        self.horizontalLayout_4.addWidget(self.text_font_size)
-
-        self.text_color = QPushButton(self.groupBox)
-        self.text_color.setObjectName(u"text_color")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Maximum)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.text_color.sizePolicy().hasHeightForWidth())
-        self.text_color.setSizePolicy(sizePolicy5)
-        self.text_color.setMaximumSize(QSize(50, 16777215))
-        palette = QPalette()
-        brush = QBrush(QColor(0, 0, 0, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        brush1 = QBrush(QColor(255, 255, 255, 255))
-        brush1.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Button, brush1)
-        palette.setBrush(QPalette.Active, QPalette.Light, brush1)
-        palette.setBrush(QPalette.Active, QPalette.Midlight, brush1)
-        brush2 = QBrush(QColor(127, 127, 127, 255))
-        brush2.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Dark, brush2)
-        brush3 = QBrush(QColor(170, 170, 170, 255))
-        brush3.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Mid, brush3)
-        palette.setBrush(QPalette.Active, QPalette.Text, brush)
-        palette.setBrush(QPalette.Active, QPalette.BrightText, brush1)
-        palette.setBrush(QPalette.Active, QPalette.ButtonText, brush)
-        palette.setBrush(QPalette.Active, QPalette.Base, brush1)
-        palette.setBrush(QPalette.Active, QPalette.Window, brush1)
-        palette.setBrush(QPalette.Active, QPalette.Shadow, brush)
-        palette.setBrush(QPalette.Active, QPalette.AlternateBase, brush1)
-        brush4 = QBrush(QColor(255, 255, 220, 255))
-        brush4.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.ToolTipBase, brush4)
-        palette.setBrush(QPalette.Active, QPalette.ToolTipText, brush)
-        brush5 = QBrush(QColor(0, 0, 0, 128))
-        brush5.setStyle(Qt.SolidPattern)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Active, QPalette.PlaceholderText, brush5)
-#endif
-        palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.Button, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Light, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Midlight, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Dark, brush2)
-        palette.setBrush(QPalette.Inactive, QPalette.Mid, brush3)
-        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.BrightText, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.Base, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Window, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Shadow, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush4)
-        palette.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush5)
-#endif
-        palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush2)
-        palette.setBrush(QPalette.Disabled, QPalette.Button, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Light, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Midlight, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Dark, brush2)
-        palette.setBrush(QPalette.Disabled, QPalette.Mid, brush3)
-        palette.setBrush(QPalette.Disabled, QPalette.Text, brush2)
-        palette.setBrush(QPalette.Disabled, QPalette.BrightText, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.ButtonText, brush2)
-        palette.setBrush(QPalette.Disabled, QPalette.Base, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Window, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Shadow, brush)
-        palette.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush4)
-        palette.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush5)
-#endif
-        self.text_color.setPalette(palette)
-
-        self.horizontalLayout_4.addWidget(self.text_color)
-
-
-        self.formLayout.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout_4)
-
-        self.label_9 = QLabel(self.groupBox)
-        self.label_9.setObjectName(u"label_9")
-
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_9)
-
-        self.background_color = QPushButton(self.groupBox)
-        self.background_color.setObjectName(u"background_color")
-        sizePolicy5.setHeightForWidth(self.background_color.sizePolicy().hasHeightForWidth())
-        self.background_color.setSizePolicy(sizePolicy5)
-        self.background_color.setMaximumSize(QSize(16777215, 16777215))
-        palette1 = QPalette()
-        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        palette1.setBrush(QPalette.Active, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Light, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Midlight, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Dark, brush2)
-        palette1.setBrush(QPalette.Active, QPalette.Mid, brush3)
-        palette1.setBrush(QPalette.Active, QPalette.Text, brush)
-        palette1.setBrush(QPalette.Active, QPalette.BrightText, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush)
-        palette1.setBrush(QPalette.Active, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Window, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Shadow, brush)
-        palette1.setBrush(QPalette.Active, QPalette.AlternateBase, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.ToolTipBase, brush4)
-        palette1.setBrush(QPalette.Active, QPalette.ToolTipText, brush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush5)
-#endif
-        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Light, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Midlight, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Dark, brush2)
-        palette1.setBrush(QPalette.Inactive, QPalette.Mid, brush3)
-        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        palette1.setBrush(QPalette.Inactive, QPalette.BrightText, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
-        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Shadow, brush)
-        palette1.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipBase, brush4)
-        palette1.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush5)
-#endif
-        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush2)
-        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Light, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Midlight, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Dark, brush2)
-        palette1.setBrush(QPalette.Disabled, QPalette.Mid, brush3)
-        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush2)
-        palette1.setBrush(QPalette.Disabled, QPalette.BrightText, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush2)
-        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Shadow, brush)
-        palette1.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipBase, brush4)
-        palette1.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush5)
-#endif
-        self.background_color.setPalette(palette1)
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.background_color)
-
-
-        self.verticalLayout_3.addLayout(self.formLayout)
+        self.verticalLayout_3.addWidget(self.button_states)
 
 
         self.right_horizontalLayout.addWidget(self.groupBox)
@@ -484,7 +195,7 @@ class Ui_MainWindow(object):
         self.main_horizontalLayout.addLayout(self.right_horizontalLayout)
 
 
-        self.verticalLayout_2.addLayout(self.main_horizontalLayout)
+        self.horizontalLayout.addLayout(self.main_horizontalLayout)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -500,15 +211,6 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         QWidget.setTabOrder(self.device_list, self.settingsButton)
         QWidget.setTabOrder(self.settingsButton, self.pages)
-        QWidget.setTabOrder(self.pages, self.imageButton)
-        QWidget.setTabOrder(self.imageButton, self.removeButton)
-        QWidget.setTabOrder(self.removeButton, self.text)
-        QWidget.setTabOrder(self.text, self.text_v_align)
-        QWidget.setTabOrder(self.text_v_align, self.command)
-        QWidget.setTabOrder(self.command, self.keys)
-        QWidget.setTabOrder(self.keys, self.switch_page)
-        QWidget.setTabOrder(self.switch_page, self.change_brightness)
-        QWidget.setTabOrder(self.change_brightness, self.write)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -524,6 +226,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.pages.setCurrentIndex(0)
+        self.button_states.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -547,39 +250,17 @@ class Ui_MainWindow(object):
         self.remove_page.setToolTip(QCoreApplication.translate("MainWindow", u"Delete current page", None))
 #endif // QT_CONFIG(tooltip)
         self.remove_page.setText("")
-        self.pages.setTabText(self.pages.indexOf(self.page_1), QCoreApplication.translate("MainWindow", u"1", None))
+        self.pages.setTabText(self.pages.indexOf(self.page_1), "")
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Configure Button", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Image:", None))
-        self.imageButton.setText(QCoreApplication.translate("MainWindow", u"Image...", None))
 #if QT_CONFIG(tooltip)
-        self.removeButton.setToolTip(QCoreApplication.translate("MainWindow", u"Remove the image from the button", None))
+        self.add_button_state.setToolTip(QCoreApplication.translate("MainWindow", u"Add a new button state", None))
 #endif // QT_CONFIG(tooltip)
-        self.removeButton.setText("")
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Label:", None))
+        self.add_button_state.setText("")
 #if QT_CONFIG(tooltip)
-        self.text_v_align.setToolTip(QCoreApplication.translate("MainWindow", u"Text vertical alignment", None))
+        self.remove_button_state.setToolTip(QCoreApplication.translate("MainWindow", u"Remove current selected button state", None))
 #endif // QT_CONFIG(tooltip)
-        self.text_v_align.setText("")
-#if QT_CONFIG(tooltip)
-        self.text_h_align.setToolTip(QCoreApplication.translate("MainWindow", u"Text horizontal alignment", None))
-#endif // QT_CONFIG(tooltip)
-        self.text_h_align.setText("")
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Font:", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Command:", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Press Keys:", None))
-
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Switch Page:", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Brightness +/-:", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Write Text:", None))
-#if QT_CONFIG(tooltip)
-        self.text_color.setToolTip(QCoreApplication.translate("MainWindow", u"Text Color", None))
-#endif // QT_CONFIG(tooltip)
-        self.text_color.setText("")
-        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Background", None))
-#if QT_CONFIG(tooltip)
-        self.background_color.setToolTip(QCoreApplication.translate("MainWindow", u"Text Color", None))
-#endif // QT_CONFIG(tooltip)
-        self.background_color.setText("")
+        self.remove_button_state.setText("")
+        self.button_states.setTabText(self.button_states.indexOf(self.tab), "")
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
