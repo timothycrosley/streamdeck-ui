@@ -5,10 +5,9 @@ import signal
 import sys
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
-import pkg_resources
-from PySide6 import QtWidgets
+from importlib_metadata import PackageNotFoundError, version
 from PySide6.QtCore import QMimeData, QSettings, QSignalBlocker, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QDrag, QFont, QIcon, QPalette
 from PySide6.QtWidgets import (
@@ -16,11 +15,16 @@ from PySide6.QtWidgets import (
     QColorDialog,
     QDialog,
     QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
     QMainWindow,
     QMenu,
     QMessageBox,
     QSizePolicy,
     QSystemTrayIcon,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 from streamdeck_ui.api import StreamDeckServer
@@ -29,18 +33,38 @@ from streamdeck_ui.config import (
     APP_LOGO,
     APP_NAME,
     DEFAULT_BACKGROUND_COLOR,
-    DEFAULT_FONT,
     DEFAULT_FONT_COLOR,
     DEFAULT_FONT_FALLBACK_PATH,
+    DEFAULT_FONT_SIZE,
     STATE_FILE,
+    STATE_FILE_BACKUP,
+    config_file_need_migration,
+    do_config_file_migration,
 )
-from streamdeck_ui.fonts import FONTS_DICT
+from streamdeck_ui.display.text_filter import is_a_valid_text_filter_font
+from streamdeck_ui.modules.fonts import DEFAULT_FONT_FAMILY, FONTS_DICT, find_font_info
 from streamdeck_ui.modules.keyboard import Keyboard, pynput_supported
+from streamdeck_ui.modules.utils.timers import debounce
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
+from streamdeck_ui.ui_button import Ui_ButtonForm
 from streamdeck_ui.ui_main import Ui_MainWindow
 from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
-api: StreamDeckServer
+# this ignore is just a workaround to set api with something
+# and be able to test
+api: StreamDeckServer = StreamDeckServer()
+
+main_window: "MainWindow"
+"Reference to the main window, used across multiple functions"
+
+last_image_dir: str = ""
+"Stores the last direction where user selected an image from"
+
+selected_button: Optional[QToolButton] = None
+"A reference to the currently selected button"
+
+text_update_timer: Optional[QTimer] = None
+"Timer used to delay updates to the button text"
 
 BUTTON_STYLE = """
     QToolButton {
@@ -70,12 +94,6 @@ DEVICE_PAGE_STYLE = """
 background-color: black
 """
 
-selected_button: Optional[QtWidgets.QToolButton] = None
-"A reference to the currently selected button"
-
-text_update_timer: Optional[QTimer] = None
-"Timer used to delay updates to the button text"
-
 dimmer_options = {
     "Never": 0,
     "10 Seconds": 10,
@@ -88,36 +106,35 @@ dimmer_options = {
     "5 Hours": 7200,
     "10 Hours": 36000,
 }
-last_image_dir = ""
 
 
-class DraggableButton(QtWidgets.QToolButton):
+class DraggableButton(QToolButton):
     """A QToolButton that supports drag and drop and swaps the button properties on drop"""
 
-    def __init__(self, parent, ui, api: StreamDeckServer):
+    def __init__(self, parent, ui, api_: StreamDeckServer):
         super(DraggableButton, self).__init__(parent)
 
         self.setAcceptDrops(True)
         self.ui = ui
-        self.api = api
+        self.api = api_
 
     def mouseMoveEvent(self, e):  # noqa: N802 - Part of QT signature.
         if e.buttons() != Qt.LeftButton:
             return
 
-        self.api.reset_dimmer(_deck_id(self.ui))
+        self.api.reset_dimmer(_deck())
 
-        mimedata = QMimeData()
+        mime_data = QMimeData()
         drag = QDrag(self)
-        drag.setMimeData(mimedata)
+        drag.setMimeData(mime_data)
         drag.exec(Qt.MoveAction)
 
     def dropEvent(self, e):  # noqa: N802 - Part of QT signature.
         global selected_button
 
         self.setStyleSheet(BUTTON_STYLE)
-        serial_number = _deck_id(self.ui)
-        page = _page(self.ui)
+        deck_id = _deck()
+        page_id = _page()
 
         index = self.property("index")
         if e.source():
@@ -126,9 +143,9 @@ class DraggableButton(QtWidgets.QToolButton):
             if source_index == index:
                 return
 
-            self.api.swap_buttons(serial_number, page, source_index, index)
+            self.api.swap_buttons(deck_id, page_id, source_index, index)
             # In the case that we've dragged the currently selected button, we have to
-            # check the target button instead so it appears that it followed the drag/drop
+            # check the target button instead, so it appears that it followed the drag/drop
             if e.source().isChecked():
                 e.source().setChecked(False)
                 self.setChecked(True)
@@ -137,15 +154,15 @@ class DraggableButton(QtWidgets.QToolButton):
             # Handle drag and drop from outside the application
             if e.mimeData().hasUrls:
                 file_name = e.mimeData().urls()[0].toLocalFile()
-                self.api.set_button_icon(serial_number, page, index, file_name)
+                self.api.set_button_icon(deck_id, page_id, index, file_name)
 
         if e.source():
             source_index = e.source().property("index")
-            icon = self.api.get_button_icon_pixmap(serial_number, page, source_index)
+            icon = self.api.get_button_icon_pixmap(deck_id, page_id, source_index)
             if icon:
                 e.source().setIcon(icon)
 
-        icon = self.api.get_button_icon_pixmap(serial_number, page, index)
+        icon = self.api.get_button_icon_pixmap(deck_id, page_id, index)
         if icon:
             self.setIcon(icon)
 
@@ -200,76 +217,54 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
         switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
             api.set_page(deck_id, switch_page - 1)
-            if _deck_id(ui) == deck_id:
+            if _deck() == deck_id:
                 ui.pages.setCurrentIndex(switch_page - 1)
 
-
-def _deck_id(ui: Ui_MainWindow) -> str:
-    """Returns the currently selected Stream Deck serial number
-
-    :param ui: A reference to the ui object
-    :type ui: _type_
-    :return: The serial number
-    :rtype: str
-    """
-    return ui.device_list.itemData(ui.device_list.currentIndex())
+        switch_state = api.get_button_switch_state(deck_id, page, key)
+        if switch_state:
+            api.set_button_state(deck_id, page, key, switch_state - 1)
+            if _deck() == deck_id:
+                if _button() == key:
+                    ui.button_states.setCurrentIndex(switch_state - 1)
+                redraw_button(key)
 
 
-def _page(ui: Ui_MainWindow) -> int:
-    tab_index = ui.pages.currentIndex()
-    page = ui.pages.widget(tab_index)
+def _deck() -> Optional[str]:
+    """Returns the currently selected Stream Deck serial number"""
+    if main_window.ui.device_list.count() == 0:
+        return None
+    return main_window.ui.device_list.itemData(main_window.ui.device_list.currentIndex())
+
+
+def _page() -> Optional[int]:
+    """Returns the currently selected page index"""
+    tab_index = main_window.ui.pages.currentIndex()
+    page = main_window.ui.pages.widget(tab_index)
+    if page is None:
+        return None
     return page.property("page_id")
 
 
-def _button(_ui: Ui_MainWindow) -> int:
-    if selected_button is not None:
-        index = selected_button.property("index")
-        return index
-    return -1
+def _button() -> Optional[int]:
+    """Returns the currently selected button index"""
+    if selected_button is None:
+        return None
+    index = selected_button.property("index")
+
+    if index < 0:
+        return None
+
+    return index
 
 
-def update_button_text(ui, text: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        if deck_id:
-            # There may be no decks attached
-            api.set_button_text(deck_id, _page(ui), _button(ui), text)
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
-            if icon:
-                selected_button.setIcon(icon)
+def _button_state() -> Optional[int]:
+    """Returns the currently selected button state index"""
+    tab_index = main_window.ui.button_states.currentIndex()
+    state = main_window.ui.button_states.widget(tab_index)
+    return state.property("button_state_id")
 
 
-def update_button_command(ui, command: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_command(deck_id, _page(ui), _button(ui), command)
-
-
-def update_button_keys(ui, keys: str) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_keys(deck_id, _page(ui), _button(ui), keys)
-
-
-def update_button_write(ui) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_write(deck_id, _page(ui), _button(ui), ui.write.toPlainText())
-
-
-def update_change_brightness(ui, amount: int) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_change_brightness(deck_id, _page(ui), _button(ui), amount)
-
-
-def update_switch_page(ui, page: int) -> None:
-    if selected_button:
-        deck_id = _deck_id(ui)
-        api.set_button_switch_page(deck_id, _page(ui), _button(ui), page)
-
-
-def handle_change_page(ui) -> None:
+def handle_change_page() -> None:
     """Change the Stream Deck to the desired page and update
     the on-screen buttons.
     """
@@ -279,34 +274,47 @@ def handle_change_page(ui) -> None:
         selected_button.setChecked(False)
         selected_button = None
 
-    deck_id = _deck_id(ui)
-    page = _page(ui)
-    if deck_id:
-        api.set_page(deck_id, page)
-        redraw_buttons(ui)
+    deck_id = _deck()
+    page_id = _page()
+    if deck_id is not None and page_id is not None:
+        api.set_page(deck_id, page_id)
+        redraw_buttons()
+        api.reset_dimmer(deck_id)
+    build_button_state_pages()
+
+
+def handle_change_button_state() -> None:
+    """Change the Stream Deck to the desired button state and update
+    the on-screen buttons.
+    """
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    button_state_id = _button_state()
+    if deck_id is not None and page_id is not None and button_id is not None and button_state_id is not None:
+        api.set_button_state(deck_id, page_id, button_id, button_state_id)
+        redraw_button(button_id)
         api.reset_dimmer(deck_id)
 
-    reset_button_configuration(ui)
 
-
-def handle_new_page(ui) -> None:
-    deck_id = _deck_id(ui)
+def handle_new_page() -> None:
+    deck_id = _deck()
     if not deck_id:
         return
 
     # Add the new page to the api
     new_page_index = api.add_new_page(deck_id)
-    build_device(ui)
+    build_device(main_window.ui)
 
     # look for the new page in the ui
-    for page in range(ui.pages.count()):
-        if ui.pages.widget(page).property("page_id") == new_page_index:
-            ui.pages.setCurrentIndex(page)
+    for page in range(main_window.ui.pages.count()):
+        if main_window.ui.pages.widget(page).property("page_id") == new_page_index:
+            main_window.ui.pages.setCurrentIndex(page)
             break
-    ui.remove_page.setEnabled(True)
+    main_window.ui.remove_page.setEnabled(True)
 
 
-def handle_delete_page_with_confirmation(main_window, ui) -> None:
+def handle_delete_page_with_confirmation() -> None:
     confirm = QMessageBox(main_window)
     confirm.setWindowTitle("Delete Page")
     confirm.setText("Are you sure you want to delete this page?")
@@ -314,33 +322,77 @@ def handle_delete_page_with_confirmation(main_window, ui) -> None:
     confirm.setIcon(QMessageBox.Icon.Question)
     button = confirm.exec()
     if button == QMessageBox.StandardButton.Yes:
-        handle_delete_page(ui)
+        handle_delete_page()
 
 
-def handle_delete_page(ui) -> None:
-    deck_id = _deck_id(ui)
-    if not deck_id:
+def handle_delete_page() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    if deck_id is None or page_id is None:
         return
+
     pages = api.get_pages(deck_id)
     if len(pages) == 1:
         return
 
-    page = _page(ui)
-    new_page = _closest_page(page, pages)
+    new_page = _closest_page(page_id, pages)
     tab_index_to_move = -1
     tab_index_to_remove = -1
-    for tab_index in range(ui.pages.count()):
-        tab = ui.pages.widget(tab_index)
+    for tab_index in range(main_window.ui.pages.count()):
+        tab = main_window.ui.pages.widget(tab_index)
         if tab.property("page_id") == new_page:
             tab_index_to_move = tab_index
-        if tab.property("page_id") == page:
+        if tab.property("page_id") == page_id:
             tab_index_to_remove = tab_index
 
-    ui.pages.setCurrentIndex(tab_index_to_move)
-    api.remove_page(deck_id, page)
-    ui.pages.removeTab(tab_index_to_remove)
-    if ui.pages.count() == 1:
-        ui.remove_page.setEnabled(False)
+    main_window.ui.pages.setCurrentIndex(tab_index_to_move)
+    api.remove_page(deck_id, page_id)
+    main_window.ui.pages.removeTab(tab_index_to_remove)
+    if main_window.ui.pages.count() == 1:
+        main_window.ui.remove_page.setEnabled(False)
+
+
+def handle_new_button_state() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+
+    if deck_id is None or page_id is None or button_id is None:
+        return
+
+    new_button_state_index = api.add_new_button_state(deck_id, page_id, button_id)
+    build_button_state_pages()
+
+    for button_state in range(main_window.ui.button_states.count()):
+        if main_window.ui.button_states.widget(button_state).property("button_state_id") == new_button_state_index:
+            main_window.ui.button_states.setCurrentIndex(button_state)
+            break
+    main_window.ui.remove_button_state.setEnabled(True)
+
+
+def handle_delete_button_state_with_confirmation() -> None:
+    confirm = QMessageBox(main_window)
+    confirm.setWindowTitle("Delete Button State")
+    confirm.setText("Are you sure you want to delete this button state?")
+    confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    confirm.setIcon(QMessageBox.Icon.Question)
+    button = confirm.exec()
+    if button == QMessageBox.StandardButton.Yes:
+        handle_delete_button_state()
+
+
+def handle_delete_button_state() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    button_state_id = _button_state()
+    if deck_id is None or page_id is None or button_id is None or button_state_id is None:
+        return
+
+    api.remove_button_state(deck_id, page_id, button_id, button_state_id)
+    main_window.ui.button_states.removeTab(main_window.ui.button_states.currentIndex())
+    if main_window.ui.button_states.count() == 1:
+        main_window.ui.remove_button_state.setEnabled(False)
 
 
 def _closest_page(page: int, pages: List[int]) -> int:
@@ -360,154 +412,208 @@ def _closest_page(page: int, pages: List[int]) -> int:
             return next_page
 
 
-def select_image(window) -> None:
-    global last_image_dir
-    deck_id = _deck_id(window.ui)
-    image_file = api.get_button_icon(deck_id, _page(window.ui), _button(window.ui))
-    if not image_file:
-        if not last_image_dir:
-            image_file = os.path.expanduser("~")
-        else:
-            image_file = last_image_dir
-    file_name = QFileDialog.getOpenFileName(
-        window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)"
-    )[0]
-    if file_name:
-        last_image_dir = os.path.dirname(file_name)
-        deck_id = _deck_id(window.ui)
-        api.set_button_icon(deck_id, _page(window.ui), _button(window.ui), file_name)
-        redraw_buttons(window.ui)
-
-
-def align_text_vertical(window) -> None:
-    serial_number = _deck_id(window.ui)
-    position = api.get_text_vertical_align(serial_number, _page(window.ui), _button(window.ui))
-    if position == "bottom" or position == "":
-        position = "middle-bottom"
-    elif position == "middle-bottom":
-        position = "middle"
-    elif position == "middle":
-        position = "middle-top"
-    elif position == "middle-top":
-        position = "top"
-    else:
-        position = ""
-
-    api.set_text_vertical_align(serial_number, _page(window.ui), _button(window.ui), position)
-    redraw_buttons(window.ui)
-
-
-def align_text_horizontal(window) -> None:
-    serial_number = _deck_id(window.ui)
-    position = api.get_text_horizontal_align(serial_number, _page(window.ui), _button(window.ui))
-    if position == "center" or position == "":
-        position = "left"
-    elif position == "left":
-        position = "right"
-    elif position == "right":
-        position = ""
-
-    api.set_text_horizontal_align(serial_number, _page(window.ui), _button(window.ui), position)
-    redraw_buttons(window.ui)
-
-
-def remove_image(window) -> None:
-    deck_id = _deck_id(window.ui)
-    image = api.get_button_icon(deck_id, _page(window.ui), _button(window.ui))
-    if image:
-        confirm = QMessageBox(window)
-        confirm.setWindowTitle("Remove image")
-        confirm.setText("Are you sure you want to remove the image for this button?")
-        confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        confirm.setIcon(QMessageBox.Icon.Question)
-        button = confirm.exec()
-        if button == QMessageBox.StandardButton.Yes:
-            api.set_button_icon(deck_id, _page(window.ui), _button(window.ui), "")
-            redraw_buttons(window.ui)
-
-
-def redraw_buttons(ui) -> None:
-    deck_id = _deck_id(ui)
-    current_tab = ui.pages.currentWidget()
-    buttons = current_tab.findChildren(QtWidgets.QToolButton)
+def redraw_buttons() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    if deck_id is None or page_id is None:
+        return
+    current_tab = main_window.ui.pages.currentWidget()
+    buttons = current_tab.findChildren(QToolButton)
     for button in buttons:
         if not button.isHidden():
             # When rebuilding the buttons, we hide the old ones
             # and mark for deletion. They still hang around so
             # ignore them here
-            icon = api.get_button_icon_pixmap(deck_id, _page(ui), button.property("index"))
-            if icon:
+            icon = api.get_button_icon_pixmap(deck_id, page_id, button.property("index"))
+            if icon is not None:
                 button.setIcon(icon)
 
 
-def set_brightness(ui, value: int) -> None:
-    deck_id = _deck_id(ui)
+def redraw_button(button_index: int) -> None:
+    deck_id = _deck()
+    page_id = _page()
+    if deck_id is None or page_id is None:
+        return
+
+    current_tab = main_window.ui.pages.currentWidget()
+    buttons = current_tab.findChildren(QToolButton)
+    for button in buttons:
+        if not button.isHidden():
+            if button.property("index") == button_index:
+                icon = api.get_button_icon_pixmap(deck_id, page_id, button.property("index"))
+                if icon is not None:
+                    button.setIcon(icon)
+
+
+def set_brightness(value: int) -> None:
+    deck_id = _deck()
+    if deck_id is None:
+        return
     api.set_brightness(deck_id, value)
 
 
-def set_brightness_dimmed(ui, value: int) -> None:
-    deck_id = _deck_id(ui)
+def set_brightness_dimmed(value: int) -> None:
+    deck_id = _deck()
+    if deck_id is None:
+        return
     api.set_brightness_dimmed(deck_id, value)
     api.reset_dimmer(deck_id)
 
 
-def find_font_info(fonts, target_font_file):
-    """Returns the font family and font style for a given font file path"""
-    # The font file path is the font attribute that is stored in the .streamdeck_ui.json
-    # we need the family/style for selecting the appropriate items in the comboboxes
-    if target_font_file == "":
-        target_font_file = DEFAULT_FONT
-    for font_family, font_styles in fonts.items():
-        for font_style, font_file in font_styles.items():
-            if font_file.endswith(target_font_file):
-                return font_family, font_style
-    return find_font_info(fonts, DEFAULT_FONT)
-
-
-def button_clicked(ui, clicked_button, buttons) -> None:
+def button_clicked(clicked_button, buttons) -> None:
+    """This method build the button states tabs user interface.
+    It is called when a button is clicked on the main page."""
     global selected_button
     selected_button = clicked_button
+
+    # uncheck all other buttons
     for button in buttons:
         if button == clicked_button:
             continue
-
         button.setChecked(False)
-
-    deck_id = _deck_id(ui)
-    button_id = _button(ui)
-    if selected_button.isChecked():  # type: ignore # False positive mypy
-        enable_button_configuration(ui, True)
-        ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
-        ui.command.setText(api.get_button_command(deck_id, _page(ui), button_id))
-        ui.keys.setCurrentText(api.get_button_keys(deck_id, _page(ui), button_id))
-        ui.write.setPlainText(api.get_button_write(deck_id, _page(ui), button_id))
-        # Update the font family and font style combo boxes to match the font file stored in .streamdeck_ui.json
-        font_family, font_style = find_font_info(FONTS_DICT, api.get_button_font(deck_id, _page(ui), button_id))
-        ui.text_font.setCurrentText(font_family)
-        set_button_text_font_style_list(ui, font_family)
-        ui.text_font_style.setCurrentText(font_style)
-        update_button_text_font_style(ui, font_style)
-
-        ui.text_font_size.setValue(api.get_button_font_size(deck_id, _page(ui), button_id))
-        color = api.get_font_color(deck_id, _page(ui), button_id)
-        if color:
-            ui.text_color.setPalette(QPalette(color))
-        else:
-            ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
-        background_color = api.get_background_color(deck_id, _page(ui), button_id)
-        if background_color:
-            ui.background_color.setPalette(QPalette(background_color))
-        else:
-            ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
-        ui.change_brightness.setValue(api.get_button_change_brightness(deck_id, _page(ui), button_id))
-        ui.switch_page.setValue(api.get_button_switch_page(deck_id, _page(ui), button_id))
-        api.reset_dimmer(deck_id)
-    else:
+    # if no button is selected, do nothing
+    if selected_button is None:
+        return
+    if not selected_button.isChecked():
         selected_button = None
-        reset_button_configuration(ui)
+        return
+
+    deck_id = _deck()
+    if deck_id is not None:
+        api.reset_dimmer(deck_id)
+    build_button_state_pages()
 
 
-def enable_button_configuration(ui, enabled: bool):
+def build_button_state_pages():
+    ui = main_window.ui
+    blocker = QSignalBlocker(ui.button_states)
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    active_tab_index = 0
+
+    try:
+        if ui.button_states.count() > 0:
+            ui.button_states.clear()
+
+        if button_id is not None and deck_id is not None and page_id is not None:
+            current_state = api.get_button_state(deck_id, page_id, button_id)
+
+            for button_state_id in api.get_button_states(deck_id, page_id, button_id):
+                page = QWidget()
+                page.setLayout(QVBoxLayout())
+                page.setProperty("deck_id", deck_id)
+                page.setProperty("page_id", page_id)
+                page.setProperty("button_id", button_id)
+                page.setProperty("button_state_id", button_state_id)
+                label = _build_tab_label("State", button_state_id)
+                tab_index = ui.button_states.addTab(page, label)
+                page_tab = ui.button_states.widget(tab_index)
+                build_button_state_form(page_tab)
+                if button_state_id == current_state:
+                    active_tab_index = tab_index
+        else:
+            # add text "No button selected"
+            page = QWidget()
+            page.setLayout(QVBoxLayout())
+            page.setProperty("deck_id", deck_id)
+            page.setProperty("page_id", page_id)
+            page.setProperty("button_id", button_id)
+            page.setProperty("button_state_id", None)
+            label = _build_tab_label("State", 0)
+            tab_index = ui.button_states.addTab(page, label)
+            page_tab = ui.button_states.widget(tab_index)
+            build_button_state_form(page_tab)
+
+        some_state = button_id is not None and ui.button_states.count() > 0
+        more_than_one_state = button_id is not None and ui.button_states.count() > 1
+
+        ui.remove_button_state.setEnabled(more_than_one_state)
+
+        if some_state:
+            ui.button_states.setCurrentIndex(active_tab_index)
+            ui.add_button_state.setEnabled(True)
+            redraw_button(button_id)
+        else:
+            ui.add_button_state.setEnabled(False)
+    finally:
+        blocker.unblock()
+
+
+def build_button_state_form(tab) -> None:
+    global selected_button
+    global main_window
+
+    if hasattr(tab, "button_form"):
+        for widget in tab.findChildren(QWidget):
+            widget.hide()
+            widget.deleteLater()
+
+        tab.button_form.hide()
+        tab.button_form.deleteLater()
+        del tab.children()[0]
+        del tab.button_form
+
+    base_widget = QWidget(tab)
+    tab.children()[0].addWidget(base_widget)
+
+    tab.button_form = base_widget
+
+    tab_ui = Ui_ButtonForm()
+    tab_ui.setupUi(base_widget)
+
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    button_state_id = tab.property("button_state_id")
+
+    # set values
+    # reset the button configuration to the default
+    _reset_build_button_state_form(tab_ui)
+
+    if deck_id is None or page_id is None or button_id is None or button_state_id is None:
+        enable_button_configuration(tab_ui, False)
+        return
+
+    enable_button_configuration(tab_ui, True)
+    button_state = api.get_button_state_object(deck_id, page_id, button_id, button_state_id)
+
+    tab_ui.text.setText(button_state.text)
+    tab_ui.command.setText(button_state.command)
+    tab_ui.keys.setCurrentText(button_state.keys)
+    tab_ui.write.setPlainText(button_state.write)
+    tab_ui.change_brightness.setValue(button_state.brightness_change)
+    tab_ui.text_font_size.setValue(button_state.font_size or DEFAULT_FONT_SIZE)
+    tab_ui.text_color.setPalette(QPalette(button_state.font_color or DEFAULT_FONT_COLOR))
+    tab_ui.background_color.setPalette(QPalette(button_state.background_color or DEFAULT_BACKGROUND_COLOR))
+    tab_ui.change_brightness.setValue(button_state.brightness_change)
+    tab_ui.switch_page.setValue(button_state.switch_page)
+    tab_ui.switch_state.setValue(button_state.switch_state)
+
+    font_family, font_style = find_font_info(button_state.font or DEFAULT_FONT_FALLBACK_PATH)
+    prepare_button_state_form_text_font_list(tab_ui, font_family)
+    prepare_button_state_form_text_font_style_list(tab_ui, font_family, font_style)
+
+    # connect signals
+    tab_ui.text.textChanged.connect(partial(debounced_update_button_text, tab_ui))
+    tab_ui.command.textChanged.connect(partial(debounced_update_button_attribute, "command"))
+    tab_ui.keys.currentTextChanged.connect(partial(debounced_update_button_attribute, "keys"))
+    tab_ui.write.textChanged.connect(lambda: debounced_update_button_attribute("write", tab_ui.write.toPlainText()))
+    tab_ui.change_brightness.valueChanged.connect(partial(update_button_attribute, "change_brightness"))
+    tab_ui.text_font_size.valueChanged.connect(partial(update_displayed_button_attribute, "font_size"))
+    tab_ui.text_font.currentTextChanged.connect(lambda: update_button_attribute_font(tab_ui, "family"))
+    tab_ui.text_font_style.currentTextChanged.connect(lambda: update_button_attribute_font(tab_ui, "style"))
+    tab_ui.text_color.clicked.connect(partial(show_button_state_font_color_dialog, tab_ui))
+    tab_ui.background_color.clicked.connect(partial(show_button_state_background_color_dialog, tab_ui))
+    tab_ui.switch_page.valueChanged.connect(partial(update_button_attribute, "switch_page"))
+    tab_ui.switch_state.valueChanged.connect(partial(update_button_attribute, "switch_state"))
+    tab_ui.add_image.clicked.connect(partial(show_button_state_image_dialog))
+    tab_ui.remove_image.clicked.connect(show_button_state_remove_image_dialog)
+    tab_ui.text_h_align.clicked.connect(partial(update_align_text_horizontal))
+    tab_ui.text_v_align.clicked.connect(partial(update_align_text_vertical))
+
+
+def enable_button_configuration(ui: Ui_ButtonForm, enabled: bool):
     ui.text.setEnabled(enabled)
     ui.command.setEnabled(enabled)
     ui.keys.setEnabled(enabled)
@@ -517,34 +623,221 @@ def enable_button_configuration(ui, enabled: bool):
     ui.write.setEnabled(enabled)
     ui.change_brightness.setEnabled(enabled)
     ui.switch_page.setEnabled(enabled)
-    ui.imageButton.setEnabled(enabled)
-    ui.removeButton.setEnabled(enabled)
+    ui.switch_state.setEnabled(enabled)
+    ui.add_image.setEnabled(enabled)
+    ui.remove_image.setEnabled(enabled)
     ui.text_h_align.setEnabled(enabled)
     ui.text_v_align.setEnabled(enabled)
     ui.text_color.setEnabled(enabled)
     ui.background_color.setEnabled(enabled)
+    # default black color looks like it's enabled even when it's not
+    # we set it to white when disabled to make it more obvious
+    if enabled:
+        ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
+    else:
+        ui.background_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
+    # fields that depends on pynput be supported
     ui.label_5.setVisible(pynput_supported)
     ui.keys.setVisible(pynput_supported)
     ui.label_6.setVisible(pynput_supported)
     ui.write.setVisible(pynput_supported)
 
 
-def reset_button_configuration(ui):
-    """Clears the configuration for a button and disables editing of them. This is done when
-    there is no key selected or if there are no devices connected.
+def prepare_button_state_form_text_font_list(ui: Ui_ButtonForm, current_font_family: str) -> None:
+    """Prepares the font selection combo box with all available fonts"""
+    blocker = QSignalBlocker(ui.text_font)
+    try:
+        ui.text_font.clear()
+        ui.text_font.clearEditText()
+        for i, font_family in enumerate(FONTS_DICT):
+            ui.text_font.addItem(font_family)
+            font = QFont(font_family)
+            ui.text_font.setItemData(i, font)
+            ui.text_font.setItemData(i, font, Qt.FontRole)  # type: ignore [attr-defined]
+        ui.text_font.setCurrentText(current_font_family)
+    finally:
+        blocker.unblock()
+
+
+def prepare_button_state_form_text_font_style_list(
+    ui: Ui_ButtonForm, current_font_family: str, current_font_style: str
+) -> None:
+    """Prepares the font style selection combo box with all available styles for the selected font"""
+    blocker = QSignalBlocker(ui.text_font_style)
+    try:
+        ui.text_font_style.clear()
+        ui.text_font_style.clearEditText()
+        for _i, font_style in enumerate(FONTS_DICT[current_font_family]):
+            ui.text_font_style.addItem(font_style)
+        if current_font_style:
+            ui.text_font_style.setCurrentText(current_font_style)
+    finally:
+        blocker.unblock()
+
+
+def show_button_state_font_color_dialog(ui: Ui_ButtonForm) -> None:
+    current_color = ui.text_color.palette().color(QPalette.ColorRole.Button)
+    color = QColorDialog.getColor(current_color, ui.text_color, "Select text color")
+
+    if color.isValid():
+        ui.text_color.setPalette(QPalette(color))
+        color_hex = color.name()
+        update_displayed_button_attribute("font_color", color_hex)
+
+
+def show_button_state_background_color_dialog(ui: Ui_ButtonForm) -> None:
+    current_color = ui.background_color.palette().color(QPalette.ColorRole.Button)
+    color = QColorDialog.getColor(current_color, ui.background_color, "Select background color")
+
+    if color.isValid():
+        ui.background_color.setPalette(QPalette(color))
+        color_hex = color.name()
+        update_displayed_button_attribute("background_color", color_hex)
+
+
+def show_button_state_image_dialog() -> None:
+    global last_image_dir
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+
+    if deck_id is None or page_id is None or button_id is None:
+        return
+
+    image_file = api.get_button_icon(deck_id, page_id, button_id)
+
+    if not image_file:
+        if not last_image_dir:
+            image_file = os.path.expanduser("~")
+        else:
+            image_file = last_image_dir
+
+    file_name = QFileDialog.getOpenFileName(
+        main_window, "Open Image", image_file, "Image Files (*.png *.jpg *.bmp *.svg *.gif)"
+    )[0]
+
+    if file_name:
+        last_image_dir = os.path.dirname(file_name)
+        update_displayed_button_attribute("icon", file_name)
+
+
+def show_button_state_remove_image_dialog() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+
+    if deck_id is None or page_id is None or button_id is None:
+        return
+
+    image = api.get_button_icon(deck_id, page_id, button_id)
+    if image:
+        confirm = QMessageBox(main_window)
+        confirm.setWindowTitle("Remove image")
+        confirm.setText("Are you sure you want to remove the image for this button?")
+        confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        confirm.setIcon(QMessageBox.Icon.Question)
+        button = confirm.exec()
+        if button == QMessageBox.StandardButton.Yes:
+            update_displayed_button_attribute("icon", "")
+
+
+def update_align_text_vertical() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    align_changes = {
+        "": "middle-bottom",
+        "bottom": "middle-bottom",
+        "middle-bottom": "middle",
+        "middle": "middle-top",
+        "middle-top": "top",
+    }
+    if deck_id is not None and page_id is not None and button_id is not None:
+        current_position = api.get_button_text_vertical_align(deck_id, page_id, button_id)
+        next_position = align_changes.get(current_position, "")
+        update_displayed_button_attribute("text_vertical_align", next_position)
+
+
+def update_align_text_horizontal() -> None:
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+    align_changes = {
+        "": "left",
+        "left": "right",
+        "center": "left",
+    }
+    if deck_id is not None and page_id is not None and button_id is not None:
+        current_position = api.get_button_text_vertical_align(deck_id, page_id, button_id)
+        next_position = align_changes.get(current_position, "")
+        update_displayed_button_attribute("text_horizontal_align", next_position)
+
+
+@debounce(timeout=500)
+def debounced_update_button_text(ui: Ui_ButtonForm) -> None:
+    """Instead of directly updating the text (label) associated with
+    the button, add a small delay. If this is called before the
+    timer fires, delay it again. Effectively this creates an update
+    queue. It makes the textbox more response, as rendering the button
+    and saving to the API each time can feel somewhat slow.
     """
+    text = ui.text.toPlainText()
+    update_displayed_button_attribute("text", text)
+
+
+@debounce(timeout=500)
+def debounced_update_button_attribute(attribute: str, value: str) -> None:
+    """Instead of directly updating the attribute associated with
+    the button, add a small delay. If this is called before the
+    timer fires, delay it again. Effectively this creates an update
+    queue. It makes the textbox more response, as rendering the button
+    and saving to the API each time can feel somewhat slow.
+    """
+    update_button_attribute(attribute, value)
+
+
+def update_button_attribute_font(ui: Ui_ButtonForm, kind: str) -> None:
+    """Update the font associated with the button"""
+    font_family = ui.text_font.currentText()
+    font_style = ui.text_font_style.currentText()
+    # when the font family changes, update the font style list
+    if kind == "family":
+        prepare_button_state_form_text_font_style_list(ui, font_family, "")
+        font_style = list(FONTS_DICT[font_family])[0]
+
+    font = FONTS_DICT[font_family][font_style]
+
+    # if the font is not valid, we roll back the change to current value
+    # in case rollback fails, we set the default font
+    if is_a_valid_text_filter_font(font):
+        update_displayed_button_attribute("font", font)
+    else:
+        deck_id = _deck()
+        page_id = _page()
+        button_id = _button()
+        if deck_id is not None and page_id is not None and button_id is not None:
+            current_font = api.get_button_font(deck_id, page_id, button_id)
+            font_family, _ = find_font_info(current_font)
+            ui.text_font.setCurrentText(font_family)
+        else:
+            ui.text_font.setCurrentText(DEFAULT_FONT_FAMILY)
+
+
+def _reset_build_button_state_form(ui: Ui_ButtonForm):
+    """Clears the configuration for a button and disables editing of them."""
     ui.text.clear()
     ui.command.clear()
     ui.keys.clearEditText()
-    ui.text_font.setCurrentIndex(-1)
-    ui.text_font_style.setCurrentIndex(-1)
+    ui.text_font.clearEditText()
     ui.text_font_size.setValue(0)
+    # ui.text_font.setCurrentIndex(-1)
+    # ui.text_font_style.setCurrentIndex(-1)
     ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
     ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
     ui.write.clear()
     ui.change_brightness.setValue(0)
     ui.switch_page.setValue(0)
-    enable_button_configuration(ui, False)
+    ui.switch_state.setValue(0)
 
 
 def browse_documentation():
@@ -561,7 +854,7 @@ def build_buttons(ui, tab) -> None:
     global selected_button
 
     if hasattr(tab, "deck_buttons"):
-        buttons = tab.findChildren(QtWidgets.QToolButton)
+        buttons = tab.findChildren(QToolButton)
         for button in buttons:
             button.hide()
             # Mark them as hidden. They will be GC'd later
@@ -577,31 +870,31 @@ def build_buttons(ui, tab) -> None:
     selected_button = None
     # When rebuilding any selection is cleared
 
-    deck_id = _deck_id(ui)
+    deck_id = _deck()
 
     if not deck_id:
         return
-    deck = api.get_deck(deck_id)
+    deck_rows, deck_columns = api.get_deck_layout(deck_id)
 
     # Create a new base_widget with tab as it's parent
     # This is effectively a "blank tab"
-    base_widget = QtWidgets.QWidget(tab)
+    base_widget = QWidget(tab)
 
-    # Add an inner page (QtQidget) to the page
+    # Add an inner page (QtWidget) to the page
     tab.children()[0].addWidget(base_widget)
 
     # Set a property - this allows us to check later
     # if we've already created the buttons
     tab.deck_buttons = base_widget
 
-    row_layout = QtWidgets.QVBoxLayout(base_widget)
+    row_layout = QVBoxLayout(base_widget)
     index = 0
     buttons = []
-    for _row in range(deck["layout"][0]):  # type: ignore
-        column_layout = QtWidgets.QHBoxLayout()
+    for _row in range(deck_rows):
+        column_layout = QHBoxLayout()
         row_layout.addLayout(column_layout)
 
-        for _column in range(deck["layout"][1]):  # type: ignore
+        for _column in range(deck_columns):
             button = DraggableButton(base_widget, ui, api)
             button.setCheckable(True)
             button.setProperty("index", index)
@@ -619,10 +912,12 @@ def build_buttons(ui, tab) -> None:
     # Note that the button click event captures the ui variable, the current button
     #  and all the other buttons
     for button in buttons:
-        button.clicked.connect(lambda button=button, buttons=buttons: button_clicked(ui, button, buttons))
+        button.clicked.connect(
+            lambda current_button=button, all_buttons=buttons: button_clicked(current_button, all_buttons)
+        )
 
 
-def export_config(window) -> None:
+def export_config(window, api) -> None:
     file_name = QFileDialog.getSaveFileName(
         window, "Export Config", os.path.expanduser("~/streamdeck_ui_export.json"), "JSON (*.json)"
     )[0]
@@ -632,7 +927,7 @@ def export_config(window) -> None:
     api.export_config(file_name)
 
 
-def import_config(window) -> None:
+def import_config(window, api) -> None:
     file_name = QFileDialog.getOpenFileName(window, "Import Config", os.path.expanduser("~"), "Config Files (*.json)")[
         0
     ]
@@ -640,11 +935,11 @@ def import_config(window) -> None:
         return
 
     api.import_config(file_name)
-    redraw_buttons(window.ui)
+    redraw_buttons()
 
 
-def _build_tab_label(page_id: int) -> str:
-    return f"Page {page_id + 1}" if page_id == 0 else f"{page_id + 1}"
+def _build_tab_label(prefix: str, page_id: int) -> str:
+    return f"{prefix} {page_id + 1}" if page_id == 0 else f"{page_id + 1}"
 
 
 def build_device(ui, _device_index=None) -> None:
@@ -653,16 +948,15 @@ def build_device(ui, _device_index=None) -> None:
     a Stream Deck is added or when the last one is removed.
     It must deal with the case where there is no Stream Deck as
     a result.
-
-    :param ui: A reference to the ui
-    :type ui: _type_
-    :param _device_index: Not used, defaults to None
-    :type _device_index: _type_, optional
     """
     blocker = QSignalBlocker(ui.pages)
     try:
-        deck_id = _deck_id(ui)
+        deck_id = _deck()
         style = DEVICE_PAGE_STYLE if ui.device_list.count() > 0 else ""
+
+        # the device was removed while we were building the ui, then we skip
+        if deck_id is None:
+            return
 
         # clear the pages
         if ui.pages.count() > 0:
@@ -673,12 +967,12 @@ def build_device(ui, _device_index=None) -> None:
 
         # Add the pages
         for page_id in api.get_pages(deck_id):
-            page = QtWidgets.QWidget()
-            page.setLayout(QtWidgets.QGridLayout())
+            page = QWidget()
+            page.setLayout(QGridLayout())
             page.setProperty("deck_id", deck_id)
             page.setProperty("page_id", page_id)
             page.setStyleSheet(style)
-            label = _build_tab_label(page_id)
+            label = _build_tab_label("Page", page_id)
             tab_index = ui.pages.addTab(page, label)
             page_tab = ui.pages.widget(tab_index)
             build_buttons(ui, page_tab)
@@ -697,11 +991,10 @@ def build_device(ui, _device_index=None) -> None:
             ui.pages.setCurrentIndex(active_tab_index)
 
             # Draw the buttons for the active page
-            redraw_buttons(ui)
+            redraw_buttons()
         else:
             ui.settingsButton.setEnabled(False)
             ui.add_page.setEnabled(False)
-            reset_button_configuration(ui)
     finally:
         blocker.unblock()
 
@@ -713,9 +1006,6 @@ class MainWindow(QMainWindow):
     The QtCreator UI designer allows you to create a UI quickly. It compiles
     into a class called Ui_MainWindow() and everything comes together by
     calling the setupUi() method and passing a reference to the QMainWindow.
-
-    :param QMainWindow: The parent QMainWindow object
-    :type QMainWindow: [type]
     """
 
     ui: Ui_MainWindow
@@ -739,7 +1029,7 @@ class MainWindow(QMainWindow):
         event.ignore()
 
     def systray_clicked(self, status=None) -> None:
-        if status is QtWidgets.QSystemTrayIcon.ActivationReason.Context:
+        if status is QSystemTrayIcon.ActivationReason.Context:
             return
         if self.window_shown:
             self.hide()
@@ -762,91 +1052,55 @@ class MainWindow(QMainWindow):
         dependencies = ("streamdeck", "pyside6", "pillow", "pynput")
         for dep in dependencies:
             try:
-                dist = pkg_resources.get_distribution(dep)
-                body.append("{} {}".format(dep, dist.version))
-            except pkg_resources.DistributionNotFound:
+                dist_version = version(dep)
+                body.append("{} {}".format(dep, dist_version))
+            except PackageNotFoundError:
                 pass
-        QtWidgets.QMessageBox.about(self, title, "\n".join(body))
+        QMessageBox.about(self, title, "\n".join(body))
 
 
-def update_button_text_font(ui, _) -> None:
-    if not selected_button:
+def update_displayed_button_attribute(attribute: str, value: Union[str, int]) -> None:
+    """Updates the given attribute for the currently selected button.
+    and updates the icon of the current selected button."""
+    updated = update_button_attribute(attribute, value)
+
+    if not updated:
         return
-    deck_id = _deck_id(ui)
-    if deck_id is None:
+
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
+
+    if deck_id is None or page_id is None or button_id is None:
         return
 
-    font_family = ui.text_font.currentText()
-    # when the font combobox is updated the font style list needs to be updated with the available styles
-    set_button_text_font_style_list(ui, font_family)
-    font_style = ui.text_font_style.currentText()
-    font_file = FONTS_DICT[font_family][font_style]
-    # set the button's font using the font file path
-    api.set_button_font(deck_id, _page(ui), _button(ui), font_file)
-    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
-    if icon:
+    icon = api.get_button_icon_pixmap(deck_id, page_id, button_id)
+    if icon is not None and selected_button is not None:
         selected_button.setIcon(icon)
 
 
-def update_button_text_font_style(ui, _) -> None:
-    if not selected_button:
-        return
-    deck_id = _deck_id(ui)
-    if deck_id is None:
-        return
-    # set valid index if using placeholdertext
-    if ui.text_font_style.currentIndex() < 0:
-        ui.text_font_style.setCurrentIndex(0)
-    # get font file to save to json
-    font_family = ui.text_font.currentText()
-    font_style = ui.text_font_style.currentText()
-    font_file = FONTS_DICT[font_family][font_style]
-    # set the button's font using the font file path
-    api.set_button_font(deck_id, _page(ui), _button(ui), font_file)
-    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
-    if icon:
-        selected_button.setIcon(icon)
-
-
-def update_button_text_font_size(ui, font_size: int) -> None:
-    if not selected_button:
-        return
-    deck_id = _deck_id(ui)
-    if deck_id is None:
-        return
-    api.set_button_font_size(deck_id, _page(ui), _button(ui), font_size)
-    icon = api.get_button_icon_pixmap(deck_id, _page(ui), _button(ui))
-    if icon:
-        selected_button.setIcon(icon)
-
-
-def queue_update_button_text(ui) -> None:
-    """Instead of directly updating the text (label) associated with
-    the button, add a small delay. If this is called before the
-    timer fires, delay it again. Effectively this creates an update
-    queue. It makes the textbox more response, as rendering the button
-    and saving to the API each time can feel somewhat slow.
-
-    :param ui: Reference to the ui
-    :type ui: _type_
+def update_button_attribute(attribute: str, value: Union[str, int]) -> bool:
     """
-    text = ui.text.toPlainText()
+    Updates the given attribute for the currently selected button.
+    and updates the icon of the current selected button.
+    """
+    deck_id = _deck()
+    page_id = _page()
+    button_id = _button()
 
-    global text_update_timer
+    if deck_id is None or page_id is None or button_id is None:
+        return False
 
-    if text_update_timer:
-        text_update_timer.stop()
+    update_function = getattr(api, f"set_button_{attribute}")
+    update_function(deck_id, page_id, button_id, value)
 
-    text_update_timer = QTimer()
-    text_update_timer.setSingleShot(True)
-    text_update_timer.timeout.connect(partial(update_button_text, ui, text))  # type: ignore [attr-defined]
-    text_update_timer.start(500)
+    return True
 
 
 def change_brightness(deck_id: str, brightness: int):
     """Changes the brightness of the given streamdeck, but does not save
     the state."""
-    api.decks[deck_id].set_brightness(brightness)
+    api.decks_by_serial[deck_id].set_brightness(brightness)
 
 
 class SettingsDialog(QDialog):
@@ -862,8 +1116,11 @@ class SettingsDialog(QDialog):
 def show_settings(window: MainWindow) -> None:
     """Shows the settings dialog and allows the user the change deck specific
     settings. Settings are not saved until OK is clicked."""
-    ui = window.ui
-    deck_id = _deck_id(ui)
+    deck_id = _deck()
+
+    if deck_id is None:
+        return
+
     settings = SettingsDialog(window)
     api.stop_dimmer(deck_id)
 
@@ -888,12 +1145,10 @@ def show_settings(window: MainWindow) -> None:
     settings.ui.brightness.valueChanged.connect(partial(change_brightness, deck_id))
     settings.ui.dim.currentIndexChanged.connect(partial(disable_dim_settings, settings))
     if settings.exec():
-        # Commit changes
         if existing_index != settings.ui.dim.currentIndex():
-            # dimmers[deck_id].timeout = settings.ui.dim.currentData()
             api.set_display_timeout(deck_id, settings.ui.dim.currentData())
-        set_brightness(window.ui, settings.ui.brightness.value())
-        set_brightness_dimmed(window.ui, settings.ui.brightness_dimmed.value())
+        set_brightness(settings.ui.brightness.value())
+        set_brightness_dimmed(settings.ui.brightness_dimmed.value())
     else:
         # User cancelled, reset to original brightness
         change_brightness(deck_id, api.get_brightness(deck_id))
@@ -911,102 +1166,76 @@ def toggle_dim_all() -> None:
     api.toggle_dimmers()
 
 
-def create_main_window(logo: QIcon, app: QApplication) -> MainWindow:
-    """Creates the main application window and configures slots and signals
+def create_main_window(api: StreamDeckServer, app: QApplication) -> MainWindow:
+    """Creates the main application window and configures slots and signals"""
+    global main_window
 
-    :param logo: The icon displayed in the main application window
-    :type logo: QIcon
-    :param app: The QApplication that started it all
-    :type app: QApplication
-    :return: Returns the MainWindow instance
-    :rtype: MainWindow
-    """
     main_window = MainWindow()
     ui = main_window.ui
-    ui.text.textChanged.connect(partial(queue_update_button_text, ui))
-    ui.command.textChanged.connect(partial(update_button_command, ui))
-    ui.keys.currentTextChanged.connect(partial(update_button_keys, ui))
-    ui.write.textChanged.connect(partial(update_button_write, ui))
-    ui.change_brightness.valueChanged.connect(partial(update_change_brightness, ui))
-    ui.text_font_size.valueChanged.connect(partial(update_button_text_font_size, ui))
-    set_button_text_font_list(ui)
-    ui.text_font.currentTextChanged.connect(partial(update_button_text_font, ui))
-    ui.text_font_style.textActivated.connect(partial(update_button_text_font_style, ui))
-    ui.text_color.clicked.connect(partial(show_color_dialog_font, ui))
-    ui.background_color.clicked.connect(partial(show_color_dialog_background, ui))
-    ui.switch_page.valueChanged.connect(partial(update_switch_page, ui))
-    ui.imageButton.clicked.connect(partial(select_image, main_window))
-    ui.text_h_align.clicked.connect(partial(align_text_horizontal, main_window))
-    ui.text_v_align.clicked.connect(partial(align_text_vertical, main_window))
-    ui.removeButton.clicked.connect(partial(remove_image, main_window))
+
     ui.settingsButton.clicked.connect(partial(show_settings, main_window))
-    ui.add_page.clicked.connect(partial(handle_new_page, ui))
-    ui.remove_page.clicked.connect(partial(handle_delete_page_with_confirmation, main_window, ui))
-    ui.actionExport.triggered.connect(partial(export_config, main_window))
-    ui.actionImport.triggered.connect(partial(import_config, main_window))
+    ui.add_page.clicked.connect(handle_new_page)
+    ui.remove_page.clicked.connect(handle_delete_page_with_confirmation)
+    ui.add_button_state.clicked.connect(handle_new_button_state)
+    ui.add_button_state.setEnabled(False)
+    ui.remove_button_state.clicked.connect(handle_delete_button_state_with_confirmation)
+    ui.remove_button_state.setEnabled(False)
+    ui.actionExport.triggered.connect(partial(export_config, main_window, api))
+    ui.actionImport.triggered.connect(partial(import_config, main_window, api))
     ui.actionExit.triggered.connect(app.exit)
     ui.actionAbout.triggered.connect(main_window.about_dialog)
     ui.actionDocs.triggered.connect(browse_documentation)
     ui.actionGithub.triggered.connect(browse_github)
     ui.settingsButton.setEnabled(False)
-    enable_button_configuration(ui, False)
+    ui.button_states.clear()
+    build_button_state_pages()
+
+    ui = main_window.ui
+    # allow call redraw_button from ui instance
+    ui.redraw_button = redraw_button  # type: ignore [attr-defined]
+
+    api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+
+    ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
+    ui.pages.currentChanged.connect(lambda: handle_change_page())
+    ui.button_states.currentChanged.connect(lambda: handle_change_button_state())
+    api.plugevents.attached.connect(partial(streamdeck_attached, ui))
+    api.plugevents.detached.connect(partial(streamdeck_detached, ui))
+    api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
+
     return main_window
 
 
-def set_button_text_font_list(ui) -> None:
-    """Prepares the font selection combo box with all available fonts"""
-    ui.text_font.clear()
-    ui.text_font.setPlaceholderText("")
-    # the font list should only need to be set once
-    for i, font_family in enumerate(FONTS_DICT.keys()):
-        ui.text_font.addItem(font_family)
-        font = QFont(font_family)
-        ui.text_font.setItemData(i, font, Qt.FontRole)  # type: ignore [attr-defined]
+def show_migration_config_warning_and_check(app: QApplication) -> None:
+    """Shows a warning dialog when a different configuration version is detected.
+    If the user confirms the migration, the configuration is migrated and the
+    application continues. Otherwise, the application exits."""
+    if not config_file_need_migration(STATE_FILE):
+        return
+
+    confirm = QMessageBox(main_window)
+    confirm.setWindowTitle("Old configuration detected")
+    confirm.setText(
+        "The configuration file format has changed. \n"
+        "Do you want to upgrade your configuration to the new format?\n\n"
+        f"If you confirm a copy of your current configuration will be created in {STATE_FILE_BACKUP}\n"
+        "Otherwise the application will exit."
+    )
+    confirm.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    confirm.setIcon(QMessageBox.Icon.Warning)
+    button = confirm.exec()
+
+    if button == QMessageBox.StandardButton.No:
+        app.quit()
+        sys.exit()
+
+    if button == QMessageBox.StandardButton.Yes:
+        do_config_file_migration()
 
 
-def set_button_text_font_style_list(ui, font_family) -> None:
-    """Prepares the font style selection combo box with available font styles for this font_family"""
-    ui.text_font_style.clear()
-    ui.text_font.setPlaceholderText("")
-    for font_style in FONTS_DICT[font_family]:
-        ui.text_font_style.addItem(font_style)
-    ui.text_font_style.setCurrentIndex(0)
-
-
-def show_color_dialog_font(ui: Ui_MainWindow) -> None:
-    current_color = ui.text_color.palette().color(QPalette.ColorRole.Button)
-    color = QColorDialog.getColor(current_color, ui.text_color, "Select text color")
-
-    if color.isValid():
-        ui.text_color.setPalette(QPalette(color))
-        color_hex = color.name()
-        api.set_font_color(_deck_id(ui), _page(ui), _button(ui), color_hex)
-        redraw_buttons(ui)
-
-
-def show_color_dialog_background(ui: Ui_MainWindow) -> None:
-    current_color = ui.background_color.palette().color(QPalette.ColorRole.Button)
-    color = QColorDialog.getColor(current_color, ui.background_color, "Select background color")
-
-    if color.isValid():
-        ui.background_color.setPalette(QPalette(color))
-        color_hex = color.name()
-        api.set_background_color(_deck_id(ui), _page(ui), _button(ui), color_hex)
-        redraw_buttons(ui)
-
-
-def create_tray(logo: QIcon, app: QApplication, main_window: MainWindow) -> QSystemTrayIcon:
+def create_tray(logo: QIcon, app: QApplication) -> QSystemTrayIcon:
     """Creates a system tray with the provided icon and parent. The main
     window passed will be activated when clicked.
-
-    :param logo: The icon to show in the system tray
-    :type logo: QIcon
-    :param app: The parent object the tray is bound to
-    :type app: QApplication
-    :param main_window: The window what will be activated by the tray
-    :type main_window: QMainWindow
-    :return: Returns the QSystemTrayIcon instance
-    :rtype: QSystemTrayIcon
     """
     tray = QSystemTrayIcon(logo, app)
     tray.activated.connect(main_window.systray_clicked)  # type: ignore [attr-defined]
@@ -1029,7 +1258,7 @@ def create_tray(logo: QIcon, app: QApplication, main_window: MainWindow) -> QSys
 def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
     if cpu > 100:
         cpu = 100
-    if _deck_id(ui) == serial_number:
+    if _deck() == serial_number:
         ui.cpu_usage.setValue(cpu)
         ui.cpu_usage.setToolTip(f"Rendering CPU usage: {cpu}%")
         ui.cpu_usage.update()
@@ -1058,7 +1287,23 @@ def streamdeck_detached(ui, serial_number):
         build_device(ui)
 
 
-def sigterm_handler(api, app, signal_value, frame):
+def configure_signals(app: QApplication):
+    """Configures the termination signals for the application."""
+    # Configure signal handlers
+    # https://stackoverflow.com/a/4939113/192815
+    timer = QTimer()
+    timer.start(500)
+    timer.timeout.connect(lambda: None)  # type: ignore [attr-defined] # Let interpreter run to handle signal
+
+    # Handle SIGTERM so we release semaphore and shutdown API gracefully
+    signal.signal(signal.SIGTERM, partial(sigterm_handler, app))
+
+    # Handle <ctrl+c>
+    signal.signal(signal.SIGINT, partial(sigterm_handler, app))
+
+
+def sigterm_handler(app, signal_value, frame):
+    print("Received signal", signal_value, frame)
     api.stop()
     app.quit()
     if signal_value == signal.SIGTERM:
@@ -1072,6 +1317,7 @@ def sigterm_handler(api, app, signal_value, frame):
 
 def start(_exit: bool = False) -> None:
     global api
+    global main_window
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")
@@ -1083,54 +1329,36 @@ def start(_exit: bool = False) -> None:
         show_ui = False
 
     try:
-        version = pkg_resources.get_distribution("streamdeck-linux-gui").version
-    except pkg_resources.DistributionNotFound:
-        version = "devel"
+        app_version = version("streamdeck-linux-gui")
+    except PackageNotFoundError:
+        app_version = "devel"
 
     try:
         with Semaphore("/tmp/streamdeck_ui.lock"):  # nosec - this file is only observed with advisory lock
             # The semaphore was created, so this is the first instance
 
-            api = StreamDeckServer()
-            if os.path.isfile(STATE_FILE):
-                api.open_config(STATE_FILE)
-
-            # The QApplication object holds the Qt event loop and you need one of these
+            # The QApplication object holds the Qt event loop, and you need one of these
             # for your application
             app = QApplication(sys.argv)
             app.setApplicationName(APP_NAME)
-            app.setApplicationVersion(version)
+            app.setApplicationVersion(app_version)
             logo = QIcon(APP_LOGO)
             app.setWindowIcon(logo)
-            main_window = create_main_window(logo, app)
-            ui = main_window.ui
-            tray = create_tray(logo, app, main_window)
+            main_window = create_main_window(api, app)
+            tray = create_tray(logo, app)
 
-            api.streamdeck_keys.key_pressed.connect(partial(handle_keypress, ui))
+            configure_signals(app)
 
-            ui.device_list.currentIndexChanged.connect(partial(build_device, ui))
-            ui.pages.currentChanged.connect(lambda: handle_change_page(ui))
+            # check if we want to continue with the configuration migrate
+            show_migration_config_warning_and_check(app)
 
-            api.plugevents.attached.connect(partial(streamdeck_attached, ui))
-            api.plugevents.detached.connect(partial(streamdeck_detached, ui))
-            api.plugevents.cpu_changed.connect(partial(streamdeck_cpu_changed, ui))
-
+            # read the state file if it exists
+            if os.path.isfile(STATE_FILE):
+                api.open_config(STATE_FILE)
             api.start()
 
-            cli = CLIStreamDeckServer(api, ui)
+            cli = CLIStreamDeckServer(api, main_window.ui)
             cli.start()
-
-            # Configure signal hanlders
-            # https://stackoverflow.com/a/4939113/192815
-            timer = QTimer()
-            timer.start(500)
-            timer.timeout.connect(lambda: None)  # type: ignore [attr-defined] # Let interpreter run to handle signal
-
-            # Handle SIGTERM so we release semaphore and shutdown API gracefully
-            signal.signal(signal.SIGTERM, partial(sigterm_handler, api, app))
-
-            # Handle <ctrl+c>
-            signal.signal(signal.SIGINT, partial(sigterm_handler, api, app))
 
             tray.show()
             if show_ui:

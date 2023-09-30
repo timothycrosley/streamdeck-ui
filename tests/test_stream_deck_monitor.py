@@ -1,7 +1,5 @@
 import threading
 from time import sleep
-from unittest import TestCase
-from unittest.mock import patch
 
 from streamdeck_ui.stream_deck_monitor import StreamDeckMonitor
 

@@ -99,7 +99,7 @@ def execute():
         type="string",
         dest="action",
         help="the action to be performed. valid options (case-insensitive): "
-        + "SET_PAGE, SET_BRIGHTNESS, SET_TEXT, SET_ALIGNMENT, SET_CMD, SET_KEYS, SET_WRITE, SET_ICON, CLEAR_ICON",
+        + "SET_PAGE, SET_BRIGHTNESS, SET_TEXT, SET_ALIGNMENT, SET_CMD, SET_KEYS, SET_WRITE, SET_ICON, CLEAR_ICON, SET_STATE",
         metavar="NAME",
     )
 
@@ -122,7 +122,9 @@ def execute():
     parser.add_option(
         "-b", "--button", type="int", dest="button_index", help="the button to be manipulated", metavar="INDEX"
     )
-
+    parser.add_option(
+        "-s", "--state", type="int", dest="state_index", help="the button state to be manipulated", metavar="INDEX"
+    )
     parser.add_option(
         "--icon", type="string", dest="icon_path", help="path to an icon. used with SET_ICON", metavar="PATH"
     )
@@ -270,6 +272,20 @@ def execute():
                 "deck": options.deck_index,
                 "page": options.page_index,
                 "button": options.button_index,
+            }
+        elif action_name == "set_state":
+            if options.button_index is None:
+                print("error: --button not set...")
+                return
+            if options.state_index is None:
+                print("error: --state not set...")
+                return
+            data = {
+                "command": "set_state",
+                "deck": options.deck_index,
+                "page": options.page_index,
+                "button": options.button_index,
+                "state": options.state_index,
             }
 
     if data is not None:
