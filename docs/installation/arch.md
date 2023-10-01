@@ -39,3 +39,23 @@ Launch with
 streamdeck
 ```
 See [troubleshooting](../troubleshooting.md) for tips if you're stuck.
+
+## Install with the AUR
+The AUR currently has an [easy install script](https://aur.archlinux.org/packages/streamdeck-ui) that is being maintained by dhtseany. 
+There may be more packages that need to be installed before the script will run, after you install those you should be able to finish installing. 
+``` bash
+cd Downloads 
+git clone https://aur.archlinux.org/streamdeck-ui.git
+cd streamdeck-ui
+makepkg
+sudo pacman -U streamdeck-ui-3.1.0-1-any.pkg.tar.zst
+```
+You can also install the [Development branch](https://aur.archlinux.org/packages/streamdeck-ui-develop) if you want to stay up to date with improvements.
+Both of these will install an icon in your programs list. 
+
+## Install with yay
+[yay is a Pacman wrapper and AUR helper](https://aur.archlinux.org/packages/yay) that will download and install all of the prerequisites for you, along with the StreamDeck UI app itself. 
+``` bash
+yay -S streamdeck-ui
+```
+To open you can use the new icon that is added to your programs list. 
