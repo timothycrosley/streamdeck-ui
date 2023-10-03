@@ -26,7 +26,7 @@ def get_fonts():
                         fallback_font_file = fallback_fonts_dict[fallback_font_family][fallback_font_style]
                         system_fonts_dict[fallback_font_family][fallback_font_style] = fallback_font_file
             else:
-                system_fonts_dict[fallback_font_family] = fallback_fonts_dict
+                system_fonts_dict[fallback_font_family] = fallback_fonts_dict[fallback_font_family]
         return system_fonts_dict
 
 
