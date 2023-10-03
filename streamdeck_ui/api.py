@@ -16,6 +16,7 @@ from streamdeck_ui.config import (
     DEFAULT_BACKGROUND_COLOR,
     DEFAULT_FONT,
     DEFAULT_FONT_COLOR,
+    DEFAULT_FONT_FALLBACK_PATH,
     DEFAULT_FONT_SIZE,
     STATE_FILE,
 )
@@ -687,11 +688,11 @@ class StreamDeckServer:
             filters.append(PulseFilter())
 
         text = button_settings.get("text")
-        font = button_settings.get("font", DEFAULT_FONT)
+        font = button_settings.get("font", DEFAULT_FONT_FALLBACK_PATH)
         font_size = button_settings.get("font_size", DEFAULT_FONT_SIZE)
         font_color = button_settings.get("font_color", DEFAULT_FONT_COLOR)
         if font == "":
-            font = DEFAULT_FONT
+            font = DEFAULT_FONT_FALLBACK_PATH
         vertical_align = button_settings.get("text_vertical_align", "")
         horizontal_align = button_settings.get("text_horizontal_align", "")
 
