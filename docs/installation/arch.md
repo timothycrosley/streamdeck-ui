@@ -1,6 +1,10 @@
 # Installing on Arch
 
-This has been tested on Arch with Plasma, in July 2023.
+This has been tested on:
+
+* Arch with Plasma (July 2023)
+* Arch with Cinnamon (October 2023)
+* Arch with Gnome (Per every release, thanks to dhtseany)
 
 ## Install Dependencies
 
@@ -50,7 +54,30 @@ Please make sure you have followed [Install dependencies](#install-dependencies)
 
 The steps to install from source can be found [here](source.md)
 
-### Launch the Streamdeck UI
+### Install with the AUR
+
+The AUR currently has an [easy install script](https://aur.archlinux.org/packages/streamdeck-ui) that is being maintained by dhtseany.
+> Additional packages may be required before the script will finish, once those have been installed the script will finish installing.
+
+``` bash
+cd Downloads
+git clone https://aur.archlinux.org/streamdeck-ui.git
+cd streamdeck-ui
+makepkg
+sudo pacman -U streamdeck-ui-3.1.0-1-any.pkg.tar.zst
+```
+
+### Install with yay
+
+[yay is a Pacman wrapper and AUR helper](https://aur.archlinux.org/packages/yay) that will download and install all of the prerequisites for you, along with the StreamDeck UI app itself.
+
+``` bash
+yay -S streamdeck-ui
+```
+
+> For both yay and the AUR you can also install the [Development branch](https://aur.archlinux.org/packages/streamdeck-ui-develop) if you want to stay on the bleeding edge or help with testing.
+
+## Launch the Streamdeck UI
 
 Launch with
 
