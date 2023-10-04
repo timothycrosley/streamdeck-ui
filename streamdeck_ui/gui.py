@@ -461,7 +461,7 @@ def find_font_info(fonts, target_font_file):
         for font_style, font_file in font_styles.items():
             if font_file.endswith(target_font_file):
                 return font_family, font_style
-    return find_font_info(fonts, DEFAULT_FONT_FALLBACK_PATH)
+    return find_font_info(fonts, DEFAULT_FONT)
 
 
 def button_clicked(ui, clicked_button, buttons) -> None:

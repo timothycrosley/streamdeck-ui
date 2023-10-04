@@ -18,6 +18,7 @@ from streamdeck_ui.config import (
     DEFAULT_FONT_COLOR,
     DEFAULT_FONT_FALLBACK_PATH,
     DEFAULT_FONT_SIZE,
+    FONTS_FALLBACK_PATH,
     STATE_FILE,
 )
 from streamdeck_ui.dimmer import Dimmer
@@ -693,10 +694,17 @@ class StreamDeckServer:
         font_color = button_settings.get("font_color", DEFAULT_FONT_COLOR)
         if font == "":
             font = DEFAULT_FONT_FALLBACK_PATH
+        elif not font.startswith("/"):
+            font = os.path.join(FONTS_FALLBACK_PATH, font)
         vertical_align = button_settings.get("text_vertical_align", "")
         horizontal_align = button_settings.get("text_horizontal_align", "")
 
         if text:
-            filters.append(TextFilter(text, font, font_size, font_color, vertical_align, horizontal_align))
+            try:
+                filters.append(TextFilter(text, font, font_size, font_color, vertical_align, horizontal_align))
+            except OSError:
+                print("Unable to set font: " + font + ", falling back to default...")
+                font = DEFAULT_FONT_FALLBACK_PATH
+                filters.append(TextFilter(text, font, font_size, font_color, vertical_align, horizontal_align))
 
         display_handler.replace(page, button, filters)
