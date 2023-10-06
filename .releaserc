@@ -17,13 +17,12 @@
     }]
   ],
     "release": {
-    "branches": [ "main", "beta", "develop", "test" ]
+    "branches": [ "main", "beta", "test" ]
   },
 
   "branches": [
     {name: 'main'},
     {name: 'beta', channel: 'beta', prerelease: true},
     {name: 'test', channel: 'test', prerelease: true},
-    {name: 'develop', channel: 'develop', prerelease: true}
   ]
 }
