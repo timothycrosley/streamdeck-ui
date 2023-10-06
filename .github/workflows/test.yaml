@@ -1,6 +1,20 @@
 name: Test
 
-on: [pull_request, workflow_dispatch, workflow_call]
+on: 
+  push:
+    paths:
+      - 'scripts/*'
+      - 'streamdeck_ui/*'
+      - 'tests/*'
+      - '.github/workflows/test.yaml'
+  pull_request:
+    paths: 
+      - 'scripts/*'
+      - 'streamdeck_ui/*'
+      - 'tests/*'
+      - '.github/workflows/test.yaml'
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
   test:
@@ -76,3 +90,4 @@ jobs:
         with:
           file: ./coverage.xml
           fail_ci_if_error: true
+
