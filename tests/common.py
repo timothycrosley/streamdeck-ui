@@ -5,6 +5,7 @@ from streamdeck_ui.model import ButtonMultiState, ButtonState, DeckState
 
 STREAMDECK_SERIAL = "DL4XXXXXX"
 STREAMDECK_KEY_COUNT = 3
+STREAMDECK_TYPE = "Stream Deck Original"
 
 # the number of pages in the test state
 PAGES = 3
@@ -45,12 +46,19 @@ def create_test_api_server() -> TestableStreamDeckServer:
     api.dimmers[STREAMDECK_SERIAL] = MagicMock()
 
     api.state = {
+        STREAMDECK_TYPE: DeckState(
+            buttons={
+                0: func_gen_page(),
+                1: func_gen_page(),
+                2: func_gen_page(),
+            },
+        ),
         STREAMDECK_SERIAL: DeckState(
             buttons={
                 0: func_gen_page(),
                 1: func_gen_page(),
             },
-        )
+        ),
     }
     # we don't want to save the state to disk
     api._save_state = MagicMock()

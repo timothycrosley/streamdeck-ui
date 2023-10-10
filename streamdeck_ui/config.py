@@ -16,6 +16,7 @@ DEFAULT_FONT_SIZE = 14
 DEFAULT_FONT_COLOR = "#ffffff"
 DEFAULT_BACKGROUND_COLOR = "#000000"
 STATE_FILE = os.environ.get("STREAMDECK_UI_CONFIG", os.path.expanduser("~/.streamdeck_ui.json"))
+LOG_FILE = os.environ.get("STREAMDECK_UI_LOG_FILE", os.path.expanduser("~/.streamdeck_ui.log"))
 STATE_FILE_BACKUP = os.path.expanduser("~/.streamdeck_ui.json_old")
 CONFIG_FILE_VERSION = 2
 CONFIG_FILE_PREVIOUS_VERSION = 1
