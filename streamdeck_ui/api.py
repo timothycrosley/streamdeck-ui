@@ -1,6 +1,7 @@
 """Defines the Python API for interacting with the StreamDeck Configuration UI"""
 import os
 import threading
+from copy import deepcopy
 from functools import partial
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -26,6 +27,7 @@ from streamdeck_ui.display.display_grid import DisplayGrid
 from streamdeck_ui.display.filter import Filter
 from streamdeck_ui.display.image_filter import ImageFilter
 from streamdeck_ui.display.text_filter import TextFilter
+from streamdeck_ui.logger import logger
 from streamdeck_ui.model import ButtonMultiState, ButtonState, DeckState
 from streamdeck_ui.stream_deck_monitor import StreamDeckMonitor
 
@@ -194,6 +196,7 @@ class StreamDeckServer:
         self.decks_map_id_to_serial[streamdeck_id] = serial_number
         self.decks_by_serial[serial_number] = streamdeck
 
+        self.set_default_state(serial_number, streamdeck.deck_type())
         self._initialize_stream_deck_page_state(serial_number, 0, streamdeck.key_count())
 
         streamdeck.set_key_callback(partial(self._key_change_callback, serial_number))
@@ -215,6 +218,13 @@ class StreamDeckServer:
                 "layout": streamdeck.key_layout(),
             }
         )
+
+    def set_default_state(self, serial_number: str, deck_type: str):
+        if serial_number in self.state:
+            return
+        elif deck_type in self.state:
+            logger.info(f"no configuration found for {serial_number}, use generic configuration for type: {deck_type}.")
+            self.state[serial_number] = deepcopy(self.state[deck_type])
 
     def _initialize_stream_deck_page_state(self, serial_number: str, page: int, key_count: int):
         """Initializes the state for the given serial number. This allocates

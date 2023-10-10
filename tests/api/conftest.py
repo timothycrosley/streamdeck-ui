@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from tests.common import STREAMDECK_SERIAL, TestableStreamDeckServer, create_test_api_server
+from tests.common import STREAMDECK_SERIAL, STREAMDECK_TYPE, TestableStreamDeckServer, create_test_api_server
 
 
 @pytest.fixture(autouse=True)
@@ -31,3 +31,8 @@ def api_server() -> TestableStreamDeckServer:
 @pytest.fixture
 def streamdeck_serial() -> str:
     return STREAMDECK_SERIAL
+
+
+@pytest.fixture
+def streamdeck_type():
+    return STREAMDECK_TYPE
