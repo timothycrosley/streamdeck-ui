@@ -768,7 +768,7 @@ def update_align_text_horizontal() -> None:
         "center": "left",
     }
     if deck_id is not None and page_id is not None and button_id is not None:
-        current_position = api.get_button_text_vertical_align(deck_id, page_id, button_id)
+        current_position = api.get_button_text_horizontal_align(deck_id, page_id, button_id)
         next_position = align_changes.get(current_position, "")
         update_displayed_button_attribute("text_horizontal_align", next_position)
 
