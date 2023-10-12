@@ -14,12 +14,19 @@ def debounce(timeout=500):
         timer.setSingleShot(True)
 
         def partial_func(*args, **kwargs):
-            timer.timeout.disconnect()
+            try:
+                timer.timeout.disconnect()
+            except BaseException:
+                pass
             return func(*args, **kwargs)
 
         def wrapped(*args, **kwargs):
             if timer.isActive():
                 timer.stop()
+            try:
+                timer.timeout.disconnect()
+            except BaseException:
+                pass
             timer.timeout.connect(partial(partial_func, *args, **kwargs))
             timer.start(timeout)
 
