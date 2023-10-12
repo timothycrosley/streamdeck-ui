@@ -79,10 +79,10 @@ class DisplayGrid:
         DisplayGrid._empty_filter.initialize(self.size)
 
     def initialize_page(self, page: int):
-        with self.lock:
-            self.pages[page] = {}
-            for button in range(self.streamdeck.key_count()):
-                self.pages[page][button] = Pipeline()
+        self.pages[page] = {}
+        for button in range(self.streamdeck.key_count()):
+            self.pages[page][button] = Pipeline()
+            self.replace(page, button, [])
 
     def remove_page(self, page: int):
         with self.lock:
