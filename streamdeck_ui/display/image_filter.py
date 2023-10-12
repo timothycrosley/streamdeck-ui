@@ -69,6 +69,11 @@ class ImageFilter(Filter):
         self.frames = []
         for frame, milliseconds, hashcode in zip(frames, frame_duration, frame_hash):
             frame = frame.copy()
+            if frame.mode == "P":
+                try:
+                    frame = frame.convert("RGBA")
+                except BaseException:
+                    pass
             frame.thumbnail(size, Image.LANCZOS)
             self.frames.append((frame, milliseconds, hashcode))
 
