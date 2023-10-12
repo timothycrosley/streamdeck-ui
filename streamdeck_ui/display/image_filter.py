@@ -8,6 +8,7 @@ import cairosvg
 import filetype
 from PIL import Image, ImageSequence
 
+from streamdeck_ui.config import WARNING_ICON
 from streamdeck_ui.display.filter import Filter
 
 
@@ -56,10 +57,10 @@ class ImageFilter(Filter):
                         frame_hash.append(image_hash)
                         break
 
-        except OSError as icon_error:
+        except BaseException as icon_error:
             # FIXME: caller should handle this?
             print(f"Unable to load icon {self.file} with error {icon_error}")
-            image = Image.new("RGB", size)
+            image = Image.open(WARNING_ICON)
             frame_duration.append(-1)
             frame_hash.append(image_hash)
 

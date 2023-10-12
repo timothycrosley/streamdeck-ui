@@ -21,6 +21,7 @@ STATE_FILE_BACKUP = os.path.expanduser("~/.streamdeck_ui.json_old")
 CONFIG_FILE_VERSION = 2
 CONFIG_FILE_PREVIOUS_VERSION = 1
 CONFIG_FILE_SUPPORTED_VERSIONS = [CONFIG_FILE_VERSION, CONFIG_FILE_PREVIOUS_VERSION]
+WARNING_ICON = os.path.join(PROJECT_PATH, "icons", "warning_icon_button.png")
 
 
 def config_file_need_migration(config_file_path: str) -> bool:
