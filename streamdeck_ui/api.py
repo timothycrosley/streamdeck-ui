@@ -623,6 +623,8 @@ class StreamDeckServer:
     def set_page(self, serial_number: str, page: int) -> None:
         """Sets the current page shown on the stream deck"""
         if self.get_page(serial_number) != page:
+            if page not in self.get_pages(serial_number):
+                return
             self.state[serial_number].page = page
             self._save_state()
 

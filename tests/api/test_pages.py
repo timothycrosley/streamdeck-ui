@@ -54,3 +54,14 @@ def test_page(api_server, streamdeck_serial):
     assert isinstance(display_handler, MagicMock)
     display_handler.set_page.assert_called()
     display_handler.synchronize.assert_called()
+
+
+def test_set_non_existing_page(api_server, streamdeck_serial):
+    """Test the page state was not updated."""
+    page_before = api_server.get_page(streamdeck_serial)
+    api_server.set_page(streamdeck_serial, 10)
+    assert api_server.get_page(streamdeck_serial) == page_before
+    display_handler = api_server.display_handlers[streamdeck_serial]
+    assert isinstance(display_handler, MagicMock)
+    display_handler.set_page.assert_not_called()
+    display_handler.synchronize.assert_not_called()
