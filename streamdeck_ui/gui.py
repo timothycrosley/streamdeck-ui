@@ -52,6 +52,7 @@ from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 # this ignore is just a workaround to set api with something
 # and be able to test
+tray: QSystemTrayIcon
 api: StreamDeckServer = StreamDeckServer()
 
 main_window: "MainWindow"
@@ -190,6 +191,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 Popen(shlex.split(command))  # nosec, need to allow execution of arbitrary commands
             except Exception as error:
                 print(f"The command '{command}' failed: {error}")
+                show_tray_warning_message("The command failed to execute.")
 
         keyboard = Keyboard()
 
@@ -199,6 +201,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 keyboard.keys(keys)
             except Exception as error:
                 print(f"Could not press keys '{keys}': {error}")
+                show_tray_warning_message("Unable to perform key press action.")
 
         write = api.get_button_write(deck_id, page, key)
         if write:
@@ -206,6 +209,7 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 keyboard.write(write)
             except Exception as error:
                 print(f"Could not complete the write command: {error}")
+                show_tray_warning_message("Unable to perform write action.")
 
         brightness_change = api.get_button_change_brightness(deck_id, page, key)
         if brightness_change:
@@ -213,20 +217,39 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 api.change_brightness(deck_id, brightness_change)
             except Exception as error:
                 print(f"Could not change brightness: {error}")
+                show_tray_warning_message("Unable to change brightness.")
 
         switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
-            api.set_page(deck_id, switch_page - 1)
-            if _deck() == deck_id:
-                ui.pages.setCurrentIndex(switch_page - 1)
+            switch_page_index = switch_page - 1
+            if switch_page_index in api.get_pages(deck_id):
+                api.set_page(deck_id, switch_page_index)
+                if _deck() == deck_id:
+                    for page in range(ui.pages.count()):
+                        if ui.pages.widget(page).property("page_id") == switch_page_index:
+                            ui.pages.setCurrentIndex(page)
+                            break
+            else:
+                show_tray_warning_message(
+                    f"Unable to perform switch page, the page {switch_page} does not exist in your current settings"
+                )
 
         switch_state = api.get_button_switch_state(deck_id, page, key)
         if switch_state:
-            api.set_button_state(deck_id, page, key, switch_state - 1)
-            if _deck() == deck_id:
-                if _button() == key:
-                    ui.button_states.setCurrentIndex(switch_state - 1)
-                redraw_button(key)
+            switch_state_index = switch_state - 1
+            if switch_state_index in api.get_button_states(deck_id, page, key):
+                api.set_button_state(deck_id, page, key, switch_state_index)
+                if _deck() == deck_id:
+                    if _button() == key:
+                        for button_state in range(ui.button_states.count()):
+                            if ui.button_states.widget(button_state).property("button_state_id") == switch_state_index:
+                                ui.button_states.setCurrentIndex(button_state)
+                                break
+                    redraw_button(key)
+            else:
+                show_tray_warning_message(
+                    f"Unable to perform switch button state, the button state {switch_state} does not exist in your current settings"
+                )
 
 
 def _deck() -> Optional[str]:
@@ -1255,6 +1278,11 @@ def create_tray(logo: QIcon, app: QApplication) -> QSystemTrayIcon:
     return tray
 
 
+def show_tray_warning_message(message: str) -> None:
+    """Shows a warning message in the system tray"""
+    tray.showMessage("Warning", message, QSystemTrayIcon.MessageIcon.Warning, 5000)
+
+
 def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
     if cpu > 100:
         cpu = 100
@@ -1318,6 +1346,7 @@ def sigterm_handler(app, signal_value, frame):
 def start(_exit: bool = False) -> None:
     global api
     global main_window
+    global tray
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")

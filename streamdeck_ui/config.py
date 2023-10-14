@@ -59,7 +59,28 @@ def read_state_from_config(config_file_path: str) -> Dict[str, DeckState]:
             )
         if file_version == CONFIG_FILE_PREVIOUS_VERSION:
             return _migrate_deck_state_from_previous_version(config["state"])
-        return _to_deck_states(config["state"])
+        state = _to_deck_states(config["state"])
+        validate_current_page(state)
+        validate_current_button_state(state)
+        return state
+
+
+def validate_current_page(state: Dict[str, DeckState]) -> None:
+    """Validate that the current page is valid, if the current page is not valid, set it to the first page
+    of the deck"""
+    for _deck_id, deck_state in state.items():
+        if deck_state.page not in deck_state.buttons:
+            deck_state.page = next(iter(deck_state.buttons))
+
+
+def validate_current_button_state(state: Dict[str, DeckState]) -> None:
+    """Validate that the current button state is valid, if the current button state is not valid, set it to the first state
+    of the button"""
+    for _deck_id, deck_state in state.items():
+        for _page_of_buttons_id, page_of_buttons_state in deck_state.buttons.items():
+            for _button_id, button_state in page_of_buttons_state.items():
+                if button_state.state not in button_state.states:
+                    button_state.state = next(iter(button_state.states))
 
 
 def write_state_to_config(config_file_path: str, state: Dict[str, DeckState]) -> None:
