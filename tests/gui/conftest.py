@@ -2,9 +2,11 @@ from typing import Tuple
 from unittest.mock import MagicMock, patch
 
 import pytest
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from streamdeck_ui.gui import MainWindow, build_device, create_main_window
+from streamdeck_ui.config import APP_LOGO
+from streamdeck_ui.gui import MainWindow, build_device, create_main_window, create_tray
 from tests.common import STREAMDECK_SERIAL, TestableStreamDeckServer, create_test_api_server
 
 
@@ -36,6 +38,7 @@ def api_and_window(mock_classes) -> Tuple[MainWindow, TestableStreamDeckServer]:
     api = create_test_api_server()
     patch("streamdeck_ui.gui.api", api).start()
     main_window = create_main_window(api, QApplication.instance())
+    create_tray(QIcon(APP_LOGO), QApplication.instance())
 
     # we simulate what happens when a deck is connected
     main_window.ui.device_list.addItem("test", userData=STREAMDECK_SERIAL)

@@ -52,7 +52,6 @@ from streamdeck_ui.ui_settings import Ui_SettingsDialog
 
 # this ignore is just a workaround to set api with something
 # and be able to test
-tray: QSystemTrayIcon
 api: StreamDeckServer = StreamDeckServer()
 
 main_window: "MainWindow"
@@ -1034,6 +1033,9 @@ class MainWindow(QMainWindow):
     ui: Ui_MainWindow
     "A reference to all the UI objects for the main window"
 
+    tray: QSystemTrayIcon
+    "A reference to the system tray icon"
+
     window_shown: bool
     settings: QSettings
 
@@ -1260,8 +1262,8 @@ def create_tray(logo: QIcon, app: QApplication) -> QSystemTrayIcon:
     """Creates a system tray with the provided icon and parent. The main
     window passed will be activated when clicked.
     """
-    tray = QSystemTrayIcon(logo, app)
-    tray.activated.connect(main_window.systray_clicked)  # type: ignore [attr-defined]
+    main_window.tray = QSystemTrayIcon(logo, app)
+    main_window.tray.activated.connect(main_window.systray_clicked)  # type: ignore [attr-defined]
 
     menu = QMenu()
     action_dim = QAction("Dim display (toggle)", main_window)
@@ -1274,13 +1276,13 @@ def create_tray(logo: QIcon, app: QApplication) -> QSystemTrayIcon:
     action_exit = QAction("Exit", main_window)
     action_exit.triggered.connect(app.exit)  # type: ignore [attr-defined]
     menu.addAction(action_exit)
-    tray.setContextMenu(menu)
-    return tray
+    main_window.tray.setContextMenu(menu)
+    return main_window.tray
 
 
 def show_tray_warning_message(message: str) -> None:
     """Shows a warning message in the system tray"""
-    tray.showMessage("Warning", message, QSystemTrayIcon.MessageIcon.Warning, 5000)
+    main_window.tray.showMessage("Warning", message, QSystemTrayIcon.MessageIcon.Warning, 5000)
 
 
 def streamdeck_cpu_changed(ui, serial_number: str, cpu: int):
@@ -1374,7 +1376,7 @@ def start(_exit: bool = False) -> None:
             logo = QIcon(APP_LOGO)
             app.setWindowIcon(logo)
             main_window = create_main_window(api, app)
-            tray = create_tray(logo, app)
+            create_tray(logo, app)
 
             configure_signals(app)
 
@@ -1389,7 +1391,7 @@ def start(_exit: bool = False) -> None:
             cli = CLIStreamDeckServer(api, main_window.ui)
             cli.start()
 
-            tray.show()
+            main_window.tray.show()
             if show_ui:
                 main_window.show()
 
