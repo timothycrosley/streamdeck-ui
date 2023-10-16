@@ -185,6 +185,12 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
 
         page = api.get_page(deck_id)
         command = api.get_button_command(deck_id, page, key)
+        keys = api.get_button_keys(deck_id, page, key)
+        write = api.get_button_write(deck_id, page, key)
+        brightness_change = api.get_button_change_brightness(deck_id, page, key)
+        switch_page = api.get_button_switch_page(deck_id, page, key)
+        switch_state = api.get_button_switch_state(deck_id, page, key)
+
         if command:
             try:
                 Popen(shlex.split(command))  # nosec, need to allow execution of arbitrary commands
@@ -194,7 +200,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
 
         keyboard = Keyboard()
 
-        keys = api.get_button_keys(deck_id, page, key)
         if keys:
             try:
                 keyboard.keys(keys)
@@ -202,7 +207,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 print(f"Could not press keys '{keys}': {error}")
                 show_tray_warning_message("Unable to perform key press action.")
 
-        write = api.get_button_write(deck_id, page, key)
         if write:
             try:
                 keyboard.write(write)
@@ -210,7 +214,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 print(f"Could not complete the write command: {error}")
                 show_tray_warning_message("Unable to perform write action.")
 
-        brightness_change = api.get_button_change_brightness(deck_id, page, key)
         if brightness_change:
             try:
                 api.change_brightness(deck_id, brightness_change)
@@ -218,7 +221,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 print(f"Could not change brightness: {error}")
                 show_tray_warning_message("Unable to change brightness.")
 
-        switch_page = api.get_button_switch_page(deck_id, page, key)
         if switch_page:
             switch_page_index = switch_page - 1
             if switch_page_index in api.get_pages(deck_id):
@@ -233,7 +235,6 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                     f"Unable to perform switch page, the page {switch_page} does not exist in your current settings"
                 )
 
-        switch_state = api.get_button_switch_state(deck_id, page, key)
         if switch_state:
             switch_state_index = switch_state - 1
             if switch_state_index in api.get_button_states(deck_id, page, key):
