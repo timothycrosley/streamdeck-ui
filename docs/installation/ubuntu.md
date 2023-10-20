@@ -9,7 +9,7 @@ sudo apt install libhidapi-libusb0 pipx
 ```
 
 > Note that for version `2.0.6` and below, you also need to install `libxcb-xinerama0` (include it with apt in the line above).
->
+
 ## Set path
 
 You need to add `~/.local/bin` to your path. Be sure to add this to your `.bashrc` (or equivalent) file so it automatically sets it for you in future.
@@ -42,7 +42,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 python3 -m pipx install streamdeck-linux-gui
 ```
 
-### From Surce
+### From Source
 
 Please make sure you have followed the steps below untill the **Install Stream Deck UI section** before continuing.
 

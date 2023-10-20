@@ -8,7 +8,7 @@ This has been tested on Tumbleweed.
 sudo zypper install libhidapi-libusb0 python312-devel kernel-devel python311-evdev
 ```
 
- > `python310-devel` and `kernel-devel` are required because pip is going to have to build `evdev`.
+> `python310-devel` and `kernel-devel` are required because pip is going to have to build `evdev`.
 
 ## Upgrade pip
 
@@ -42,7 +42,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 python3 -m pip install streamdeck-linux-gui --user
 ```
 
-### From Surce
+### From Source
 
 Please make sure you have followed the steps below untill the **Install Stream Deck UI section** before continuing.
 

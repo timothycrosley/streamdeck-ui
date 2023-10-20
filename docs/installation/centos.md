@@ -4,7 +4,7 @@ This has been tested on CentOS 7, 8.
 
 ## Install hidapi
 
-``` bash
+```bash
 sudo yum install epel-release
 sudo yum update
 sudo yum install hidapi
@@ -13,7 +13,7 @@ sudo yum install hidapi
 > ### Note for CentOS7
 >
 > If you're having trouble installing hdapi, try installing the epel from the Fedora site as follows:
->
+
 ```bash
 sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 ```
@@ -28,7 +28,7 @@ CentOS 7/8 ships with Python 3.6. We need to build version 3.8 (or later if you 
 sudo yum -y groupinstall "Development Tools"
 sudo yum -y install openssl-devel bzip2-devel libffi-devel
 wget https://www.python.org/ftp/python/3.8.9/Python-3.8.9.tgz
-tar xvf Python-3.8.9.tgz 
+tar xvf Python-3.8.9.tgz
 cd Python-3.8.9/
 ./configure --enable-optimizations
 sudo make altinstall
@@ -66,7 +66,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 python3.8 -m pip install streamdeck-linux-gui --user
 ```
 
-### From Surce
+### From Source
 
 Please make sure you have followed the steps below untill the **Install Stream Deck UI section** before continuing.
 
