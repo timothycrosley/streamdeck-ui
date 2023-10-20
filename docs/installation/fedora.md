@@ -40,7 +40,7 @@ If the software is having problems later to detect the Stream Deck, you can try 
 python -m pip install streamdeck-linux-gui --user
 ```
 
-### From Surce
+### From Source
 
 Please make sure you have followed the steps below untill the **Install Stream Deck UI section** before continuing.
 
