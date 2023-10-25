@@ -12,6 +12,10 @@ from streamdeck_ui.config import WARNING_ICON
 from streamdeck_ui.display.filter import Filter
 
 
+def need_rgba_transform(image: Image.Image) -> bool:
+    return image.mode in ["LA", "P", "PA", "RGBa", "La"]
+
+
 class ImageFilter(Filter):
     """
     Represents a static image. It transforms the input image by replacing it with a static image.
@@ -70,7 +74,7 @@ class ImageFilter(Filter):
         self.frames = []
         for frame, milliseconds, hashcode in zip(frames, frame_duration, frame_hash):
             frame = frame.copy()
-            if frame.mode == "P":
+            if need_rgba_transform(frame):
                 try:
                     frame = frame.convert("RGBA")
                 except BaseException:
