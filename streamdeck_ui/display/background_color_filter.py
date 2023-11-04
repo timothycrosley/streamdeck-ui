@@ -31,7 +31,7 @@ class BackgroundColorFilter(Filter):
         return self.image, self.hashcode
 
 
-def to_rgb(hex_str: str) -> tuple[int, ...]:
+def to_rgb(hex_str: str) -> Tuple[int, ...]:
     """
     Converts a hex string or a color string to an RGB tuple.
     """

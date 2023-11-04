@@ -12,7 +12,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
+python = ">=3.8,<3.12"
 streamdeck = "^0.9.3"
 pillow = "^9.4.0"
 pynput = "^1.7.6"
@@ -59,6 +59,9 @@ line-length = 120
 
 [tool.isort]
 profile = "hug"
+
+[tool.mypy]
+python_version = "3.8"
 
 [tool.portray]
 output_dir = "site"
