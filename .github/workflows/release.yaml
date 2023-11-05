@@ -9,29 +9,32 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    environment: stable
+    outputs:
+      version: ${{ steps.semrel.outputs.version }}
+
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install semantic-release plugins
-        run: |
-          npm install @semantic-release/github -D
-          npm install @semantic-release/changelog -D
-          npm install @semantic-release/release-notes-generator -D
-          
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: npx semantic-release
+      - uses: go-semantic-release/action@v1
+        id: semrel
+        name: Release
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
-    needs: release
     runs-on: ubuntu-latest
+    needs: release
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-    
+    environment: stable
+    permissions:
+      id-token: write
+    env: 
+      VERSION: ${{ needs.release.outputs.version }}
+
     steps:
       - uses: actions/checkout@v3
-        
+
       - name: Set up python 
         uses: actions/setup-python@v4
         with:
@@ -49,7 +52,17 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction --no-root --no-ansi
 
+      - name: Set package version
+        run: |
+          echo "Version to publish: $VERSION"
+          poetry version $VERSION
+
+      - name: Build package
+        run: poetry build
+
       - name: publish pypi
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-        run: poetry publish --build
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+
