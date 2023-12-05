@@ -55,7 +55,7 @@ Documentation is available at [https://streamdeck-linux-gui.github.io/streamdeck
 
 Once you're up and running, consider installing a [systemd service](docs/installation/systemd.md).
 
-> Use the [troubleshooting](docs/troubleshooting.md) guide or [search](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/issues?q=is%3Aissue) the issues for guidance. If you cannot find on the issue on this repository please try searching on the original at [streamdeck_ui](https://githib.com/timothycrosley/streamdeck_ui/issues?q=is%Aissue).
+> Use the [troubleshooting](docs/troubleshooting.md) guide or [search](https://github.com/streamdeck-linux-gui/streamdeck-linux-gui/issues?q=is%3Aissue) the issues for guidance. If you cannot find on the issue on this repository please try searching on the original at [streamdeck_ui](https://github.com/timothycrosley/streamdeck-ui/issues?q=is%3Aissue++).
 
 ### Precooked Scripts
 
