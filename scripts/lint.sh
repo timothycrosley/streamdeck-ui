@@ -11,6 +11,7 @@ if [[ $# -eq 1 ]] && [[ $1 == "--fix" ]]; then
     isort_flag=""
 fi
 
+set -x
 
 poetry run mypy --ignore-missing-imports streamdeck_ui/ --exclude 'ui_main.py|resources_rc.py|ui_settings.py|ui_button.py'
 poetry run isort $isort_flag streamdeck_ui/ tests/ --skip ui_main.py --skip resources_rc.py --skip ui_settings.py  --skip ui_button.py --line-length 120
