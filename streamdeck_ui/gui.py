@@ -738,6 +738,11 @@ def show_button_state_image_dialog() -> None:
     )[0]
 
     if file_name:
+        if file_name == image_file:
+            # if the user selects the same file name, clear out the last image
+            # this will allow the image to update in the case where the user edited the image
+            # and saved over the original file
+            update_displayed_button_attribute("icon", "")
         last_image_dir = os.path.dirname(file_name)
         update_displayed_button_attribute("icon", file_name)
 
