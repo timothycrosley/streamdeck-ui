@@ -12,10 +12,6 @@ from streamdeck_ui.config import WARNING_ICON
 from streamdeck_ui.display.filter import Filter
 
 
-def need_rgba_transform(image: Image.Image) -> bool:
-    return image.mode in ["LA", "P", "PA", "RGBa", "La"]
-
-
 class ImageFilter(Filter):
     """
     Represents a static image. It transforms the input image by replacing it with a static image.
@@ -24,9 +20,14 @@ class ImageFilter(Filter):
     def __init__(self, file: str):
         super(ImageFilter, self).__init__()
         self.file = os.path.expanduser(file)
-        file_stats = os.stat(file)
-        file_size = file_stats.st_size
-        mod_time = file_stats.st_mtime
+        try:
+            file_stats = os.stat(file)
+            file_size = file_stats.st_size
+            mod_time = file_stats.st_mtime
+        except BaseException:
+            file_size = 0
+            mod_time = 0
+            print(f"Unable to load icon {self.file} to calculate stats.")
 
         # Create a tuple of the file metadata for creating a hashcode.
         self.metadata = (self.__class__, self.file, file_size, mod_time)
@@ -80,7 +81,7 @@ class ImageFilter(Filter):
         self.frames = []
         for frame, milliseconds, hashcode in zip(frames, frame_duration, frame_hash):
             frame = frame.copy()
-            if need_rgba_transform(frame):
+            if frame.has_transparency_data and frame.mode != "RGBA":
                 try:
                     frame = frame.convert("RGBA")
                 except BaseException:
