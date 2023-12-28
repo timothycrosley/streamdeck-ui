@@ -5,6 +5,7 @@ sudo dnf install python3-pip python3-devel hidapi
 echo "Adding udev rules and reloading"
 sudo tee /etc/udev/rules.d/70-streamdeck.rules << EOF
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
+KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess"
 EOF
 sudo udevadm trigger
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>434</width>
+    <width>568</width>
     <height>778</height>
    </rect>
   </property>
@@ -1120,108 +1120,24 @@
    <item row="5" column="1">
     <widget class="QLineEdit" name="command"/>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
       <string>Press Keys:</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
-    <widget class="QComboBox" name="keys">
-     <property name="editable">
-      <bool>true</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">F11</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">alt+F4</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">ctrl+w</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">cmd+left</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">alt+plus</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">alt+delay+F3</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">backspace</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">right</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">page_up</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_volume_up</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_volume_down</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_volume_mute</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_previous</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_next</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">media_play_pause</string>
-      </property>
-     </item>
-    </widget>
+   <item row="7" column="1">
+    <widget class="QLineEdit" name="keys"/>
    </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="label_8">
      <property name="text">
       <string>Switch Page:</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="8" column="1">
     <widget class="QSpinBox" name="switch_page">
      <property name="minimum">
       <number>0</number>
@@ -1234,42 +1150,42 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
+   <item row="9" column="0">
     <widget class="QLabel" name="label_10">
      <property name="text">
       <string>Switch state</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="9" column="1">
     <widget class="QSpinBox" name="switch_state">
      <property name="maximum">
       <number>999999999</number>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
+   <item row="10" column="0">
     <widget class="QLabel" name="label_7">
      <property name="text">
       <string>Brightness +/-:</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="1">
+   <item row="10" column="1">
     <widget class="QSpinBox" name="change_brightness">
      <property name="minimum">
       <number>-99</number>
      </property>
     </widget>
    </item>
-   <item row="10" column="0">
+   <item row="11" column="0">
     <widget class="QLabel" name="label_6">
      <property name="text">
       <string>Write Text:</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="1">
+   <item row="11" column="1">
     <widget class="QPlainTextEdit" name="write"/>
    </item>
   </layout>

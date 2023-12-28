@@ -1,37 +1,33 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
+from evdev import ecodes as e
 
-from streamdeck_ui.modules.keyboard import Keyboard
-
-
-def test_write_without_pynput_supported():
-    keyboard = Keyboard()
-    keyboard.pynput_supported = False
-    with pytest.raises(Exception, match="Virtual keyboard functionality is not supported on this system."):
-        keyboard.write("test")
+from streamdeck_ui.modules.keyboard import parse_keys_as_keycodes
 
 
-def test_keys_without_pynput_supported():
-    keyboard = Keyboard()
-    keyboard.pynput_supported = False
-    with pytest.raises(Exception, match="Virtual keyboard functionality is not supported on this system."):
-        keyboard.keys("ctrl+1")
+@pytest.mark.parametrize(
+    "keys, expected",
+    [
+        ("", []),
+        (" ", []),
+        ("a", [[e.KEY_A]]),
+        ("A", [[e.KEY_A]]),
+        ("CTRL+s", [[e.KEY_LEFTCTRL, e.KEY_S]]),
+        ("CTRL+plus", [[e.KEY_LEFTCTRL, e.KEY_EQUAL]]),  # plus is equal with shift
+        ("CTRL+comma", [[e.KEY_LEFTCTRL, e.KEY_COMMA]]),
+        ("CTRL+,", [[e.KEY_LEFTCTRL]]),
+        ("CTRL++", [[e.KEY_LEFTCTRL]]),
+        ("CTRL+numpad_add", [[e.KEY_LEFTCTRL, e.KEY_KPPLUS]]),
+        ("CTRL+numpad_0", [[e.KEY_LEFTCTRL, e.KEY_KP0]]),
+        ("CTRL+0", [[e.KEY_LEFTCTRL, e.KEY_0]]),
+        ("CTRL+KP0", [[e.KEY_LEFTCTRL, e.KEY_KP0]]),
+        ("CTRL + ", [[e.KEY_LEFTCTRL]]),
+        ("CTRL + 1, 1", [[e.KEY_LEFTCTRL, e.KEY_1], [e.KEY_1]]),
+    ],
+)
+def test_parse_keys_as_keycodes(keys, expected):
+    assert parse_keys_as_keycodes(keys) == expected
 
 
-@patch("streamdeck_ui.modules.keyboard.Controller")
-def test_write_with_pynput_supported(mock_controller: MagicMock):
-    keyboard = Keyboard(mock_controller)
-    keyboard.pynput_supported = True
-    keyboard.write("test")
-    mock_controller.press.assert_called()
-    mock_controller.release.assert_called()
-
-
-@patch("streamdeck_ui.modules.keyboard.Controller")
-def test_keys_with_pynput_supported(mock_controller: MagicMock):
-    keyboard = Keyboard(mock_controller)
-    keyboard.pynput_supported = True
-    keyboard.keys("ctrl+1")
-    mock_controller.press.assert_called()
-    mock_controller.release.assert_called()
+def test_parse_keys_as_keycodes_with_invalid_key():
+    with pytest.raises(ValueError):
+        parse_keys_as_keycodes("invalid_key")

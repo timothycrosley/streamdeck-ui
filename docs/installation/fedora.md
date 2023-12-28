@@ -22,6 +22,7 @@ The following will create a file called `/etc/udev/rules.d/70-streamdeck.rules` 
 
 ```bash
 sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0fd9\", TAG+=\"uaccess\"" > /etc/udev/rules.d/70-streamdeck.rules'
+sudo sh -c 'echo "KERNEL==\"uinput\", SUBSYSTE==\misc\, TAG+=\"uaccess\"" >> /etc/udev/rules.d/70-streamdeck.rules'
 ```
 
 For the rule to take immediate effect, run the following command:

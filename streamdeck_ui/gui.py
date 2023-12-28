@@ -43,7 +43,7 @@ from streamdeck_ui.config import (
 )
 from streamdeck_ui.display.text_filter import is_a_valid_text_filter_font
 from streamdeck_ui.modules.fonts import DEFAULT_FONT_FAMILY, FONTS_DICT, find_font_info
-from streamdeck_ui.modules.keyboard import Keyboard, pynput_supported
+from streamdeck_ui.modules.keyboard import KeyPressAutoComplete, keyboard_press_keys, keyboard_write
 from streamdeck_ui.modules.utils.timers import debounce
 from streamdeck_ui.semaphore import Semaphore, SemaphoreAcquireError
 from streamdeck_ui.ui_button import Ui_ButtonForm
@@ -198,18 +198,16 @@ def handle_keypress(ui, deck_id: str, key: int, state: bool) -> None:
                 print(f"The command '{command}' failed: {error}")
                 show_tray_warning_message("The command failed to execute.")
 
-        keyboard = Keyboard()
-
         if keys:
             try:
-                keyboard.keys(keys)
+                keyboard_press_keys(keys)
             except Exception as error:
                 print(f"Could not press keys '{keys}': {error}")
-                show_tray_warning_message("Unable to perform key press action.")
+                show_tray_warning_message(f"Unable to perform key press action. {error}")
 
         if write:
             try:
-                keyboard.write(write)
+                keyboard_write(write)
             except Exception as error:
                 print(f"Could not complete the write command: {error}")
                 show_tray_warning_message("Unable to perform write action.")
@@ -603,7 +601,7 @@ def build_button_state_form(tab) -> None:
 
     tab_ui.text.setText(button_state.text)
     tab_ui.command.setText(button_state.command)
-    tab_ui.keys.setCurrentText(button_state.keys)
+    tab_ui.keys.setText(button_state.keys)
     tab_ui.write.setPlainText(button_state.write)
     tab_ui.change_brightness.setValue(button_state.brightness_change)
     tab_ui.text_font_size.setValue(button_state.font_size or DEFAULT_FONT_SIZE)
@@ -617,10 +615,15 @@ def build_button_state_form(tab) -> None:
     prepare_button_state_form_text_font_list(tab_ui, font_family)
     prepare_button_state_form_text_font_style_list(tab_ui, font_family, font_style)
 
+    # completer for keys
+    keys_autocomplete = KeyPressAutoComplete()
+    tab_ui.keys.setCompleter(keys_autocomplete)
+    tab_ui.keys.textChanged.connect(keys_autocomplete.update_prefix)
+
     # connect signals
     tab_ui.text.textChanged.connect(partial(debounced_update_button_text, tab_ui))
     tab_ui.command.textChanged.connect(partial(debounced_update_button_attribute, "command"))
-    tab_ui.keys.currentTextChanged.connect(partial(debounced_update_button_attribute, "keys"))
+    tab_ui.keys.textChanged.connect(partial(debounced_update_button_attribute, "keys"))
     tab_ui.write.textChanged.connect(lambda: debounced_update_button_attribute("write", tab_ui.write.toPlainText()))
     tab_ui.change_brightness.valueChanged.connect(partial(update_button_attribute, "change_brightness"))
     tab_ui.text_font_size.valueChanged.connect(partial(update_displayed_button_attribute, "font_size"))
@@ -659,11 +662,6 @@ def enable_button_configuration(ui: Ui_ButtonForm, enabled: bool):
         ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
     else:
         ui.background_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
-    # fields that depends on pynput be supported
-    ui.label_5.setVisible(pynput_supported)
-    ui.keys.setVisible(pynput_supported)
-    ui.label_6.setVisible(pynput_supported)
-    ui.write.setVisible(pynput_supported)
 
 
 def prepare_button_state_form_text_font_list(ui: Ui_ButtonForm, current_font_family: str) -> None:
@@ -850,11 +848,9 @@ def _reset_build_button_state_form(ui: Ui_ButtonForm):
     """Clears the configuration for a button and disables editing of them."""
     ui.text.clear()
     ui.command.clear()
-    ui.keys.clearEditText()
+    ui.keys.clear()
     ui.text_font.clearEditText()
     ui.text_font_size.setValue(0)
-    # ui.text_font.setCurrentIndex(-1)
-    # ui.text_font_style.setCurrentIndex(-1)
     ui.text_color.setPalette(QPalette(DEFAULT_FONT_COLOR))
     ui.background_color.setPalette(QPalette(DEFAULT_BACKGROUND_COLOR))
     ui.write.clear()
@@ -1349,7 +1345,6 @@ def sigterm_handler(app, signal_value, frame):
 def start(_exit: bool = False) -> None:
     global api
     global main_window
-    global tray
     show_ui = True
     if "-h" in sys.argv or "--help" in sys.argv:
         print(f"Usage: {os.path.basename(sys.argv[0])}")

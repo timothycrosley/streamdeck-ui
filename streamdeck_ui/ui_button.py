@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'button.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -25,7 +25,7 @@ class Ui_ButtonForm(object):
     def setupUi(self, ButtonForm):
         if not ButtonForm.objectName():
             ButtonForm.setObjectName(u"ButtonForm")
-        ButtonForm.resize(434, 778)
+        ButtonForm.resize(568, 778)
         self.formLayout = QFormLayout(ButtonForm)
         self.formLayout.setObjectName(u"formLayout")
         self.label = QLabel(ButtonForm)
@@ -302,34 +302,17 @@ class Ui_ButtonForm(object):
         self.label_5 = QLabel(ButtonForm)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_5)
 
-        self.keys = QComboBox(ButtonForm)
-        self.keys.addItem(u"")
-        self.keys.addItem(u"F11")
-        self.keys.addItem(u"alt+F4")
-        self.keys.addItem(u"ctrl+w")
-        self.keys.addItem(u"cmd+left")
-        self.keys.addItem(u"alt+plus")
-        self.keys.addItem(u"alt+delay+F3")
-        self.keys.addItem(u"backspace")
-        self.keys.addItem(u"right")
-        self.keys.addItem(u"page_up")
-        self.keys.addItem(u"media_volume_up")
-        self.keys.addItem(u"media_volume_down")
-        self.keys.addItem(u"media_volume_mute")
-        self.keys.addItem(u"media_previous")
-        self.keys.addItem(u"media_next")
-        self.keys.addItem(u"media_play_pause")
+        self.keys = QLineEdit(ButtonForm)
         self.keys.setObjectName(u"keys")
-        self.keys.setEditable(True)
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.keys)
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.keys)
 
         self.label_8 = QLabel(ButtonForm)
         self.label_8.setObjectName(u"label_8")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_8)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_8)
 
         self.switch_page = QSpinBox(ButtonForm)
         self.switch_page.setObjectName(u"switch_page")
@@ -337,39 +320,39 @@ class Ui_ButtonForm(object):
         self.switch_page.setMaximum(999999999)
         self.switch_page.setValue(0)
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.switch_page)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.switch_page)
 
         self.label_10 = QLabel(ButtonForm)
         self.label_10.setObjectName(u"label_10")
 
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_10)
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_10)
 
         self.switch_state = QSpinBox(ButtonForm)
         self.switch_state.setObjectName(u"switch_state")
         self.switch_state.setMaximum(999999999)
 
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.switch_state)
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.switch_state)
 
         self.label_7 = QLabel(ButtonForm)
         self.label_7.setObjectName(u"label_7")
 
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_7)
 
         self.change_brightness = QSpinBox(ButtonForm)
         self.change_brightness.setObjectName(u"change_brightness")
         self.change_brightness.setMinimum(-99)
 
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.change_brightness)
+        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.change_brightness)
 
         self.label_6 = QLabel(ButtonForm)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(11, QFormLayout.LabelRole, self.label_6)
 
         self.write = QPlainTextEdit(ButtonForm)
         self.write.setObjectName(u"write")
 
-        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.write)
+        self.formLayout.setWidget(11, QFormLayout.FieldRole, self.write)
 
 
         self.retranslateUi(ButtonForm)
@@ -415,7 +398,6 @@ class Ui_ButtonForm(object):
         self.text_color.setText("")
         self.label_3.setText(QCoreApplication.translate("ButtonForm", u"Command:", None))
         self.label_5.setText(QCoreApplication.translate("ButtonForm", u"Press Keys:", None))
-
         self.label_8.setText(QCoreApplication.translate("ButtonForm", u"Switch Page:", None))
         self.label_10.setText(QCoreApplication.translate("ButtonForm", u"Switch state", None))
         self.label_7.setText(QCoreApplication.translate("ButtonForm", u"Brightness +/-:", None))

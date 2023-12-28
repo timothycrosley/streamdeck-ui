@@ -15,12 +15,12 @@ packages = [
 python = ">=3.8,<3.12"
 streamdeck = "^0.9.3"
 pillow = "^9.4.0"
-pynput = "^1.7.6"
 pyside6 = "^6.4.2"
 CairoSVG = "^2.5.2"
 filetype = "^1.0.10"
 python-xlib = "^0.33"
 importlib-metadata = "^6.8.0"
+evdev = "^1.6.1"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = ">=1.4.2"

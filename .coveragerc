@@ -4,4 +4,7 @@ exclude_lines =
 omit =
     *tests*
     streamdeck_ui/ui_main.py
+    streamdeck_ui/ui_settings.py
+    streamdeck_ui/ui_button.py
+    resources_rc.py
 
