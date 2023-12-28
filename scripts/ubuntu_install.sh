@@ -9,5 +9,5 @@ KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess"
 EOF
 sudo udevadm trigger
 
-pip3 install --user streamdeck_ui
+pip3 install --user streamdeck-linux-gui
 echo "If the installation was successful, run 'streamdeck' to start."
