@@ -16,10 +16,10 @@ def set_scene(scene_name):
     cl.set_current_program_scene(scene_name)
 
 def toggle_recording():
-    if cl.get_output_list().outputs[0]['outputActive']:
-        cl.stop_output('simple_file_output')
+    if cl.get_record_status().output_active:
+        cl.stop_record()
     else:
-        cl.start_output('simple_file_output')
+        cl.start_record()
 
 if __name__ == "__main__":
     if args.scene is not None:
