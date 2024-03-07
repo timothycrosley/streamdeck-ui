@@ -68,8 +68,8 @@ class ImageFilter(Filter):
         # Scale all the frames to the target size
         self.frames = []
         for frame, milliseconds, hashcode in zip(frames, frame_duration, frame_hash):
-            frame = frame.copy()
-            frame.thumbnail(size, Image.LANCZOS)
+            scale_factor = min(size[0] / frame.size[0], size[1] / frame.size[1])
+            frame = frame.resize((int(v * scale_factor) for v in frame.size), Image.LANCZOS)
             self.frames.append((frame, milliseconds, hashcode))
 
         self.frame_cycle = itertools.cycle(self.frames)
