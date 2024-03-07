@@ -20,9 +20,6 @@ class DisplayGrid:
     filters for one individual button display.
     """
 
-    _empty_filter: EmptyFilter = EmptyFilter()
-    "Static instance of EmptyFilter shared by all pipelines"
-
     def __init__(self, lock: threading.Lock, streamdeck: StreamDeck, pages: int, cpu_callback: Callable[[str, int], None], fps: int = 25):
         """Creates a new display instance
 
@@ -69,12 +66,16 @@ class DisplayGrid:
         self.sync = threading.Event()
         self.cpu_callback = cpu_callback
         # The sync event allows a caller to wait until all the buttons have been processed
-        DisplayGrid._empty_filter.initialize(self.size)
+
+        self._empty_filter: EmptyFilter = EmptyFilter()
+        self._empty_filter.initialize(self.size)
+        # Instance of EmptyFilter shared by all pipelines related to this
+        # DisplayGrid instance
 
     def replace(self, page: int, button: int, filters: List[Filter]):
         with self.lock:
             pipeline = Pipeline()
-            pipeline.add(DisplayGrid._empty_filter)
+            pipeline.add(self._empty_filter)
             for filter in filters:
                 filter.initialize(self.size)
                 pipeline.add(filter)
